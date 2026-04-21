@@ -37,6 +37,10 @@ resource/avatar/*
 src/handlers/avatar/liteavatar/algo/liteavatar/weights/
 src/handlers/client/rtc_client/frontend/node_modules/
 
+# Frontend build files
+frontend/node_modules/
+frontend/dist/
+
 dump_talk_audio.pcm
 dump_avatar_audio.pcm
 exp/

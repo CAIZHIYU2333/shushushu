@@ -197,8 +197,8 @@ class ClientHandlerRtc(ClientHandlerBase):
             }
             return JSONResponse(status_code=200, content=config)
 
-        # 优先使用新的原生HTML/CSS/JS文件（非Vue版本）
-        base_frontend_path = Path(DirectoryInfo.get_src_dir() + '/handlers/client/rtc_client/frontend')
+        # 使用项目主层级的前端目录
+        base_frontend_path = Path(DirectoryInfo.get_project_dir()) / 'frontend'
         dist_path = base_frontend_path / 'dist'
         
         # 检查新的原生HTML/CSS/JS文件

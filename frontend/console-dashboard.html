@@ -1,0 +1,84 @@
+<div class="module-content dashboard">
+  <!-- 统计卡片 -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">💬</div>
+      <div class="stat-info">
+        <div class="stat-title">今日会话</div>
+        <div class="stat-value" id="stat-sessions">0</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-info">
+        <div class="stat-title">活跃用户</div>
+        <div class="stat-value" id="stat-users">0</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">👤</div>
+      <div class="stat-info">
+        <div class="stat-title">数字人数量</div>
+        <div class="stat-value" id="stat-avatars">0</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📝</div>
+      <div class="stat-info">
+        <div class="stat-title">模板数量</div>
+        <div class="stat-value" id="stat-templates">0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 快速操作和最近活动 -->
+  <div class="dashboard-content">
+    <div class="action-card">
+      <div class="card-header">
+        <h3>快速操作</h3>
+      </div>
+      <div class="card-body">
+        <button class="action-btn primary" data-action="avatars">
+          <span class="btn-icon">👤</span>
+          <span>管理数字人</span>
+        </button>
+        <button class="action-btn" data-action="knowledge">
+          <span class="btn-icon">📚</span>
+          <span>管理知识库</span>
+        </button>
+        <button class="action-btn" data-action="templates">
+          <span class="btn-icon">📝</span>
+          <span>管理模板</span>
+        </button>
+        <button class="action-btn" data-action="videochat">
+          <span class="btn-icon">📹</span>
+          <span>开始视频聊天</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="activity-card">
+      <div class="card-header">
+        <h3>最近活动</h3>
+      </div>
+      <div class="card-body">
+        <div class="activity-timeline" id="activity-timeline">
+          <div class="activity-item">
+            <div class="activity-dot">✓</div>
+            <div class="activity-content">
+              <div class="activity-title">系统启动</div>
+              <div class="activity-time">刚刚</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot">⏰</div>
+            <div class="activity-content">
+              <div class="activity-title">控制台已就绪</div>
+              <div class="activity-time">1分钟前</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

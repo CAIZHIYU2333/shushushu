@@ -1,0 +1,59 @@
+<div class="module-content analytics-management">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">📊</div>
+      <div class="stat-info">
+        <div class="stat-title">总会话数</div>
+        <div class="stat-value" id="stat-sessions">0</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-info">
+        <div class="stat-title">总用户数</div>
+        <div class="stat-value" id="stat-users">0</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">✓</div>
+      <div class="stat-info">
+        <div class="stat-title">活跃用户</div>
+        <div class="stat-value" id="stat-active">0</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">⏱</div>
+      <div class="stat-info">
+        <div class="stat-title">平均时长</div>
+        <div class="stat-value" id="stat-duration">0分钟</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="management-card mt-24">
+    <div class="card-header">
+      <h3>会话列表</h3>
+      <button class="btn-primary" id="export-btn">导出数据</button>
+    </div>
+    <div class="card-body">
+      <div class="table-container">
+        <table class="data-table" id="sessions-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>用户ID</th>
+              <th>开始时间</th>
+              <th>结束时间</th>
+              <th>时长</th>
+              <th>状态</th>
+            </tr>
+          </thead>
+          <tbody id="sessions-tbody">
+            <tr><td colspan="6" class="loading">加载中...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+

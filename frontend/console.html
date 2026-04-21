@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>控制台 - 海事领域法学大模型数字人智能体系统</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="console.css">
+</head>
+<body>
+    <div class="console-layout">
+        <!-- 侧边栏 -->
+        <aside class="console-sider" id="console-sider">
+            <div class="logo">
+                <span class="logo-icon-large" id="logo-full">海事法学</span>
+                <span class="logo-icon" id="logo-collapsed" style="display: none;">海事法学</span>
+            </div>
+            <nav class="console-menu" id="console-menu">
+                <a href="#" class="menu-item active" data-key="dashboard">
+                    <span class="menu-icon">📊</span>
+                    <span class="menu-text">仪表盘</span>
+                </a>
+                <a href="#" class="menu-item" data-key="permissions">
+                    <span class="menu-icon">🔒</span>
+                    <span class="menu-text">权限管理</span>
+                </a>
+                <a href="#" class="menu-item" data-key="avatars">
+                    <span class="menu-icon">👤</span>
+                    <span class="menu-text">数字人管理</span>
+                </a>
+                <a href="#" class="menu-item" data-key="knowledge">
+                    <span class="menu-icon">📚</span>
+                    <span class="menu-text">知识库</span>
+                </a>
+                <a href="#" class="menu-item" data-key="analytics">
+                    <span class="menu-icon">📈</span>
+                    <span class="menu-text">数据可视化</span>
+                </a>
+                <a href="#" class="menu-item" data-key="templates">
+                    <span class="menu-icon">📝</span>
+                    <span class="menu-text">人物模板</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- 主内容区 -->
+        <div class="console-main">
+            <!-- 头部 -->
+            <header class="console-header">
+                <div class="header-left">
+                    <button class="back-btn" id="back-to-videochat" title="返回视频聊天">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 12H5M12 19l-7-7 7-7"/>
+                        </svg>
+                        <span>返回</span>
+                    </button>
+                    <button class="trigger" id="sidebar-toggle" title="折叠/展开侧边栏">
+                        <span id="menu-fold-icon">☰</span>
+                        <span id="menu-unfold-icon" style="display: none;">☰</span>
+                    </button>
+                </div>
+                <div class="header-center">
+                    <h1 class="console-title">海事领域法学大模型数字人智能体系统</h1>
+                </div>
+                <div class="header-right">
+                    <button class="theme-toggle" id="theme-toggle" title="切换主题">
+                        <span id="theme-icon">🌙</span>
+                    </button>
+                    <div class="user-dropdown">
+                        <button class="user-info" id="user-info-btn">
+                            <span class="user-avatar">管</span>
+                            <span class="username">管理员</span>
+                            <span class="dropdown-arrow">▼</span>
+                        </button>
+                        <div class="user-menu" id="user-menu" style="display: none;">
+                            <a href="#" class="menu-item" data-action="profile">👤 个人设置</a>
+                            <a href="#" class="menu-item" data-action="settings">⚙️ 系统设置</a>
+                            <div class="menu-divider"></div>
+                            <a href="#" class="menu-item" data-action="logout">🚪 退出登录</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 内容区 -->
+            <main class="console-content">
+                <div class="content-wrapper" id="content-wrapper">
+                    <!-- 模块内容将动态加载到这里 -->
+                    <div class="loading-container">
+                        <div class="loading-spinner"></div>
+                        <p>加载中...</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="api.js"></script>
+    <script src="state.js"></script>
+    <script src="console.js"></script>
+</body>
+</html>
+

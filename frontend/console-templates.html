@@ -1,0 +1,61 @@
+<div class="module-content templates-management">
+  <div class="management-card">
+    <div class="card-header">
+      <h3>人物模板管理</h3>
+      <button class="btn-primary" id="add-template-btn">+ 添加模板</button>
+    </div>
+    <div class="card-body">
+      <div class="table-container">
+        <table class="data-table" id="templates-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>模板名称</th>
+              <th>角色类型</th>
+              <th>描述</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="templates-tbody">
+            <tr><td colspan="5" class="loading">加载中...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="template-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="template-modal-title">添加模板</h3>
+        <button class="modal-close" id="template-modal-close">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="template-form">
+          <div class="form-item">
+            <label>模板名称 <span class="required">*</span></label>
+            <input type="text" id="template-name" required />
+          </div>
+          <div class="form-item">
+            <label>角色类型 <span class="required">*</span></label>
+            <select id="template-role-type" required>
+              <option value="">请选择</option>
+              <option value="student">学生</option>
+              <option value="teacher">老师</option>
+              <option value="assistant">助手</option>
+            </select>
+          </div>
+          <div class="form-item">
+            <label>描述</label>
+            <textarea id="template-description" rows="3"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="template-modal-cancel">取消</button>
+        <button class="btn-primary" id="template-modal-submit">确定</button>
+      </div>
+    </div>
+  </div>
+</div>
+

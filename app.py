@@ -198,11 +198,11 @@ class LiteAvatarApp:
 
     def setup_routes(self):
         """设置FastAPI路由"""
-        # 优先使用新的静态文件目录（原生HTML/CSS/JS）
-        frontend_path = project_root / "src" / "handlers" / "client" / "rtc_client" / "frontend"
+        # 使用项目主层级的前端目录
+        frontend_path = project_root / "frontend"
         dist_path = frontend_path / "dist"
         
-        # 强制检查新的原生HTML/CSS/JS文件
+        # 检查新的原生HTML/CSS/JS文件
         new_index_path = frontend_path / "index.html"
         new_videochat_path = frontend_path / "videochat.html"
         new_console_path = frontend_path / "console.html"
@@ -260,13 +260,13 @@ class LiteAvatarApp:
     
     def _get_permissions_data_path(self):
         """获取权限数据文件路径"""
-        data_dir = project_root / "src" / "handlers" / "client" / "rtc_client" / "frontend" / "data"
+        data_dir = project_root / "frontend" / "data"
         data_dir.mkdir(parents=True, exist_ok=True)
         return data_dir / "permissions_data.json"
     
     def _get_avatars_data_path(self):
         """获取数字人数据文件路径"""
-        data_dir = project_root / "src" / "handlers" / "client" / "rtc_client" / "frontend" / "data"
+        data_dir = project_root / "frontend" / "data"
         data_dir.mkdir(parents=True, exist_ok=True)
         return data_dir / "avatars_data.json"
     
