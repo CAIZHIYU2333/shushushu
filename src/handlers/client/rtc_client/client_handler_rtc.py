@@ -198,7 +198,7 @@ class ClientHandlerRtc(ClientHandlerBase):
             return JSONResponse(status_code=200, content=config)
 
         # 使用项目主层级的前端目录
-        base_frontend_path = Path(DirectoryInfo.get_project_dir()) / 'frontend'
+        base_frontend_path = Path(DirectoryInfo.get_project_dir()) / 'web'
         dist_path = base_frontend_path / 'dist'
         
         # 检查新的原生HTML/CSS/JS文件

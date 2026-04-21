@@ -38,8 +38,8 @@ src/handlers/avatar/liteavatar/algo/liteavatar/weights/
 src/handlers/client/rtc_client/frontend/node_modules/
 
 # Frontend build files
-frontend/node_modules/
-frontend/dist/
+web/node_modules/
+web/dist/
 
 # Ignore submodule changes
 src/handlers/avatar/liteavatar/algo/liteavatar/
