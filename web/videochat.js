@@ -107,6 +107,15 @@ class VideoChatManager {
     
     // 初始化UI
     this.updateUI();
+    
+    // 初始化Lucide图标
+    this.initLucideIcons();
+  }
+
+  initLucideIcons() {
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
   }
 
   async loadConfig() {

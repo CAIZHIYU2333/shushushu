@@ -6,6 +6,7 @@
     <title>控制台 - 海事领域法学大模型数字人智能体系统</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="console.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
     <div class="console-layout">
@@ -17,27 +18,27 @@
             </div>
             <nav class="console-menu" id="console-menu">
                 <a href="#" class="menu-item active" data-key="dashboard">
-                    <span class="menu-icon">📊</span>
+                    <span class="menu-icon"><i data-lucide="layout-dashboard" style="width: 18px; height: 18px;"></i></span>
                     <span class="menu-text">仪表盘</span>
                 </a>
                 <a href="#" class="menu-item" data-key="permissions">
-                    <span class="menu-icon">🔒</span>
+                    <span class="menu-icon"><i data-lucide="shield" style="width: 18px; height: 18px;"></i></span>
                     <span class="menu-text">权限管理</span>
                 </a>
                 <a href="#" class="menu-item" data-key="avatars">
-                    <span class="menu-icon">👤</span>
+                    <span class="menu-icon"><i data-lucide="user" style="width: 18px; height: 18px;"></i></span>
                     <span class="menu-text">数字人管理</span>
                 </a>
                 <a href="#" class="menu-item" data-key="knowledge">
-                    <span class="menu-icon">📚</span>
+                    <span class="menu-icon"><i data-lucide="book-open" style="width: 18px; height: 18px;"></i></span>
                     <span class="menu-text">知识库</span>
                 </a>
                 <a href="#" class="menu-item" data-key="analytics">
-                    <span class="menu-icon">📈</span>
+                    <span class="menu-icon"><i data-lucide="bar-chart-3" style="width: 18px; height: 18px;"></i></span>
                     <span class="menu-text">数据可视化</span>
                 </a>
                 <a href="#" class="menu-item" data-key="templates">
-                    <span class="menu-icon">📝</span>
+                    <span class="menu-icon"><i data-lucide="layout-template" style="width: 18px; height: 18px;"></i></span>
                     <span class="menu-text">人物模板</span>
                 </a>
             </nav>
@@ -64,7 +65,7 @@
                 </div>
                 <div class="header-right">
                     <button class="theme-toggle" id="theme-toggle" title="切换主题">
-                        <span id="theme-icon">🌙</span>
+                        <i data-lucide="moon" id="theme-icon" style="width: 18px; height: 18px;"></i>
                     </button>
                     <div class="user-dropdown">
                         <button class="user-info" id="user-info-btn">
@@ -73,10 +74,19 @@
                             <span class="dropdown-arrow">▼</span>
                         </button>
                         <div class="user-menu" id="user-menu" style="display: none;">
-                            <a href="#" class="menu-item" data-action="profile">👤 个人设置</a>
-                            <a href="#" class="menu-item" data-action="settings">⚙️ 系统设置</a>
+                            <a href="#" class="menu-item" data-action="profile">
+                                <i data-lucide="user" style="width: 16px; height: 16px;"></i>
+                                <span>个人设置</span>
+                            </a>
+                            <a href="#" class="menu-item" data-action="settings">
+                                <i data-lucide="settings" style="width: 16px; height: 16px;"></i>
+                                <span>系统设置</span>
+                            </a>
                             <div class="menu-divider"></div>
-                            <a href="#" class="menu-item" data-action="logout">🚪 退出登录</a>
+                            <a href="#" class="menu-item" data-action="logout">
+                                <i data-lucide="log-out" style="width: 16px; height: 16px;"></i>
+                                <span>退出登录</span>
+                            </a>
                         </div>
                     </div>
                 </div>

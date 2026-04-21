@@ -27,6 +27,15 @@ class ConsoleManager {
     this.initMenu();
     this.applyTheme();
     this.loadModule();
+    
+    // 初始化Lucide图标
+    this.initLucideIcons();
+  }
+
+  initLucideIcons() {
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
   }
 
   initSidebar() {
@@ -246,6 +255,9 @@ class ConsoleManager {
         
         console.log('📦 模块内容已插入，contentWrapper类名:', contentWrapper.className);
         console.log('📦 查找.dashboard元素:', document.querySelector('.dashboard'));
+        
+        // 初始化Lucide图标
+        this.initLucideIcons();
         
         // 加载对应的JS和CSS文件
         const baseName = this.currentModule;
