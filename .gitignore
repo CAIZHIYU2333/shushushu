@@ -41,6 +41,10 @@ src/handlers/client/rtc_client/frontend/node_modules/
 frontend/node_modules/
 frontend/dist/
 
+# Ignore submodule changes
+src/handlers/avatar/liteavatar/algo/liteavatar/
+src/handlers/client/rtc_client/frontend/
+
 dump_talk_audio.pcm
 dump_avatar_audio.pcm
 exp/
