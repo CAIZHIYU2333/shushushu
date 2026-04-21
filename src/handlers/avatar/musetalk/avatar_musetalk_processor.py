@@ -611,6 +611,7 @@ class AvatarMuseTalkProcessor:
                 end_of_speech = output_item['end_of_speech']
                 frame_timestamp = output_item.get('timestamp', None)
                 audio_segment = output_item['audio_segment']
+                bg_frame_id = output_item.get('bg_frame_id', -1)
             except queue.Empty:
                 frame = self._avatar.generate_idle_frame(local_frame_id)
                 speech_id = last_active_speech_id
@@ -618,13 +619,15 @@ class AvatarMuseTalkProcessor:
                 end_of_speech = False
                 frame_timestamp = time.time()
                 audio_segment = None
+                bg_frame_id = -1
             # Notify video
             video_frame = av.VideoFrame.from_ndarray(frame, format="bgr24")
             video_result = VideoResult(
                 video_frame=video_frame,
                 speech_id=speech_id,
                 avatar_status=avatar_status,
-                end_of_speech=end_of_speech
+                end_of_speech=end_of_speech,
+                bg_frame_id=bg_frame_id
             )
             # Logging logic
             is_idle = (avatar_status == AvatarStatus.LISTENING and speech_id is None)

@@ -17,11 +17,17 @@ class LiteAvatarWorkerManager:
             time.sleep(5)
     
     def start_worker(self):
+        start_worker_time = time.time()
+        logger.info(f'[TIMING] LiteAvatarWorkerManager.start_worker()开始 (time={start_worker_time})')
         for worker in self.lite_avatar_workers:
             if worker.get_status() == WorkerStatus.IDLE:
                 worker.recruit()
+                event_sent_time = time.time()
+                logger.info(f'[TIMING] 发送Tts2FaceEvent.START事件 (time={event_sent_time})')
                 worker.event_in_queue.put_nowait(Tts2FaceEvent.START)
+                logger.info(f'[TIMING] LiteAvatarWorkerManager.start_worker()完成，耗时: {(time.time() - start_worker_time)*1000:.2f}ms')
                 return worker
+        logger.warning(f'[TIMING] LiteAvatarWorkerManager.start_worker()未找到可用worker')
         return None
     
     def destroy(self):

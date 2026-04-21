@@ -1,5 +1,6 @@
 from abc import ABC
 from typing import cast, Optional, Dict
+import time
 
 import numpy as np
 from loguru import logger
@@ -112,6 +113,26 @@ class HandlerTts2Face(HandlerBase, ABC):
         speech_end = inputs.data.get_meta("avatar_speech_end", False)
         audio_entry = inputs.data.get_main_definition_entry()
         audio_array = inputs.data.get_main_data()
+        
+        # 获取TTS基准时间（如果存在）
+        tts_base_time = inputs.data.get_meta("_tts_base_time", None)
+        current_time = time.time()
+        
+        if not hasattr(context, '_first_audio_received_time'):
+            context._first_audio_received_time = current_time
+            # 存储TTS基准时间（如果存在）
+            if tts_base_time is not None:
+                context._tts_base_time = tts_base_time
+                cumulative_delay = (current_time - tts_base_time) * 1000
+                logger.info(f'[TIMING] Avatar Handler首次接收音频 (session={context.session_id}, speech_id={speech_id}, 累计延迟: {cumulative_delay:.2f}ms)')
+            else:
+                logger.info(f'[TIMING] Avatar Handler首次接收音频 (session={context.session_id}, speech_id={speech_id}, 无TTS基准时间)')
+            # 将基准时间传递给worker，用于累计计时
+            if tts_base_time is not None:
+                context.lite_avatar_worker.audio_in_queue.put(('__TIMING_BASE__', tts_base_time))
+            else:
+                context.lite_avatar_worker.audio_in_queue.put(('__TIMING_BASE__', current_time))
+        
         if audio_array is not None:
             if audio_array.dtype != np.int16:
                 audio_array = (audio_array * 32767).astype(np.int16)

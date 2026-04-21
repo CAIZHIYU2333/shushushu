@@ -54,10 +54,25 @@ class HandlerTts2FaceContext(HandlerContext):
             if self.lite_avatar_worker.audio_out_queue.qsize() > 0:
                 no_output = False
                 try:
+                    if not hasattr(self, '_first_audio_logged'):
+                        self._first_audio_received_time = time.time()
+                        # 获取基准时间（如果存在）
+                        base_time = getattr(self.lite_avatar_worker.processor, '_timing_base_time', None)
+                        cumulative_delay = (self._first_audio_received_time - base_time) * 1000 if base_time else 0
+                        logger.info(f'[TIMING] HandlerTts2FaceContext首次收到音频输出 (session={self.session_id}, 累计延迟: {cumulative_delay:.2f}ms)')
+                        self._first_audio_logged = True
+                    
                     audio_tensor = self.lite_avatar_worker.audio_out_queue.get_nowait()
                     audio = audio_tensor.numpy()
                     # self.rtc_audio_queue.put_nowait(audio)
                     self.return_data(audio, ChatDataType.AVATAR_AUDIO)
+                    
+                    if hasattr(self, '_first_audio_received_time') and not hasattr(self, '_first_audio_delay_logged'):
+                        first_audio_delay = (time.time() - self._first_audio_received_time) * 1000
+                        base_time = getattr(self.lite_avatar_worker.processor, '_timing_base_time', None)
+                        cumulative_delay = (time.time() - base_time) * 1000 if base_time else 0
+                        logger.info(f'[TIMING] HandlerTts2FaceContext首次音频输出完成，耗时: {first_audio_delay:.2f}ms, 累计延迟: {cumulative_delay:.2f}ms (session={self.session_id})')
+                        self._first_audio_delay_logged = True
                     no_output = False
                 except Exception:
                     pass
@@ -65,10 +80,27 @@ class HandlerTts2FaceContext(HandlerContext):
             if self.lite_avatar_worker.video_out_queue.qsize() > 0:
                 no_output = False
                 try:
+                    if not hasattr(self, '_first_video_logged'):
+                        self._first_video_received_time = time.time()
+                        base_time = getattr(self.lite_avatar_worker.processor, '_timing_base_time', None)
+                        cumulative_delay = (self._first_video_received_time - base_time) * 1000 if base_time else 0
+                        logger.info(f'[TIMING] HandlerTts2FaceContext首次收到视频输出 (session={self.session_id}, 累计延迟: {cumulative_delay:.2f}ms)')
+                        self._first_video_logged = True
+                    
                     video_tensor = self.lite_avatar_worker.video_out_queue.get_nowait()
                     video = video_tensor.numpy()
                     # self.rtc_video_queue.put_nowait(video)
                     self.return_data(video, ChatDataType.AVATAR_VIDEO)
+                    
+                    if hasattr(self, '_first_video_received_time') and not hasattr(self, '_first_video_delay_logged'):
+                        first_video_delay = (time.time() - self._first_video_received_time) * 1000
+                        base_time = getattr(self.lite_avatar_worker.processor, '_timing_base_time', None)
+                        cumulative_delay = (time.time() - base_time) * 1000 if base_time else 0
+                        logger.info(f'[TIMING] HandlerTts2FaceContext首次视频输出完成，耗时: {first_video_delay:.2f}ms, 累计延迟: {cumulative_delay:.2f}ms (session={self.session_id})')
+                        # 输出延迟汇总
+                        if base_time:
+                            logger.info(f'[TIMING汇总] 从TTS首次音频数据到达 到 数字人首次开口说话 总延迟: {cumulative_delay:.2f}ms (session={self.session_id})')
+                        self._first_video_delay_logged = True
                     no_output = False
                 except Exception:
                     pass

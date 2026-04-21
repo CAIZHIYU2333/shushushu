@@ -18,6 +18,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+.glut/
 ssl_certs/localhost.crt
 ssl_certs/localhost.key
 
@@ -31,6 +32,10 @@ models
 resource/audio
 resource/avatar/*
 !resource/avatar/put_avatar_here.txt
+
+# Large model files
+src/handlers/avatar/liteavatar/algo/liteavatar/weights/
+src/handlers/client/rtc_client/frontend/node_modules/
 
 dump_talk_audio.pcm
 dump_avatar_audio.pcm

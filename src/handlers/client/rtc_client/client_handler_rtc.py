@@ -197,14 +197,39 @@ class ClientHandlerRtc(ClientHandlerBase):
             }
             return JSONResponse(status_code=200, content=config)
 
-        frontend_path = Path(DirectoryInfo.get_src_dir() + '/handlers/client/rtc_client/frontend/dist')
-        if frontend_path.exists():
-            logger.info(f"Serving frontend from {frontend_path}")
-            fastapi.mount('/ui', StaticFiles(directory=frontend_path), name="static")
-            fastapi.add_route('/', RedirectResponse(url='/ui/index.html'))
+        # 优先使用新的原生HTML/CSS/JS文件（非Vue版本）
+        base_frontend_path = Path(DirectoryInfo.get_src_dir() + '/handlers/client/rtc_client/frontend')
+        dist_path = base_frontend_path / 'dist'
+        
+        # 检查新的原生HTML/CSS/JS文件
+        new_index_path = base_frontend_path / "index.html"
+        new_videochat_path = base_frontend_path / "videochat.html"
+        new_console_path = base_frontend_path / "console.html"
+        
+        # 只有在app.py还没有挂载/ui路由时才挂载（避免重复挂载）
+        # 检查是否已经有/ui路由
+        has_ui_route = any(route.path == '/ui' for route in fastapi.routes)
+        
+        if not has_ui_route:
+            if new_index_path.exists() and new_videochat_path.exists() and new_console_path.exists():
+                logger.info("=" * 60)
+                logger.info("✅ ClientHandler: 使用新的原生HTML/CSS/JS前端（非Vue版本）")
+                logger.info(f"前端路径: {base_frontend_path}")
+                logger.info("=" * 60)
+                fastapi.mount('/ui', StaticFiles(directory=str(base_frontend_path), html=True), name="static")
+                fastapi.add_route('/', RedirectResponse(url='/ui/index.html'))
+            elif dist_path.exists():
+                logger.warning("=" * 60)
+                logger.warning("⚠️  ClientHandler: 使用旧的Vue构建版本！")
+                logger.warning(f"dist路径: {dist_path}")
+                logger.warning("=" * 60)
+                fastapi.mount('/ui', StaticFiles(directory=str(dist_path), html=True), name="static")
+                fastapi.add_route('/', RedirectResponse(url='/ui/index.html'))
+            else:
+                logger.warning(f"Frontend directory {base_frontend_path} or {dist_path} does not exist")
+                fastapi.add_route('/', RedirectResponse(url='/gradio'))
         else:
-            logger.warning(f"Frontend directory {frontend_path} does not exist")
-            fastapi.add_route('/', RedirectResponse(url='/gradio'))
+            logger.info("✅ /ui路由已由app.py设置，跳过ClientHandler的静态文件挂载")
 
         if parent_block is None:
             parent_block = ui

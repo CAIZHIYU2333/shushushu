@@ -1,0 +1,187 @@
+/* ============================================
+   AI数字人教学辅助平台 - 全局配色方案
+   融合 Figma、Notion 和 Vercel 的优秀设计原则
+   ============================================ */
+
+/* === CSS Custom Properties System === */
+:root {
+  /* Primary Colors - Warm Neutrals with Blue Accent */
+  --color-primary: #0075de; /* Notion Blue - Primary accent */
+  --color-primary-dark: #005bab; /* Darker blue for active states */
+  --color-primary-light: #62aef0; /* Lighter blue for light backgrounds */
+  
+  /* Warm Neutral Scale (Notion-inspired) */
+  --color-text-primary: rgba(0, 0, 0, 0.95); /* Warm near-black */
+  --color-text-secondary: #615d59; /* Warm gray 500 */
+  --color-text-tertiary: #a39e98; /* Warm gray 300 */
+  --color-text-inverse: #ffffff; /* White */
+  
+  /* Warm Surfaces */
+  --color-bg-primary: #ffffff; /* Pure white */
+  --color-bg-secondary: #f6f5f4; /* Warm white with yellow undertone */
+  --color-bg-tertiary: #f0efed; /* Slightly warmer white */
+  --color-bg-card: #ffffff; /* Pure white for cards */
+  
+  /* Semantic Colors */
+  --color-success: #1aae39; /* Green for success */
+  --color-warning: #dd5b00; /* Orange for warnings */
+  --color-danger: #e02e2e; /* Red for errors */
+  --color-teal: #2a9d99; /* Teal for success states */
+  --color-pink: #ff64c8; /* Pink for decorative accents */
+  
+  /* Borders (Ultra-thin Notion-style) */
+  --border-whisper: 1px solid rgba(0, 0, 0, 0.1); /* Whisper-weight border */
+  --border-light: 1px solid rgba(0, 0, 0, 0.15); /* Slightly stronger border */
+  --border-medium: 1px solid rgba(0, 0, 0, 0.2); /* Medium border */
+  
+  /* Shadows (Multi-layer, low-opacity) */
+  --shadow-card: 
+    rgba(0, 0, 0, 0.04) 0px 4px 18px,
+    rgba(0, 0, 0, 0.027) 0px 2.025px 7.84688px,
+    rgba(0, 0, 0, 0.02) 0px 0.8px 2.925px,
+    rgba(0, 0, 0, 0.01) 0px 0.175px 1.04062px;
+  
+  --shadow-deep: 
+    rgba(0, 0, 0, 0.01) 0px 1px 3px,
+    rgba(0, 0, 0, 0.02) 0px 3px 7px,
+    rgba(0, 0, 0, 0.02) 0px 7px 15px,
+    rgba(0, 0, 0, 0.04) 0px 14px 28px,
+    rgba(0, 0, 0, 0.05) 0px 23px 52px;
+  
+  /* Typography */
+  --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-family-mono: 'SF Mono', 'Roboto Mono', 'Fira Code', 'Consolas', monospace;
+  
+  /* Spacing System (8px base) */
+  --spacing-xxs: 2px;
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+  --spacing-xxl: 32px;
+  --spacing-xxxl: 48px;
+  
+  /* Radius System */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-xxl: 16px;
+  --radius-full: 9999px; /* Pill shape */
+  
+  /* Transitions */
+  --transition-fast: all 0.15s ease;
+  --transition-normal: all 0.2s ease;
+  --transition-slow: all 0.3s ease;
+}
+
+/* === Global Reset & Base Styles === */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: var(--font-family-primary);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* === Typography System (Notion-inspired) === */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+h1 { 
+  font-size: 2.5rem; /* 40px */
+  letter-spacing: -0.02em; /* Slight negative tracking */
+} 
+h2 { 
+  font-size: 2rem; /* 32px */ 
+  letter-spacing: -0.015em;
+}
+h3 { 
+  font-size: 1.5rem; /* 24px */ 
+  letter-spacing: -0.01em;
+}
+h4 { 
+  font-size: 1.25rem; /* 20px */ 
+  font-weight: 600;
+}
+h5 { 
+  font-size: 1.125rem; /* 18px */ 
+  font-weight: 600;
+}
+h6 { 
+  font-size: 1rem; /* 16px */ 
+  font-weight: 600;
+}
+
+p { 
+  margin-bottom: var(--spacing-sm); 
+  color: var(--color-text-secondary);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* === Avatar Video Container Specific Fix === */
+.avatar-video-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: var(--border-whisper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-video-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.avatar-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(4px);
+  z-index: 10;
+}
+
+.video-label {
+  position: absolute;
+  bottom: var(--spacing-xs);
+  left: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: var(--radius-xs);
+  font-size: 0.75rem;
+  color: white;
+  font-weight: 500;
+  z-index: 5;
+}

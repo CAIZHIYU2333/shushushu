@@ -139,8 +139,11 @@ class LiteAvatarWorker:
     def _event_input_loop(self):
         while True:
             event: Tts2FaceEvent = self.event_in_queue.get()
-            logger.info("receive event: {}", event)
+            event_received_time = time.time()
+            logger.info(f'[TIMING] 收到Avatar Worker事件: {event} (time={event_received_time})')
             if event == Tts2FaceEvent.START:
+                start_event_time = time.time()
+                logger.info(f'[TIMING] Avatar Worker START事件开始处理 (time={start_event_time})')
                 self.session_running = True
                 result_hanler = Tts2FaceOutputHandler(
                     audio_output_queue=self.audio_out_queue,
@@ -148,9 +151,13 @@ class LiteAvatarWorker:
                     event_out_queue=self.event_out_queue,
                 )
                 self.processor.register_output_handler(result_hanler)
+                processor_start_time = time.time()
                 self.processor.start()
+                processor_start_done = time.time()
+                logger.info(f'[TIMING] Avatar Processor.start()完成，耗时: {(processor_start_done - processor_start_time)*1000:.2f}ms')
                 self.audio_input_thread = threading.Thread(target=self._audio_input_loop)
                 self.audio_input_thread.start()
+                logger.info(f'[TIMING] Avatar Worker START事件处理完成，总耗时: {(time.time() - start_event_time)*1000:.2f}ms')
 
             elif event == Tts2FaceEvent.STOP:
                 self.session_running = False
@@ -164,7 +171,17 @@ class LiteAvatarWorker:
     def _audio_input_loop(self):
         while self.session_running:
             try:
-                speech_audio = self.audio_in_queue.get(timeout=0.1)
+                item = self.audio_in_queue.get(timeout=0.1)
+                # 处理基准时间消息
+                if isinstance(item, tuple) and len(item) == 2 and item[0] == '__TIMING_BASE__':
+                    base_time = item[1]
+                    if not hasattr(self.processor, '_timing_base_time'):
+                        self.processor._timing_base_time = base_time
+                        cumulative_delay = (time.time() - base_time) * 1000
+                        logger.info(f'[TIMING] Avatar Processor接收基准时间: {base_time}, 累计延迟: {cumulative_delay:.2f}ms')
+                    continue
+                # 处理正常的音频数据
+                speech_audio = item
                 self.processor.add_audio(speech_audio)
             except Exception:
                 continue

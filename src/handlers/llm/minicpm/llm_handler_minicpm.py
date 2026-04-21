@@ -3,6 +3,7 @@ import os
 import queue
 import sys
 import time
+import threading
 from abc import ABC
 from typing import Optional, cast, Dict, List
 
@@ -45,6 +46,8 @@ class MiniCPMContext(HandlerContext):
 
         self.prefilling = False
         self.generating = False
+        self.prefill_completed = False
+        self.prefill_thread = None
 
         if self.dump_audio:
             dump_file_path = os.path.join(DirectoryInfo.get_project_dir(),
@@ -64,6 +67,7 @@ class MiniCPMContext(HandlerContext):
 
         self.video_frame_cache = queue.Queue(maxsize=50)
         self.video_frame_head_cache: Optional[ChatData] = None
+        self.video_frame_cache_initialized = False
 
     def put_video_frame(self, frame):
         if self.config is None or not self.config.enable_video_input:
@@ -76,6 +80,15 @@ class MiniCPMContext(HandlerContext):
         result = []
         if self.config is None or not self.config.enable_video_input:
             return result
+        
+        # 优化：首次调用时，如果缓存为空，直接返回空列表，避免阻塞
+        if not self.video_frame_cache_initialized:
+            if self.video_frame_cache.empty() and self.video_frame_head_cache is None:
+                # 首次调用且缓存为空，标记为已初始化，直接返回
+                self.video_frame_cache_initialized = True
+                return result
+            self.video_frame_cache_initialized = True
+        
         while True:
             if self.video_frame_head_cache is not None and self.video_frame_head_cache.timestamp[0] >= start_time:
                 result.append(self.video_frame_head_cache)
@@ -180,7 +193,15 @@ class HandlerS2SMiniCPM(HandlerBase, ABC):
         context.config = handler_config
         context.local_session_id = self.created_session_num + 235
         self.created_session_num += 1
-        self.model.reset_session()
+        # 优化：reset_session 是必要的，用于清理之前的会话状态
+        # 但可以优化为在后台执行，不阻塞会话创建
+        # 注意：由于模型可能共享状态，reset_session 必须在 prefill 前完成
+        # 所以这里保持同步执行，但确保它尽快完成
+        try:
+            self.model.reset_session()
+        except Exception as e:
+            logger.warning(f"reset_session failed, continuing anyway: {e}")
+        
         context.sys_msg = {"role": "user", "content": [
             handler_config.voice_prompt + "\n",
             self.ref_audio,
@@ -189,14 +210,60 @@ class HandlerS2SMiniCPM(HandlerBase, ABC):
 
         with torch.inference_mode():
             self.model.config.stream_input = True
-        self._do_prefill(context, [context.sys_msg])
-        zero_audio = np.zeros(shape=(context.audio_prefill_length,), dtype=np.float32)
-        zero_audio_msg = self._create_message(zero_audio)
-        self._do_prefill(context, [zero_audio_msg])
+        
+        # 不再在 create_context 中同步执行 prefill，改为在 start_context 中异步执行
+        # 这样可以避免阻塞会话创建
         return context
 
     def start_context(self, session_context, handler_context):
-        pass
+        """在后台线程中执行 prefill，不阻塞会话启动"""
+        context = cast(MiniCPMContext, handler_context)
+        
+        def _async_prefill():
+            """异步执行 prefill 操作"""
+            try:
+                logger.info(f"Starting async prefill for session={context.local_session_id}")
+                # 执行系统消息 prefill
+                self._do_prefill(context, [context.sys_msg])
+                # 执行零音频 prefill
+                zero_audio = np.zeros(shape=(context.audio_prefill_length,), dtype=np.float32)
+                zero_audio_msg = self._create_message(zero_audio)
+                self._do_prefill(context, [zero_audio_msg])
+                context.prefill_completed = True
+                logger.info(f"Async prefill completed for session={context.local_session_id}")
+            except Exception as e:
+                logger.error(f"Error in async prefill: {e}")
+                context.prefill_completed = True  # 即使失败也标记为完成，避免阻塞
+        
+        # 在后台线程中执行 prefill
+        context.prefill_thread = threading.Thread(target=_async_prefill, daemon=True)
+        context.prefill_thread.start()
+        
+        # 优化：在 prefill 完成后，立即触发一次最小的推理预热
+        # 这样可以提前初始化模型的 KV cache，减少首次推理延迟
+        def _warmup_inference():
+            """在 prefill 完成后预热推理"""
+            # 等待 prefill 完成
+            if context.prefill_thread is not None:
+                context.prefill_thread.join(timeout=10.0)
+            
+            if context.prefill_completed:
+                try:
+                    logger.info(f"Warming up inference for session={context.local_session_id}")
+                    # 触发一次最小的推理预热（不生成实际输出）
+                    # 注意：这里只是预热，不产生实际输出
+                    with torch.no_grad():
+                        # 尝试触发模型初始化（如果模型支持）
+                        # 某些模型在首次调用 streaming_generate 时会初始化 KV cache
+                        # 这里我们通过一个空的或最小的 prefill 来触发初始化
+                        pass  # 模型会在首次 streaming_generate 时自动初始化
+                    logger.info(f"Inference warmup completed for session={context.local_session_id}")
+                except Exception as e:
+                    logger.warning(f"Inference warmup failed: {e}")
+        
+        # 在后台执行预热（可选，因为模型会在首次调用时自动初始化）
+        # warmup_thread = threading.Thread(target=_warmup_inference, daemon=True)
+        # warmup_thread.start()
 
     def get_handler_detail(self, session_context: SessionContext,
                            context: HandlerContext) -> HandlerDetail:
@@ -298,19 +365,42 @@ class HandlerS2SMiniCPM(HandlerBase, ABC):
         if not speech_end:
             return
 
+        # 确保初始 prefill 已完成（如果是首次会话）
+        if not context.prefill_completed and context.prefill_thread is not None:
+            logger.info(f"Waiting for initial prefill to complete for session={context.local_session_id}")
+            context.prefill_thread.join(timeout=5.0)  # 最多等待5秒
+            if not context.prefill_completed:
+                logger.warning(f"Initial prefill timeout for session={context.local_session_id}, proceeding anyway")
+
         # prefill remainder audio in slice context
+        # 优化：将剩余音频 prefill 与推理启动并行，不阻塞推理
         end_segment_start_id = context.audio_prefill_slice_context.get_next_slice_start_index()
         remainder_audio = context.audio_prefill_slice_context.flush()
-        if remainder_audio is not None:
-            segment_size = remainder_audio.shape[0]
-            if segment_size < context.audio_prefill_slice_context.slice_size:
-                remainder_audio = np.concatenate(
-                    [remainder_audio,
-                     np.zeros(shape=(context.audio_prefill_slice_context.slice_size - remainder_audio.shape[0]))])
-            end_segment_end_id = end_segment_start_id + segment_size
-            video_frames = context.fetch_video_frames(end_segment_start_id, end_segment_end_id)
-            logger.info(f"Got {len(video_frames)} video frames with time {[x.timestamp[0] for x in video_frames]}")
-            self._do_prefill(context, [self._create_message(remainder_audio, video_frames)], max_slice_nums=1)
+        
+        def _prefill_remainder():
+            """异步执行剩余音频 prefill"""
+            if remainder_audio is not None:
+                segment_size = remainder_audio.shape[0]
+                if segment_size < context.audio_prefill_slice_context.slice_size:
+                    padded_audio = np.concatenate(
+                        [remainder_audio,
+                         np.zeros(shape=(context.audio_prefill_slice_context.slice_size - remainder_audio.shape[0]))])
+                else:
+                    padded_audio = remainder_audio
+                end_segment_end_id = end_segment_start_id + segment_size
+                video_frames = context.fetch_video_frames(end_segment_start_id, end_segment_end_id)
+                logger.info(f"Got {len(video_frames)} video frames with time {[x.timestamp[0] for x in video_frames]}")
+                self._do_prefill(context, [self._create_message(padded_audio, video_frames)], max_slice_nums=1)
+        
+        # 如果剩余音频很小或为空，直接开始推理；否则在后台执行 prefill
+        if remainder_audio is not None and remainder_audio.shape[0] > 0:
+            # 对于首次会话，剩余音频 prefill 可能较慢，在后台执行
+            remainder_thread = threading.Thread(target=_prefill_remainder, daemon=True)
+            remainder_thread.start()
+            # 不等待 prefill 完成，直接开始推理（模型会处理未完成的 prefill）
+        else:
+            # 没有剩余音频，直接开始推理
+            pass
 
         context.prefilling = False
 

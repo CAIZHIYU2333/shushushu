@@ -127,12 +127,19 @@ class HandlerTTS(HandlerBase, ABC):
         try:
             if not text_end:
                 if context.synthesizer is None:
+                    tts_init_start = time.time()
                     callback = CosyvoiceCallBack(
                         context=context, output_definition=output_definition, speech_id=speech_id)
                     context.synthesizer = SpeechSynthesizer(
                         model=self.model_name, voice=self.voice, callback=callback, format=AudioFormat.PCM_24000HZ_MONO_16BIT)
-                logger.info(f'streaming_call {text}')
+                    tts_init_time = (time.time() - tts_init_start) * 1000
+                    logger.info(f'[TIMING] TTS Synthesizer初始化耗时: {tts_init_time:.2f}ms (session={context.session_id})')
+                
+                tts_call_start = time.time()
+                logger.info(f'[TIMING] TTS streaming_call开始 (session={context.session_id}, text_len={len(text) if text else 0})')
                 context.synthesizer.streaming_call(text)
+                tts_call_time = (time.time() - tts_call_start) * 1000
+                logger.info(f'[TIMING] TTS streaming_call完成耗时: {tts_call_time:.2f}ms (session={context.session_id})')
             else:
                 logger.info(f'streaming_call last {text}')
                 context.synthesizer.streaming_call(text)
@@ -165,6 +172,14 @@ class CosyvoiceCallBack(ResultCallback):
         pass
 
     def on_data(self, data: bytes) -> None:
+        if not hasattr(self, '_first_audio_received'):
+            self._first_audio_received = True
+            self._first_audio_time = time.time()
+            # 将基准时间存储到context，供后续传递
+            if not hasattr(self.context, '_tts_first_audio_base_time'):
+                self.context._tts_first_audio_base_time = self._first_audio_time
+            logger.info(f'[TIMING] TTS首次音频数据到达 (session={self.context.session_id}, base_time={self._first_audio_time})')
+        
         self.temp_bytes += data
         if len(self.temp_bytes) > 24000:
             # 实现接收合成二进制音频结果的逻辑
@@ -175,6 +190,16 @@ class CosyvoiceCallBack(ResultCallback):
             output.set_main_data(output_audio)
             output.add_meta("avatar_speech_end", False)
             output.add_meta("speech_id", self.speech_id)
+            # 传递基准时间到Avatar Handler
+            if hasattr(self.context, '_tts_first_audio_base_time'):
+                output.add_meta("_tts_base_time", self.context._tts_first_audio_base_time)
+            
+            if hasattr(self, '_first_audio_time') and not hasattr(self, '_first_audio_delay_logged'):
+                first_audio_delay = (time.time() - self._first_audio_time) * 1000
+                cumulative_delay = (time.time() - self.context._tts_first_audio_base_time) * 1000 if hasattr(self.context, '_tts_first_audio_base_time') else 0
+                logger.info(f'[TIMING] TTS首次音频输出耗时: {first_audio_delay:.2f}ms, 累计延迟: {cumulative_delay:.2f}ms (session={self.context.session_id})')
+                self._first_audio_delay_logged = True
+            
             self.context.submit_data(output)
             self.temp_bytes = b''
 

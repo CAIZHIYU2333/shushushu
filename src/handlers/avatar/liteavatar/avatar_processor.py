@@ -69,13 +69,22 @@ class AvatarProcessor:
         self._init_algo()
 
     def start(self):
+        start_time = time.time()
+        logger.info(f'[TIMING] Avatar Processor start()开始 (session_start_time={start_time})')
         self._session_running = True
         self._callback_start()
         self._reset_processor_status()
+        reset_time = time.time()
+        logger.info(f'[TIMING] Avatar Processor _reset_processor_status()耗时: {(reset_time - start_time)*1000:.2f}ms')
+        
         self._start_threads()
+        threads_start_time = time.time()
+        logger.info(f'[TIMING] Avatar Processor _start_threads()耗时: {(threads_start_time - reset_time)*1000:.2f}ms')
+        
         self._session_start_time = time.time()
         self._audio2signal_counter = IntervalCounter("generate signal")
         self._callback_counter = IntervalCounter("avatar callback")
+        logger.info(f'[TIMING] Avatar Processor start()总耗时: {(time.time() - start_time)*1000:.2f}ms')
 
     def stop(self):
         logger.info("stop avatar processor, totol session time {:.3f}",
@@ -113,13 +122,15 @@ class AvatarProcessor:
         """
         generate signal for signal2img
         """
-        logger.info("audio2signal loop started")
+        audio2signal_start = time.time()
+        logger.info(f'[TIMING] audio2signal loop线程启动 (time={audio2signal_start})')
         speech_id = ""
         audio_slice = None
         self._audio2signal_speed_limiter.start()
         target_round_time = 0.9
+        first_audio_processed = False
         while self._session_running:
-            start_time = time.time()
+            loop_start = time.time()
             try:
                 audio_slice: AudioSlice = self._audio_slice_queue.get(timeout=0.1)
                 target_round_time = audio_slice.get_audio_duration() - 0.1
@@ -133,8 +144,23 @@ class AvatarProcessor:
             if audio_slice.end_of_speech:
                 self._last_speech_ended = True
 
+            if not first_audio_processed:
+                first_audio_time = time.time()
+                cumulative_delay = (first_audio_time - self._timing_base_time) * 1000 if hasattr(self, '_timing_base_time') else 0
+                logger.info(f'[TIMING] audio2signal首次收到音频 (speech_id={speech_id}, audio_duration={audio_slice.get_audio_duration():.3f}s, 累计延迟: {cumulative_delay:.2f}ms)')
+                first_audio_processed = True
+                self._first_audio2signal_time = first_audio_time
+
             logger.info("audio2signal input audio durtaion {}", audio_slice.get_audio_duration())
+            audio2signal_call_start = time.time()
             signal_vals = self._algo_adapter.audio2signal(audio_slice)
+            audio2signal_call_time = (time.time() - audio2signal_call_start) * 1000
+            
+            if hasattr(self, '_first_audio2signal_time') and not hasattr(self, '_first_audio2signal_delay_logged'):
+                first_audio2signal_delay = (time.time() - self._first_audio2signal_time) * 1000
+                cumulative_delay = (time.time() - self._timing_base_time) * 1000 if hasattr(self, '_timing_base_time') else 0
+                logger.info(f'[TIMING] audio2signal首次处理完成耗时: {first_audio2signal_delay:.2f}ms (audio2signal调用耗时: {audio2signal_call_time:.2f}ms, 累计延迟: {cumulative_delay:.2f}ms)')
+                self._first_audio2signal_delay_logged = True
             avatar_status = AvatarStatus.SPEAKING
 
             self._speech_audio_aligner.add_audio(audio_slice.play_audio_data, speech_id)
@@ -165,7 +191,7 @@ class AvatarProcessor:
                 )
                 self._audio2signal_counter.add()
                 self._signal_queue.put_nowait(middle_result)
-            cost = time.time() - start_time
+            cost = time.time() - loop_start
             sleep_time = target_round_time - cost
             if sleep_time > 0:
                 time.sleep(sleep_time)
@@ -175,12 +201,17 @@ class AvatarProcessor:
         """
         generate image and do callbacks
         """
-        logger.info("signal2img loop started")
+        signal2img_start = time.time()
+        logger.info(f'[TIMING] signal2img loop线程启动 (time={signal2img_start})')
         start_time = -1
         timestamp = 0
         
         # delay start to ensure no extra audio and video generated
+        delay_start = time.time()
+        logger.info(f'[TIMING] signal2img loop开始0.5秒延迟 (这是固定延迟，每次会话都有)')
         time.sleep(0.5)
+        delay_end = time.time()
+        logger.info(f'[TIMING] signal2img loop延迟结束，实际延迟: {(delay_end - delay_start)*1000:.2f}ms')
         
         while self._session_running:
             if self._signal_queue.empty():
@@ -227,15 +258,27 @@ class AvatarProcessor:
         logger.info("signal2img loop ended")
 
     def _mouth2full_loop(self):
-        logger.info("combine img loop started")
+        mouth2full_start = time.time()
+        logger.info(f'[TIMING] mouth2full loop线程启动 (time={mouth2full_start})')
+        first_video_generated = False
         while self._session_running:
             try:
                 mouth_reusult: MouthResult = self._mouth_img_queue.get(timeout=0.1)
             except Exception:
                 continue
+            
+            if not first_video_generated:
+                first_video_time = time.time()
+                cumulative_delay = (first_video_time - self._timing_base_time) * 1000 if hasattr(self, '_timing_base_time') else 0
+                logger.info(f'[TIMING] mouth2full首次收到mouth_result (global_frame_id={mouth_reusult.global_frame_id}, 累计延迟: {cumulative_delay:.2f}ms)')
+                first_video_generated = True
+                self._first_video_generation_start = first_video_time
+            
             image = mouth_reusult.mouth_image
             bg_frame_id = mouth_reusult.bg_frame_id
+            mouth2full_start_time = time.time()
             full_img = self._algo_adapter.mouth2full(image, bg_frame_id)
+            mouth2full_time = (time.time() - mouth2full_start_time) * 1000
             
             if mouth_reusult.audio_slice is not None:
                 # create audio result
@@ -277,6 +320,12 @@ class AvatarProcessor:
                 bg_frame_id=bg_frame_id
             )
 
+            if hasattr(self, '_first_video_generation_start') and not hasattr(self, '_first_video_generation_delay_logged'):
+                first_video_delay = (time.time() - self._first_video_generation_start) * 1000
+                cumulative_delay = (time.time() - self._timing_base_time) * 1000 if hasattr(self, '_timing_base_time') else 0
+                logger.info(f'[TIMING] mouth2full首次视频生成完成，总耗时: {first_video_delay:.2f}ms (mouth2full调用耗时: {mouth2full_time:.2f}ms, 累计延迟: {cumulative_delay:.2f}ms, global_frame_id={mouth_reusult.global_frame_id})')
+                self._first_video_generation_delay_logged = True
+
             self._callback_image(image_result)
             
             if self._callback_avatar_status != image_result.avatar_status and self._callback_avatar_status is not None:
@@ -301,8 +350,11 @@ class AvatarProcessor:
         self._speech_audio_aligner = SpeechAudioAligner(self._init_option.video_frame_rate, self._init_option.audio_sample_rate)
 
     def _init_algo(self):
-        logger.info("init algo")
+        init_algo_start = time.time()
+        logger.info(f'[TIMING] Avatar Processor _init_algo()开始 (time={init_algo_start})')
         self._algo_adapter.init(self._init_option)
+        init_algo_time = (time.time() - init_algo_start) * 1000
+        logger.info(f'[TIMING] Avatar Processor _init_algo()完成，耗时: {init_algo_time:.2f}ms')
 
     def _start_threads(self):
         self._audio2signal_thread = threading.Thread(target=self._audio2signal_loop)

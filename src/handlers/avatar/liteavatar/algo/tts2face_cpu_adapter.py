@@ -2,6 +2,7 @@
 import os
 import shutil
 import sys
+import time
 from typing import Optional
 import subprocess as sp
 
@@ -30,8 +31,12 @@ class Tts2faceCpuAdapter(BaseAlgoAdapter):
                                              "src", "handlers", "avatar", "liteavatar")
 
     def init(self, init_option: AvatarInitOption):
+        init_start = time.time()
+        logger.info(f'[TIMING] Tts2faceCpuAdapter.init()开始 (avatar_name={init_option.avatar_name})')
         self.change_to_algo_dir()
         data_dir = self._get_avatar_data_dir(init_option.avatar_name)
+        
+        liteavatar_init_start = time.time()
         if InspectUtils.has_init_param(liteAvatar, "use_gpu"):
             self.tts2face = liteAvatar(
                 data_dir=data_dir,
@@ -43,19 +48,47 @@ class Tts2faceCpuAdapter(BaseAlgoAdapter):
                 data_dir=data_dir,
                 fps=init_option.video_frame_rate
             )
+        liteavatar_init_time = (time.time() - liteavatar_init_start) * 1000
+        logger.info(f'[TIMING] liteAvatar对象创建耗时: {liteavatar_init_time:.2f}ms')
+        
         bg_step = self.TARGET_FPS // init_option.video_frame_rate
+        
+        load_model_start = time.time()
         self.tts2face.load_dynamic_model(data_dir)
+        load_model_time = (time.time() - load_model_start) * 1000
+        logger.info(f'[TIMING] load_dynamic_model()耗时: {load_model_time:.2f}ms')
+        
         self._bg_counter = BgFrameCounter(len(self.tts2face.ref_img_list), bg_step)
+        
+        warmup_start = time.time()
         self.warm_up()
+        warmup_time = (time.time() - warmup_start) * 1000
+        logger.info(f'[TIMING] warm_up()耗时: {warmup_time:.2f}ms')
+        
+        total_init_time = (time.time() - init_start) * 1000
+        logger.info(f'[TIMING] Tts2faceCpuAdapter.init()总耗时: {total_init_time:.2f}ms')
         return super().init(init_option)
 
     @timeit
     def audio2signal(self, audio_slice):
+        if not hasattr(self, '_first_audio2signal_call'):
+            self._first_audio2signal_call = True
+            self._first_audio2signal_start = time.time()
+            logger.info(f'[TIMING] Tts2faceCpuAdapter.audio2signal首次调用 (audio_len={len(audio_slice.algo_audio_data) if audio_slice.algo_audio_data else 0})')
+        
+        audio2param_start = time.time()
         signal_list = self.tts2face.audio2param(
             input_audio_byte=audio_slice.algo_audio_data,
             prefix_padding_size=0,
             is_complete=audio_slice.end_of_speech,
         )
+        audio2param_time = (time.time() - audio2param_start) * 1000
+        
+        if hasattr(self, '_first_audio2signal_start') and not hasattr(self, '_first_audio2signal_delay_logged'):
+            first_audio2signal_delay = (time.time() - self._first_audio2signal_start) * 1000
+            logger.info(f'[TIMING] Tts2faceCpuAdapter.audio2signal首次调用完成，总耗时: {first_audio2signal_delay:.2f}ms (audio2param耗时: {audio2param_time:.2f}ms)')
+            self._first_audio2signal_delay_logged = True
+        
         return signal_list
 
     @timeit

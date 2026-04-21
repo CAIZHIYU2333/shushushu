@@ -1,0 +1,102 @@
+
+default:
+  chat_engine:
+    handler_configs:
+      CosyVoice:
+        api_key: sk-88dd7955b608436b852996e446023a69
+        enabled: true
+        model_name: cosyvoice-v1
+        module: tts/bailian_tts/tts_handler_cosyvoice_bailian
+        voice: longjing
+      LLM_Bailian:
+        api_key: sk-88dd7955b608436b852996e446023a69
+        api_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+        enable_video_input: true
+        enabled: true
+        model_name: qwen-vl-max
+        module: llm/openai_compatible/llm_handler_openai_compatible
+        system_prompt: 你是一名高校人工智能基础通识课老师，你讲话幽默风趣善于引用示例，同时讲话有梗，亲近易懂
+      LiteAvatar:
+        avatar_name: "20250408/sample_data"
+        debug: false
+        enable_fast_mode: false
+        fps: 20
+        module: avatar/liteavatar/avatar_handler_liteavatar
+        use_gpu: true
+      RtcClient:
+        module: client/rtc_client/client_handler_rtc
+      SenseVoice:
+        enabled: true
+        model_name: iic/SenseVoiceSmall
+        module: asr/sensevoice/asr_handler_sensevoice
+      SileroVad:
+        buffer_look_back: 5000
+        end_delay: 10000
+        module: vad/silerovad/vad_handler_silero
+        speaking_threshold: 0.5
+        speech_padding: 512
+        start_delay: 2048
+    handler_search_path:
+    - src/handlers
+    model_root: models
+  logger:
+    log_level: INFO
+  service:
+    cert_file: ssl_certs/localhost.crt
+    cert_key: ssl_certs/localhost.key
+    host: 127.0.0.1
+    port: 8282
+
+
+
+
+  
+
+  # default:
+#   logger:
+#     log_level: "INFO"
+#   service:
+#     host: "127.0.0.1"
+#     port: 8282
+#     cert_file: "ssl_certs/localhost.crt"
+#     cert_key: "ssl_certs/localhost.key"
+#   chat_engine:
+#     model_root: "models"
+#     handler_search_path:
+#       - "src/handlers"
+#     handler_configs:
+#       RtcClient:
+#         module: client/rtc_client/client_handler_rtc
+#       SileroVad:
+#         module: vad/silerovad/vad_handler_silero
+#         speaking_threshold: 0.5
+#         start_delay: 2048
+#         end_delay: 5000
+#         buffer_look_back: 5000
+#         speech_padding: 512
+#       SenseVoice:
+#         enabled: True
+#         module: asr/sensevoice/asr_handler_sensevoice
+#         model_name: "iic/SenseVoiceSmall"
+#       Edge_TTS:
+#         enabled: True
+#         module: tts/edgetts/tts_handler_edgetts
+#         voice: "zh-CN-XiaoxiaoNeural"
+#       LLM_Bailian:
+#         enabled: True
+#         module: llm/openai_compatible/llm_handler_openai_compatible
+#         model_name: "GLM-4.1V-Thinking-Flash"
+#         enable_video_input: True # ensure your llm support video input
+#         # model_name: "gemini-2.0-flash"
+# system_prompt: 专业律师，接下来你为当事人提供法律咨询服务，其中回答正当防卫时，应先给出你答案的提纲及方向，再解释故意伤害的概念，再按照四要件、三阶层、二阶层来回答构成要件，再解释故意伤害的情形以及出罪和入罪的标准，其次给出两高给出的相关司法解释，再给出刑法典中关于故意伤害修正案的相关内容，最后给出辽宁省大连市关于故意伤害的相关判例，说明正当防卫与故意伤害的界限以及关于治安管理处罚法及其修正案中对于互殴及正当防卫的通俗解释并给出最终的结论。要是问到与法律无关且为识别物体的问题时不要回答前面的点。回答时去除markdown格式符号并在对话内容中加入合适的标点符号，不需要讨论标点符号相关的内容
+#         api_url: "https://open.bigmodel.cn/api/paas/v4"
+#         # api_url: 'http://127.0.0.1:11434/v1' # ollama
+#         # api_url: 'https://generativelanguage.googleapis.com/v1beta/openai/'
+#         api_key: "a0038ae26e3b47f7b0d8b960c1f1fe2e.yQ8agRjhefo82h6e" # default=os.getenv("DASHSCOPE_API_KEY")
+#       LiteAvatar:
+#         module: avatar/liteavatar/avatar_handler_liteavatar
+#         avatar_name: 20250408/sample_data
+#         fps: 25
+#         debug: false
+#         enable_fast_mode: false
+#         use_gpu: true

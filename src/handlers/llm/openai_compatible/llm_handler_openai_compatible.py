@@ -2,6 +2,8 @@
 
 import os
 import re
+import time
+import threading
 from typing import Dict, Optional, cast
 from loguru import logger
 from pydantic import BaseModel, Field
@@ -41,6 +43,8 @@ class LLMContext(HandlerContext):
         self.current_image = None
         self.history = None
         self.enable_video_input = False
+        self.connection_warmed = False
+        self.warmup_thread = None
 
 
 class HandlerLLM(HandlerBase, ABC):
@@ -99,7 +103,49 @@ class HandlerLLM(HandlerBase, ABC):
         return context
     
     def start_context(self, session_context, handler_context):
-        pass
+        """预热 API 连接，减少首次请求延迟"""
+        context = cast(LLMContext, handler_context)
+        
+        def _warmup_connection():
+            """在后台线程中预热 API 连接"""
+            try:
+                logger.info(f"Warming up API connection for model={context.model_name}")
+                # 发送一个最小的请求来预热连接和初始化服务器端模型实例
+                # 使用一个非常短的提示，只为了建立连接
+                test_messages = [
+                    context.system_prompt,
+                    {"role": "user", "content": "hi"}
+                ]
+                
+                # 发送一个最小的流式请求来预热
+                start_time = time.time()
+                try:
+                    completion = context.client.chat.completions.create(
+                        model=context.model_name,
+                        messages=test_messages,
+                        stream=True,
+                        max_tokens=1,  # 只生成1个token，快速返回
+                    )
+                    # 读取第一个chunk来确保连接建立
+                    first_chunk = next(completion, None)
+                    if first_chunk:
+                        elapsed = time.time() - start_time
+                        logger.info(f"API connection warmed up in {elapsed*1000:.2f}ms")
+                    # 关闭流，不处理剩余数据
+                    for _ in completion:
+                        break
+                except Exception as e:
+                    logger.warning(f"API warmup failed (non-critical): {e}")
+                
+                context.connection_warmed = True
+                logger.info(f"API connection warmup completed for model={context.model_name}")
+            except Exception as e:
+                logger.error(f"Error in API connection warmup: {e}")
+                context.connection_warmed = True  # 即使失败也标记为完成，避免阻塞
+        
+        # 在后台线程中执行预热，不阻塞会话启动
+        context.warmup_thread = threading.Thread(target=_warmup_connection, daemon=True)
+        context.warmup_thread.start()
 
     def handle(self, context: HandlerContext, inputs: ChatData,
                output_definitions: Dict[ChatDataType, HandlerDataInfo]):
@@ -128,10 +174,24 @@ class HandlerLLM(HandlerBase, ABC):
         chat_text = re.sub(r"<\|.*?\|>", "", chat_text)
         if len(chat_text) < 1:
             return
+        
+        # 优化：如果连接预热未完成，等待一小段时间（最多2秒）
+        # 这样可以减少首次请求的延迟
+        if not context.connection_warmed and context.warmup_thread is not None:
+            logger.info(f"Waiting for API connection warmup (max 2s) for session={context.session_id}")
+            context.warmup_thread.join(timeout=2.0)
+            if context.connection_warmed:
+                logger.info(f"API connection warmup completed, proceeding with request")
+            else:
+                logger.warning(f"API connection warmup timeout, proceeding anyway")
+        
         logger.info(f'llm input {context.model_name} {chat_text} ')
         current_content = context.history.generate_next_messages(chat_text, 
                                                                  [context.current_image] if context.current_image is not None else [])
         logger.debug(f'llm input {context.model_name} {current_content} ')
+        
+        # 记录请求开始时间，用于性能分析
+        request_start_time = time.time()
         try:
             completion = context.client.chat.completions.create(
                 model=context.model_name,  # 此处以qwen-plus为例，可按需更换模型名称。模型列表：https://help.aliyun.com/zh/model-studio/getting-started/models
@@ -144,8 +204,15 @@ class HandlerLLM(HandlerBase, ABC):
             context.current_image = None
             context.input_texts = ''
             context.output_texts = ''
+            
+            first_chunk_received = False
             for chunk in completion:
                 if (chunk and chunk.choices and chunk.choices[0] and chunk.choices[0].delta.content):
+                    if not first_chunk_received:
+                        first_chunk_received = True
+                        first_chunk_time = time.time() - request_start_time
+                        logger.info(f'First token received in {first_chunk_time*1000:.2f}ms for session={context.session_id}')
+                    
                     output_text = chunk.choices[0].delta.content
                     context.output_texts += output_text
                     logger.info(output_text)
