@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI数字人教学辅助平台</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="teaching.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="teaching-layout">
+    <div class="teaching-container">
+        <!-- 顶部导航栏 -->
+        <header class="teaching-header">
+            <div class="header-left">
+                <button class="back-btn" id="back-to-videochat" title="返回视频聊天">
+                    <i data-lucide="arrow-left" style="width: 18px; height: 18px;"></i>
+                    <span>返回</span>
+                </button>
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i data-lucide="bot" style="width: 24px; height: 24px;"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h1>AI数字人教学助手</h1>
+                        <span class="subtitle">Intelligent Teaching Assistant</span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="status-indicator">
+                    <div class="status-dot connected" id="connectionDot"></div>
+                    <span id="connectionStatus">已连接</span>
+                </div>
+                <button class="header-btn" id="memoryBtn" title="记忆系统">
+                    <i data-lucide="brain" style="width: 18px; height: 18px;"></i>
+                    <span>记忆</span>
+                </button>
+                <button class="header-btn" id="knowledgeBtn" title="知识图谱">
+                    <i data-lucide="network" style="width: 18px; height: 18px;"></i>
+                    <span>知识图谱</span>
+                </button>
+                <button class="header-btn" id="lessonBtn" title="教案生成">
+                    <i data-lucide="file-text" style="width: 18px; height: 18px;"></i>
+                    <span>教案</span>
+                </button>
+                <button class="header-btn" id="evaluationBtn" title="学习评价">
+                    <i data-lucide="trending-up" style="width: 18px; height: 18px;"></i>
+                    <span>评价</span>
+                </button>
+                <button class="header-btn" id="settingsBtn" title="系统设置">
+                    <i data-lucide="settings" style="width: 18px; height: 18px;"></i>
+                    <span>设置</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- 主内容区 -->
+        <main class="teaching-main">
+            <div class="teaching-layout">
+                <!-- 左侧数字人区域 -->
+                <div class="avatar-section">
+                    <div class="avatar-container">
+                        <div class="avatar-header">
+                            <h3>数字人教师 - 小智</h3>
+                            <div class="avatar-info" id="avatarInfo">
+                                <span class="avatar-name">性格：活泼鼓励型</span>
+                                <span class="avatar-status" id="avatarStatus">在线</span>
+                            </div>
+                        </div>
+                        
+                        <div class="avatar-display-container">
+                            <div class="avatar-video-wrapper">
+                                <div class="video-placeholder">
+                                    <i data-lucide="video" style="width: 48px; height: 48px; opacity: 0.3;"></i>
+                                    <span>数字人视频区域</span>
+                                </div>
+                                <div class="video-label">数字人画面</div>
+                            </div>
+                            
+                            <div class="local-video-wrapper" id="localVideoWrapper" style="display:none;">
+                                <video id="localVideo" autoplay muted></video>
+                                <div class="video-label">本地摄像头</div>
+                            </div>
+                        </div>
+                        
+                        <div class="avatar-controls">
+                            <button id="avatarToggle" class="btn btn-primary btn-large">
+                                <i data-lucide="play" style="width: 18px; height: 18px;"></i>
+                                <span>开始对话</span>
+                            </button>
+                            <div class="avatar-control-buttons">
+                                <button id="toggleCameraBtn" class="btn btn-secondary btn-small">
+                                    <i data-lucide="video" style="width: 16px; height: 16px;"></i>
+                                    <span>开启摄像头</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="media-controls">
+                            <div class="control-group">
+                                <button id="micToggle" class="control-btn active" title="麦克风">
+                                    <i data-lucide="mic" style="width: 20px; height: 20px;"></i>
+                                </button>
+                                <button id="voiceBtn" class="control-btn" title="按住说话">
+                                    <i data-lucide="message-square" style="width: 20px; height: 20px;"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右侧对话区域 -->
+                <div class="chat-section">
+                    <div class="chat-header">
+                        <div class="chat-title">
+                            <h3>智能对话</h3>
+                            <span class="chat-subtitle">蔡同学，上次三角函数进步很大！</span>
+                        </div>
+                        <div class="chat-actions">
+                            <button id="clearChat" class="btn btn-ghost btn-small" title="清空对话">
+                                <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="welcome-message">
+                            <div class="welcome-icon">
+                                <i data-lucide="message-circle" style="width: 32px; height: 32px;"></i>
+                            </div>
+                            <div class="welcome-content">
+                                <h4>欢迎回来，蔡同学！</h4>
+                                <p>我是你的数字人老师小智，还记得上次我们学的三角函数吗？</p>
+                                <p>你的正确率已经从80%提升到95%了，今天想学点什么？</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input-area">
+                        <div class="input-container">
+                            <div class="input-wrapper">
+                                <textarea 
+                                    id="messageInput" 
+                                    placeholder="输入你的问题，或点击语音按钮说话..."
+                                    rows="3"
+                                ></textarea>
+                                <div class="input-actions">
+                                    <button id="voiceInputBtn" class="voice-btn" title="按住说话">
+                                        <i data-lucide="mic" style="width: 18px; height: 18px;"></i>
+                                    </button>
+                                    <button id="sendBtn" class="send-btn" title="发送消息">
+                                        <i data-lucide="send" style="width: 18px; height: 18px;"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 底部状态栏 -->
+        <footer class="teaching-footer">
+            <div class="status-bar">
+                <div class="status-item">
+                    <i data-lucide="user" style="width: 14px; height: 14px;"></i>
+                    <span>学生：蔡同学（初二）</span>
+                </div>
+                <div class="status-item">
+                    <i data-lucide="book-open" style="width: 14px; height: 14px;"></i>
+                    <span>当前课程：三角函数</span>
+                </div>
+                <div class="status-item">
+                    <i data-lucide="server" style="width: 14px; height: 14px;"></i>
+                    <span>服务状态：<span id="serviceStatus" style="color:#10b981;">运行中</span></span>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 记忆系统弹窗 -->
+    <div class="modal" id="memoryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i data-lucide="brain" style="width: 20px; height: 20px;"></i> 记忆系统</h3>
+                <button class="close-btn" id="closeMemory">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="memory-section">
+                    <h4>基本信息</h4>
+                    <div class="memory-card">
+                        <div class="memory-item">
+                            <span class="memory-label">姓名：</span>
+                            <span class="memory-value">蔡同学</span>
+                        </div>
+                        <div class="memory-item">
+                            <span class="memory-label">年级：</span>
+                            <span class="memory-value">初二</span>
+                        </div>
+                        <div class="memory-item">
+                            <span class="memory-label">学校：</span>
+                            <span class="memory-value">大连海事大学附属中学</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="memory-section">
+                    <h4>学习画像</h4>
+                    <div class="memory-card">
+                        <div class="memory-item">
+                            <span class="memory-label">掌握知识点：</span>
+                            <span class="memory-value">Python基础、数据结构、直角三角形、三角函数定义</span>
+                        </div>
+                        <div class="memory-item">
+                            <span class="memory-label">薄弱知识点：</span>
+                            <span class="memory-value" style="color:#ef4444;">正弦定理应用、动态规划</span>
+                        </div>
+                        <div class="memory-item">
+                            <span class="memory-label">学习风格：</span>
+                            <span class="memory-value">视觉型（偏好图解）</span>
+                        </div>
+                        <div class="memory-item">
+                            <span class="memory-label">学习节奏：</span>
+                            <span class="memory-value">晚上效率高</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="memory-section">
+                    <h4>交互历史</h4>
+                    <div class="memory-card">
+                        <div class="history-item">
+                            <span class="history-date">2026-04-05</span>
+                            <span class="history-content">问了三角函数问题，卡在第2步</span>
+                        </div>
+                        <div class="history-item">
+                            <span class="history-date">2026-04-06</span>
+                            <span class="history-content">问了哈夫曼树，理解良好</span>
+                        </div>
+                        <div class="history-item">
+                            <span class="history-date">2026-04-07</span>
+                            <span class="history-content">正弦定理练习，正确率85%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="memory-section">
+                    <h4>情感状态</h4>
+                    <div class="memory-card">
+                        <div class="memory-item">
+                            <span class="memory-label">最近情绪：</span>
+                            <span class="memory-value" style="color:#10b981;">积极（测验进步）</span>
+                        </div>
+                        <div class="memory-item">
+                            <span class="memory-label">信心指数：</span>
+                            <span class="memory-value">0.75（良好）</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 知识图谱弹窗 -->
+    <div class="modal" id="knowledgeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i data-lucide="network" style="width: 20px; height: 20px;"></i> 知识图谱</h3>
+                <button class="close-btn" id="closeKnowledge">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="knowledge-search">
+                    <input type="text" class="form-input" placeholder="搜索知识点..." id="knowledgeSearch">
+                    <button class="btn btn-primary" id="searchKnowledge">
+                        <i data-lucide="search" style="width: 16px; height: 16px;"></i> 搜索
+                    </button>
+                </div>
+                
+                <div class="knowledge-graph-display">
+                    <div class="knowledge-node active">
+                        <h4>三角函数</h4>
+                        <div class="node-info">
+                            <span class="node-tag">当前学习</span>
+                            <span class="node-difficulty">难度：中等</span>
+                        </div>
+                    </div>
+                    
+                    <div class="knowledge-relations">
+                        <h5>前置知识</h5>
+                        <div class="relation-list">
+                            <div class="relation-item mastered">
+                                <i data-lucide="check-circle" style="width: 16px; height: 16px;"></i>
+                                <span>直角三角形</span>
+                                <span class="relation-status">已掌握</span>
+                            </div>
+                            <div class="relation-item mastered">
+                                <i data-lucide="check-circle" style="width: 16px; height: 16px;"></i>
+                                <span>三角函数定义</span>
+                                <span class="relation-status">已掌握</span>
+                            </div>
+                        </div>
+                        
+                        <h5>关联知识</h5>
+                        <div class="relation-list">
+                            <div class="relation-item learning">
+                                <i data-lucide="loader" style="width: 16px; height: 16px;"></i>
+                                <span>正弦定理</span>
+                                <span class="relation-status">学习中</span>
+                            </div>
+                            <div class="relation-item">
+                                <i data-lucide="circle" style="width: 16px; height: 16px;"></i>
+                                <span>余弦定理</span>
+                                <span class="relation-status">未学习</span>
+                            </div>
+                            <div class="relation-item">
+                                <i data-lucide="circle" style="width: 16px; height: 16px;"></i>
+                                <span>向量</span>
+                                <span class="relation-status">未学习</span>
+                            </div>
+                        </div>
+                        
+                        <h5>应用场景</h5>
+                        <div class="relation-list">
+                            <div class="relation-item">
+                                <i data-lucide="circle" style="width: 16px; height: 16px;"></i>
+                                <span>解三角形</span>
+                            </div>
+                            <div class="relation-item">
+                                <i data-lucide="circle" style="width: 16px; height: 16px;"></i>
+                                <span>物理力学</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 教案生成弹窗 -->
+    <div class="modal" id="lessonModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i data-lucide="file-text" style="width: 20px; height: 20px;"></i> 教案生成</h3>
+                <button class="close-btn" id="closeLesson">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="lesson-form">
+                    <div class="form-group">
+                        <label>教学目标</label>
+                        <input type="text" class="form-input" placeholder="例如：45分钟讲完三角函数" value="45分钟讲完正弦定理">
+                    </div>
+                    <div class="form-group">
+                        <label>学生水平</label>
+                        <select class="form-select">
+                            <option>初二基础</option>
+                            <option selected>初二中等</option>
+                            <option>初二进阶</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>课时长度</label>
+                        <select class="form-select">
+                            <option>30分钟</option>
+                            <option selected>45分钟</option>
+                            <option>60分钟</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary btn-block" id="generateLesson">
+                        <i data-lucide="sparkles" style="width: 16px; height: 16px;"></i> 生成教案
+                    </button>
+                </div>
+                
+                <div class="lesson-result" id="lessonResult" style="display:none;">
+                    <h4>生成的教案</h4>
+                    <div class="lesson-content">
+                        <div class="lesson-section">
+                            <h5>一、导入（5分钟）</h5>
+                            <p>回顾上节课内容：直角三角形与三角函数定义</p>
+                            <p>提问：sin30° = ? cos60° = ?</p>
+                        </div>
+                        <div class="lesson-section">
+                            <h5>二、新知讲解（20分钟）</h5>
+                            <p>1. 正弦定理的公式：a/sinA = b/sinB = c/sinC</p>
+                            <p>2. 公式推导过程（配图）</p>
+                            <p>3. 例题讲解：已知两边一角，求第三边</p>
+                        </div>
+                        <div class="lesson-section">
+                            <h5>三、练习巩固（15分钟）</h5>
+                            <p>基础题：直接套用公式计算</p>
+                            <p>提高题：结合实际场景应用</p>
+                        </div>
+                        <div class="lesson-section">
+                            <h5>四、总结（5分钟）</h5>
+                            <p>重点：正弦定理公式及应用条件</p>
+                            <p>作业：课后习题P45 1-5题</p>
+                        </div>
+                    </div>
+                    <div class="lesson-actions">
+                        <button class="btn btn-secondary">
+                            <i data-lucide="presentation" style="width: 16px; height: 16px;"></i> 生成PPT
+                        </button>
+                        <button class="btn btn-secondary">
+                            <i data-lucide="image" style="width: 16px; height: 16px;"></i> 生成配图
+                        </button>
+                        <button class="btn btn-primary">
+                            <i data-lucide="download" style="width: 16px; height: 16px;"></i> 导出教案
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 学习评价弹窗 -->
+    <div class="modal" id="evaluationModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i data-lucide="trending-up" style="width: 20px; height: 20px;"></i> 学习评价</h3>
+                <button class="close-btn" id="closeEvaluation">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="evaluation-overview">
+                    <div class="eval-card">
+                        <div class="eval-icon" style="background:linear-gradient(135deg, #10b981, #34d399);">
+                            <i data-lucide="check" style="width: 24px; height: 24px;"></i>
+                        </div>
+                        <div class="eval-info">
+                            <h4>课堂表现</h4>
+                            <p class="eval-score">92分</p>
+                            <p class="eval-desc">积极回答问题，思路清晰</p>
+                        </div>
+                    </div>
+                    
+                    <div class="eval-card">
+                        <div class="eval-icon" style="background:linear-gradient(135deg, #3b82f6, #60a5fa);">
+                            <i data-lucide="bar-chart-3" style="width: 24px; height: 24px;"></i>
+                        </div>
+                        <div class="eval-info">
+                            <h4>知识点掌握</h4>
+                            <p class="eval-score">85分</p>
+                            <p class="eval-desc">三角函数基础良好，正弦定理需加强</p>
+                        </div>
+                    </div>
+                    
+                    <div class="eval-card">
+                        <div class="eval-icon" style="background:linear-gradient(135deg, #f59e0b, #fbbf24);">
+                            <i data-lucide="trophy" style="width: 24px; height: 24px;"></i>
+                        </div>
+                        <div class="eval-info">
+                            <h4>进步幅度</h4>
+                            <p class="eval-score">+15分</p>
+                            <p class="eval-desc">较上月提升明显，继续保持</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="evaluation-detail">
+                    <h4>详细分析</h4>
+                    <div class="eval-chart">
+                        <div class="chart-item">
+                            <div class="chart-label">三角函数定义</div>
+                            <div class="chart-bar">
+                                <div class="chart-fill" style="width:95%;background:linear-gradient(90deg,#10b981,#34d399);"></div>
+                            </div>
+                            <div class="chart-value">95%</div>
+                        </div>
+                        <div class="chart-item">
+                            <div class="chart-label">正弦定理</div>
+                            <div class="chart-bar">
+                                <div class="chart-fill" style="width:75%;background:linear-gradient(90deg,#f59e0b,#fbbf24);"></div>
+                            </div>
+                            <div class="chart-value">75%</div>
+                        </div>
+                        <div class="chart-item">
+                            <div class="chart-label">余弦定理</div>
+                            <div class="chart-bar">
+                                <div class="chart-fill" style="width:40%;background:linear-gradient(90deg,#ef4444,#f87171);"></div>
+                            </div>
+                            <div class="chart-value">40%</div>
+                        </div>
+                        <div class="chart-item">
+                            <div class="chart-label">向量基础</div>
+                            <div class="chart-bar">
+                                <div class="chart-fill" style="width:60%;background:linear-gradient(90deg,#3b82f6,#60a5fa);"></div>
+                            </div>
+                            <div class="chart-value">60%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="evaluation-suggestion">
+                    <h4>学习建议</h4>
+                    <div class="suggestion-list">
+                        <div class="suggestion-item">
+                            <i data-lucide="lightbulb" style="width: 16px; height: 16px;"></i>
+                            <span>建议多做正弦定理的练习题，特别是应用题</span>
+                        </div>
+                        <div class="suggestion-item">
+                            <i data-lucide="lightbulb" style="width: 16px; height: 16px;"></i>
+                            <span>可以开始预习余弦定理，与正弦定理对比学习</span>
+                        </div>
+                        <div class="suggestion-item">
+                            <i data-lucide="lightbulb" style="width: 16px; height: 16px;"></i>
+                            <span>向量是后续重点，建议提前了解基本概念</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 系统设置弹窗 -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i data-lucide="settings" style="width: 20px; height: 20px;"></i> 系统设置</h3>
+                <button class="close-btn" id="closeSettings">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="tabs">
+                    <div class="tab-header">
+                        <button class="tab-btn active" data-tab="general">通用</button>
+                        <button class="tab-btn" data-tab="avatar">数字人</button>
+                        <button class="tab-btn" data-tab="audio">音频</button>
+                        <button class="tab-btn" data-tab="device">设备</button>
+                        <button class="tab-btn" data-tab="advanced">高级</button>
+                    </div>
+                    
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="general-tab">
+                            <div class="setting-group">
+                                <label for="language">语言</label>
+                                <select class="form-select" id="language">
+                                    <option value="zh-CN">简体中文</option>
+                                    <option value="en-US">English</option>
+                                </select>
+                            </div>
+                            
+                            <div class="setting-group">
+                                <label for="theme">主题</label>
+                                <select class="form-select" id="theme">
+                                    <option value="light">浅色</option>
+                                    <option value="dark">深色</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-pane" id="avatar-tab">
+                            <div class="setting-group">
+                                <label for="avatarPersonality">数字人性格</label>
+                                <select class="form-select" id="avatarPersonality">
+                                    <option value="serious">严肃型</option>
+                                    <option value="lively" selected>活泼鼓励型</option>
+                                    <option value="humorous">幽默型</option>
+                                </select>
+                            </div>
+                            
+                            <div class="setting-group">
+                                <label for="avatarVoice">音色</label>
+                                <select class="form-select" id="avatarVoice">
+                                    <option value="female1" selected>女声-温柔</option>
+                                    <option value="female2">女声-活泼</option>
+                                    <option value="male1">男声-沉稳</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-pane" id="audio-tab">
+                            <div class="setting-group">
+                                <label for="ttsService">TTS服务</label>
+                                <select class="form-select" id="ttsService">
+                                    <option value="dashscope" selected>DashScope</option>
+                                    <option value="edge">Edge TTS</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-pane" id="device-tab">
+                            <div class="setting-group">
+                                <label for="audioDevice">麦克风</label>
+                                <select class="form-select" id="audioDevice">
+                                    <option value="">自动选择</option>
+                                </select>
+                            </div>
+                            
+                            <div class="setting-group">
+                                <label for="videoDevice">摄像头</label>
+                                <select class="form-select" id="videoDevice">
+                                    <option value="">自动选择</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-pane" id="advanced-tab">
+                            <div class="setting-group">
+                                <label for="avatarType">数字人类型</label>
+                                <select class="form-select" id="avatarType">
+                                    <option value="liteavatar" selected>LiteAvatar</option>
+                                </select>
+                            </div>
+                            
+                            <div class="setting-group">
+                                <label for="avatarModel">数字人模型</label>
+                                <select class="form-select" id="avatarModel">
+                                    <option value="20250408/sample_data" selected>默认模型</option>
+                                </select>
+                            </div>
+                            
+                            <div class="setting-group">
+                                <label for="aiModel">AI 模型</label>
+                                <select class="form-select" id="aiModel">
+                                    <option value="bailian" selected>百炼</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelSettings">取消</button>
+                <button class="btn btn-primary" id="saveSettings">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载遮罩 -->
+    <div class="loading-overlay">
+        <div class="loading-spinner-large"></div>
+        <div class="loading-content">
+            <h3>正在加载</h3>
+            <p>请稍候...</p>
+        </div>
+    </div>
+
+    <!-- 通知容器 -->
+    <div class="notification-container"></div>
+
+    <script src="teaching.js"></script>
+</body>
+</html>
