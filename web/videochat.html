@@ -290,24 +290,48 @@
     <div class="teaching-modal" id="teaching-memory-modal">
         <div class="teaching-modal-content">
             <div class="teaching-modal-header">
-                <h3>记忆系统</h3>
+                <h3>记忆系统 - 学生画像</h3>
                 <button class="teaching-modal-close" data-close="teaching-memory-modal">&times;</button>
             </div>
             <div class="teaching-modal-body">
                 <div class="memory-section">
-                    <h4>学生信息</h4>
+                    <h4>基本信息</h4>
                     <div class="memory-card">
-                        <div class="memory-item"><span class="memory-label">姓名：</span><span class="memory-value">蔡同学</span></div>
-                        <div class="memory-item"><span class="memory-label">年级：</span><span class="memory-value">初二</span></div>
-                        <div class="memory-item"><span class="memory-label">学校：</span><span class="memory-value">大连海事大学附属中学</span></div>
+                        <div class="memory-item"><span class="memory-label">姓名：</span><span class="memory-value">张同学</span></div>
+                        <div class="memory-item"><span class="memory-label">专业：</span><span class="memory-value">人工智能</span></div>
+                        <div class="memory-item"><span class="memory-label">年级：</span><span class="memory-value">大三</span></div>
                     </div>
                 </div>
                 <div class="memory-section">
-                    <h4>学习画像</h4>
+                    <h4>知识掌握情况</h4>
                     <div class="memory-card">
-                        <div class="memory-item"><span class="memory-label">掌握知识：</span><span class="memory-value">Python基础、数据结构、三角函数</span></div>
-                        <div class="memory-item"><span class="memory-label">薄弱知识：</span><span class="memory-value" style="color:#ff6b6b;">正弦定理应用、动态规划</span></div>
-                        <div class="memory-item"><span class="memory-label">学习风格：</span><span class="memory-value">视觉型（偏好图解）</span></div>
+                        <div class="memory-item"><span class="memory-label">已掌握：</span><span class="memory-value">Python编程、线性代数、概率论、机器学习基础、神经网络基础</span></div>
+                        <div class="memory-item"><span class="memory-label">学习中：</span><span class="memory-value" style="color:#f59e0b;">卷积神经网络(CNN)、循环神经网络(RNN)、Transformer</span></div>
+                        <div class="memory-item"><span class="memory-label">待学习：</span><span class="memory-value">强化学习、生成对抗网络(GAN)、图神经网络(GNN)</span></div>
+                    </div>
+                </div>
+                <div class="memory-section">
+                    <h4>学习风格与偏好</h4>
+                    <div class="memory-card">
+                        <div class="memory-item"><span class="memory-label">学习风格：</span><span class="memory-value">实践型（偏好代码实现+项目驱动）</span></div>
+                        <div class="memory-item"><span class="memory-label">薄弱环节：</span><span class="memory-value" style="color:#ef4444;">数学推导、算法复杂度分析</span></div>
+                        <div class="memory-item"><span class="memory-label">学习时段：</span><span class="memory-value">下午2-5点效率最高</span></div>
+                    </div>
+                </div>
+                <div class="memory-section">
+                    <h4>最近学习记录</h4>
+                    <div class="memory-card">
+                        <div class="history-item"><div class="history-date">2026-04-15</div><div class="history-content">学习了CNN的卷积层和池化层原理，完成了手写数字识别项目</div></div>
+                        <div class="history-item"><div class="history-date">2026-04-18</div><div class="history-content">学习了RNN和LSTM，理解了序列数据处理方法</div></div>
+                        <div class="history-item"><div class="history-date">2026-04-20</div><div class="history-content">学习了Transformer架构，理解了Self-Attention机制</div></div>
+                    </div>
+                </div>
+                <div class="memory-section">
+                    <h4>人格设定（AI教师）</h4>
+                    <div class="memory-card">
+                        <div class="memory-item"><span class="memory-label">教学风格：</span><span class="memory-value">严谨细致，善于用类比解释复杂概念</span></div>
+                        <div class="memory-item"><span class="memory-label">互动方式：</span><span class="memory-value">启发式提问，引导学生自主思考</span></div>
+                        <div class="memory-item"><span class="memory-label">反馈方式：</span><span class="memory-value">及时肯定进步，指出改进方向</span></div>
                     </div>
                 </div>
             </div>
@@ -317,26 +341,60 @@
     <div class="teaching-modal" id="teaching-knowledge-modal">
         <div class="teaching-modal-content">
             <div class="teaching-modal-header">
-                <h3>知识图谱</h3>
+                <h3>知识图谱 - Transformer架构</h3>
                 <button class="teaching-modal-close" data-close="teaching-knowledge-modal">&times;</button>
             </div>
             <div class="teaching-modal-body">
                 <div class="knowledge-graph">
                     <div class="knowledge-node active">
-                        <h4>三角函数</h4>
-                        <div class="node-tags"><span class="node-tag">当前学习</span><span class="node-tag">难度：中等</span></div>
+                        <div class="node-header">
+                            <h4>Transformer架构</h4>
+                            <span class="node-badge">当前学习</span>
+                        </div>
+                        <div class="node-info">
+                            <span>难度：困难</span>
+                            <span>掌握度：60%</span>
+                        </div>
                     </div>
-                    <div class="knowledge-relations">
+                    <div class="knowledge-section">
                         <h5>前置知识</h5>
                         <div class="relation-list">
-                            <div class="relation-item mastered"><span class="relation-status">✓</span><span>直角三角形</span></div>
-                            <div class="relation-item mastered"><span class="relation-status">✓</span><span>三角函数定义</span></div>
+                            <div class="relation-item mastered"><span class="relation-status">✓</span><span>Python编程基础</span></div>
+                            <div class="relation-item mastered"><span class="relation-status">✓</span><span>线性代数（矩阵运算）</span></div>
+                            <div class="relation-item mastered"><span class="relation-status">✓</span><span>概率论与数理统计</span></div>
+                            <div class="relation-item mastered"><span class="relation-status">✓</span><span>机器学习基础</span></div>
+                            <div class="relation-item mastered"><span class="relation-status">✓</span><span>神经网络基础（MLP）</span></div>
+                            <div class="relation-item mastered"><span class="relation-status">✓</span><span>卷积神经网络(CNN)</span></div>
+                            <div class="relation-item mastered"><span class="relation-status">✓</span><span>循环神经网络(RNN/LSTM)</span></div>
                         </div>
-                        <h5>关联知识</h5>
+                    </div>
+                    <div class="knowledge-section">
+                        <h5>核心知识点</h5>
                         <div class="relation-list">
-                            <div class="relation-item learning"><span class="relation-status">◐</span><span>正弦定理</span></div>
-                            <div class="relation-item"><span class="relation-status">○</span><span>余弦定理</span></div>
-                            <div class="relation-item"><span class="relation-status">○</span><span>向量</span></div>
+                            <div class="relation-item learning"><span class="relation-status">◐</span><span>Self-Attention机制</span></div>
+                            <div class="relation-item learning"><span class="relation-status">◐</span><span>Multi-Head Attention</span></div>
+                            <div class="relation-item learning"><span class="relation-status">◐</span><span>Positional Encoding</span></div>
+                            <div class="relation-item"><span class="relation-status">○</span><span>Encoder-Decoder架构</span></div>
+                            <div class="relation-item"><span class="relation-status">○</span><span>Layer Normalization</span></div>
+                            <div class="relation-item"><span class="relation-status">○</span><span>残差连接(Residual Connection)</span></div>
+                        </div>
+                    </div>
+                    <div class="knowledge-section">
+                        <h5>扩展知识</h5>
+                        <div class="relation-list">
+                            <div class="relation-item"><span class="relation-status">○</span><span>BERT（双向Encoder）</span></div>
+                            <div class="relation-item"><span class="relation-status">○</span><span>GPT系列（Decoder-only）</span></div>
+                            <div class="relation-item"><span class="relation-status">○</span><span>T5（Encoder-Decoder）</span></div>
+                            <div class="relation-item"><span class="relation-status">○</span><span>Vision Transformer(ViT)</span></div>
+                        </div>
+                    </div>
+                    <div class="knowledge-section">
+                        <h5>应用场景</h5>
+                        <div class="relation-list">
+                            <div class="relation-item"><span class="relation-status">○</span><span>机器翻译</span></div>
+                            <div class="relation-item"><span class="relation-status">○</span><span>文本生成</span></div>
+                            <div class="relation-item"><span class="relation-status">○</span><span>问答系统</span></div>
+                            <div class="relation-item"><span class="relation-status">○</span><span>图像分类(ViT)</span></div>
                         </div>
                     </div>
                 </div>
@@ -347,32 +405,43 @@
     <div class="teaching-modal" id="teaching-lesson-modal">
         <div class="teaching-modal-content">
             <div class="teaching-modal-header">
-                <h3>教案生成</h3>
+                <h3>教案生成 - Self-Attention机制</h3>
                 <button class="teaching-modal-close" data-close="teaching-lesson-modal">&times;</button>
             </div>
             <div class="teaching-modal-body">
                 <div class="lesson-form">
                     <div class="form-group">
-                        <label>教学目标</label>
-                        <input type="text" class="form-input" value="45分钟讲完正弦定理">
+                        <label class="form-label">教学主题</label>
+                        <input type="text" class="form-input" value="Self-Attention机制详解">
                     </div>
                     <div class="form-group">
-                        <label>学生水平</label>
+                        <label class="form-label">学生水平</label>
                         <select class="form-select">
-                            <option>初二基础</option>
-                            <option selected>初二中等</option>
-                            <option>初二进阶</option>
+                            <option>AI基础入门</option>
+                            <option selected>AI专业大三</option>
+                            <option>AI研究生</option>
                         </select>
                     </div>
-                    <button class="btn btn-primary btn-block" id="generate-lesson-btn">生成教案</button>
+                    <div class="form-group">
+                        <label class="form-label">课时长度</label>
+                        <select class="form-select">
+                            <option>45分钟</option>
+                            <option selected>90分钟</option>
+                            <option>120分钟</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary btn-block" id="generate-lesson-btn">
+                        <i data-lucide="sparkles" style="width: 16px; height: 16px;"></i>
+                        生成教案
+                    </button>
                 </div>
                 <div class="lesson-result" id="lesson-result" style="display:none;">
                     <h4>生成的教案</h4>
                     <div class="lesson-content">
-                        <div class="lesson-section"><h5>一、导入（5分钟）</h5><p>回顾上节课内容：直角三角形与三角函数定义</p></div>
-                        <div class="lesson-section"><h5>二、新知讲解（20分钟）</h5><p>1. 正弦定理的公式：a/sinA = b/sinB = c/sinC</p></div>
-                        <div class="lesson-section"><h5>三、练习巩固（15分钟）</h5><p>基础题：直接套用公式计算</p></div>
-                        <div class="lesson-section"><h5>四、总结（5分钟）</h5><p>重点：正弦定理公式及应用条件</p></div>
+                        <div class="lesson-section"><h5>一、引入（10分钟）</h5><p>回顾RNN/LSTM的局限性：序列依赖、无法并行</p><p>引入Attention思想的直观理解</p></div>
+                        <div class="lesson-section"><h5>二、Self-Attention原理（30分钟）</h5><p>1. Q/K/V矩阵的物理意义</p><p>2. 注意力分数计算：softmax(QK^T/√d_k)</p><p>3. 缩放因子的作用：防止梯度消失</p></div>
+                        <div class="lesson-section"><h5>三、代码实现（30分钟）</h5><p>使用PyTorch实现Self-Attention层</p><p>可视化注意力权重矩阵</p></div>
+                        <div class="lesson-section"><h5>四、总结与作业（20分钟）</h5><p>重点：Self-Attention的并行计算优势</p><p>作业：实现Multi-Head Attention</p></div>
                     </div>
                 </div>
             </div>
@@ -382,30 +451,59 @@
     <div class="teaching-modal" id="teaching-evaluation-modal">
         <div class="teaching-modal-content">
             <div class="teaching-modal-header">
-                <h3>学习评价</h3>
+                <h3>学习评价 - AI专业课</h3>
                 <button class="teaching-modal-close" data-close="teaching-evaluation-modal">&times;</button>
             </div>
             <div class="teaching-modal-body">
                 <div class="evaluation-overview">
                     <div class="eval-card">
-                        <div class="eval-icon" style="background:linear-gradient(135deg, #10b981, #34d399);">✓</div>
-                        <div class="eval-info"><h4>课堂表现</h4><p class="eval-score">92分</p></div>
+                        <div class="eval-icon" style="background:linear-gradient(135deg, #10b981, #34d399);">
+                            <i data-lucide="check" style="width: 24px; height: 24px;"></i>
+                        </div>
+                        <div class="eval-info">
+                            <h4>课堂表现</h4>
+                            <p class="eval-score">88分</p>
+                            <p class="eval-desc">积极提问，代码实现能力强</p>
+                        </div>
                     </div>
                     <div class="eval-card">
-                        <div class="eval-icon" style="background:linear-gradient(135deg, #3b82f6, #60a5fa);">📊</div>
-                        <div class="eval-info"><h4>知识点掌握</h4><p class="eval-score">85分</p></div>
+                        <div class="eval-icon" style="background:linear-gradient(135deg, #3b82f6, #60a5fa);">
+                            <i data-lucide="bar-chart-3" style="width: 24px; height: 24px;"></i>
+                        </div>
+                        <div class="eval-info">
+                            <h4>知识点掌握</h4>
+                            <p class="eval-score">75分</p>
+                            <p class="eval-desc">CNN/RNN掌握良好，Transformer需加强</p>
+                        </div>
                     </div>
                     <div class="eval-card">
-                        <div class="eval-icon" style="background:linear-gradient(135deg, #f59e0b, #fbbf24);">🏆</div>
-                        <div class="eval-info"><h4>进步幅度</h4><p class="eval-score">+15分</p></div>
+                        <div class="eval-icon" style="background:linear-gradient(135deg, #f59e0b, #fbbf24);">
+                            <i data-lucide="trophy" style="width: 24px; height: 24px;"></i>
+                        </div>
+                        <div class="eval-info">
+                            <h4>项目完成度</h4>
+                            <p class="eval-score">3/5</p>
+                            <p class="eval-desc">完成MNIST、文本分类，待完成机器翻译</p>
+                        </div>
                     </div>
                 </div>
                 <div class="evaluation-detail">
                     <h4>详细分析</h4>
                     <div class="eval-chart">
-                        <div class="chart-item"><div class="chart-label">三角函数定义</div><div class="chart-bar"><div class="chart-fill" style="width:95%;background:linear-gradient(90deg,#10b981,#34d399);"></div></div><div class="chart-value">95%</div></div>
-                        <div class="chart-item"><div class="chart-label">正弦定理</div><div class="chart-bar"><div class="chart-fill" style="width:75%;background:linear-gradient(90deg,#f59e0b,#fbbf24);"></div></div><div class="chart-value">75%</div></div>
-                        <div class="chart-item"><div class="chart-label">余弦定理</div><div class="chart-bar"><div class="chart-fill" style="width:40%;background:linear-gradient(90deg,#ef4444,#f87171);"></div></div><div class="chart-value">40%</div></div>
+                        <div class="chart-item"><div class="chart-label">Python编程</div><div class="chart-bar"><div class="chart-fill" style="width:90%;background:var(--gradient-success);"></div></div><div class="chart-value">90%</div></div>
+                        <div class="chart-item"><div class="chart-label">机器学习基础</div><div class="chart-bar"><div class="chart-fill" style="width:85%;background:var(--gradient-success);"></div></div><div class="chart-value">85%</div></div>
+                        <div class="chart-item"><div class="chart-label">CNN</div><div class="chart-bar"><div class="chart-fill" style="width:80%;background:var(--gradient-primary);"></div></div><div class="chart-value">80%</div></div>
+                        <div class="chart-item"><div class="chart-label">RNN/LSTM</div><div class="chart-bar"><div class="chart-fill" style="width:75%;background:var(--gradient-primary);"></div></div><div class="chart-value">75%</div></div>
+                        <div class="chart-item"><div class="chart-label">Transformer</div><div class="chart-bar"><div class="chart-fill" style="width:60%;background:var(--gradient-warning);"></div></div><div class="chart-value">60%</div></div>
+                        <div class="chart-item"><div class="chart-label">数学推导</div><div class="chart-bar"><div class="chart-fill" style="width:55%;background:linear-gradient(90deg,#ef4444,#f87171);"></div></div><div class="chart-value">55%</div></div>
+                    </div>
+                </div>
+                <div class="evaluation-suggestion">
+                    <h4>学习建议</h4>
+                    <div class="suggestion-list">
+                        <div class="suggestion-item"><i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i><span>建议加强数学推导练习，特别是矩阵微积分</span></div>
+                        <div class="suggestion-item"><i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i><span>完成Transformer的PyTorch实现项目</span></div>
+                        <div class="suggestion-item"><i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i><span>阅读"Attention Is All You Need"原论文</span></div>
                     </div>
                 </div>
             </div>
