@@ -3,561 +3,422 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI数字人教学助手</title>
-    <link rel="stylesheet" href="design-tokens.css">
-    <link rel="stylesheet" href="videochat-teaching.css">
+    <title>数字人聊天 - OpenAvatarChat</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="videochat.css">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body>
-    <div class="app-container">
-        <!-- 左侧边栏 - 集成教学功能 -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <div class="logo-icon">
-                        <i data-lucide="bot" style="width: 24px; height: 24px;"></i>
-                    </div>
-                    <span class="logo-text">AI教学助手</span>
-                </div>
+<body class="wechat-layout">
+    <!-- 摄像头权限请求覆盖层 -->
+    <div id="webcam-permission" class="access-wrap hidden">
+        <div class="permission-content">
+            <div class="permission-icon">
+                <i data-lucide="video" style="width: 48px; height: 48px;"></i>
+            </div>
+            <div class="permission-text">点击允许访问摄像头和麦克风</div>
+            <div class="permission-hint">开始与数字人进行视频对话</div>
+        </div>
+    </div>
+
+    <div class="wechat-container" id="wechat-container">
+        <!-- 左侧导航栏 -->
+        <aside class="sidebar" id="sidebar">
+            <!-- 用户头像 -->
+            <div class="sidebar-avatar" id="sidebar-avatar">
+                <svg class="avatar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
             </div>
 
+            <!-- 功能图标组 -->
             <nav class="sidebar-nav">
-                <!-- 核心功能 -->
-                <div class="nav-section">
-                    <div class="nav-section-title">核心功能</div>
-                    <button class="nav-item active" data-panel="chat">
-                        <i data-lucide="message-square" style="width: 18px; height: 18px;"></i>
-                        <span>智能对话</span>
-                    </button>
-                    <button class="nav-item" data-panel="memory">
-                        <i data-lucide="brain" style="width: 18px; height: 18px;"></i>
-                        <span>记忆系统</span>
-                    </button>
-                    <button class="nav-item" data-panel="knowledge">
-                        <i data-lucide="network" style="width: 18px; height: 18px;"></i>
-                        <span>知识图谱</span>
-                    </button>
-                </div>
-
-                <!-- 教学工具 -->
-                <div class="nav-section">
-                    <div class="nav-section-title">教学工具</div>
-                    <button class="nav-item" data-panel="lesson">
-                        <i data-lucide="file-text" style="width: 18px; height: 18px;"></i>
-                        <span>教案生成</span>
-                    </button>
-                    <button class="nav-item" data-panel="evaluation">
-                        <i data-lucide="trending-up" style="width: 18px; height: 18px;"></i>
-                        <span>学习评价</span>
-                    </button>
-                </div>
-
-                <!-- 快捷操作 -->
-                <div class="nav-section">
-                    <div class="nav-section-title">快捷操作</div>
-                    <button class="nav-item" data-panel="students">
-                        <i data-lucide="users" style="width: 18px; height: 18px;"></i>
-                        <span>学生管理</span>
-                    </button>
-                    <button class="nav-item" data-panel="courses">
-                        <i data-lucide="book-open" style="width: 18px; height: 18px;"></i>
-                        <span>课程管理</span>
-                    </button>
-                </div>
+                <button class="nav-item active" data-action="chat" title="消息">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                </button>
+                <button class="nav-item" data-action="contacts" title="联系人">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                </button>
+                <button class="nav-item" data-action="files" title="文件">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                </button>
+                <button class="nav-item" data-action="favorites" title="收藏">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                </button>
+                
+                <!-- 教学功能分隔线 -->
+                <div class="nav-divider"></div>
+                
+                <!-- 教学功能按钮 -->
+                <button class="nav-item" id="teaching-memory-btn" title="记忆系统">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2a7 7 0 0 1 7 7c0 3-2 5-3 7h-8c-1-2-3-4-3-7a7 7 0 0 1 7-7z"></path>
+                        <path d="M10 16v2a2 2 0 1 0 4 0v-2"></path>
+                    </svg>
+                </button>
+                <button class="nav-item" id="teaching-knowledge-btn" title="知识图谱">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <circle cx="5" cy="6" r="2"></circle>
+                        <circle cx="19" cy="6" r="2"></circle>
+                        <circle cx="5" cy="18" r="2"></circle>
+                        <circle cx="19" cy="18" r="2"></circle>
+                        <path d="M7 7l3 3M17 7l-3 3M7 17l3-3M17 17l-3-3"></path>
+                    </svg>
+                </button>
+                <button class="nav-item" id="teaching-lesson-btn" title="教案生成">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                    </svg>
+                </button>
+                <button class="nav-item" id="teaching-evaluation-btn" title="学习评价">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                    </svg>
+                </button>
             </nav>
 
+            <!-- 底部操作 -->
             <div class="sidebar-footer">
-                <button class="nav-item" id="settings-btn">
-                    <i data-lucide="settings" style="width: 18px; height: 18px;"></i>
-                    <span>设置</span>
+                <button class="nav-item" id="new-chat-btn" data-action="new-chat" title="开始新对话">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
                 </button>
-                <button class="nav-item" id="theme-toggle-btn">
-                    <i data-lucide="moon" style="width: 18px; height: 18px;"></i>
+                <button class="nav-item" id="sidebar-settings-btn" data-action="settings" title="设置">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"></path>
+                    </svg>
                 </button>
             </div>
         </aside>
 
-        <!-- 主内容区 -->
-        <main class="main-content">
-            <!-- 顶部栏 -->
-            <header class="top-bar">
-                <div class="top-bar-left">
-                    <h1 class="page-title" id="page-title">智能对话</h1>
-                    <span class="page-subtitle" id="page-subtitle">与数字人教师实时交流</span>
+        <!-- 中间对话列表栏 -->
+        <section class="chat-list-panel" id="chat-list-panel">
+            <!-- 搜索框 -->
+            <div class="search-bar">
+                <div class="search-input-wrapper">
+                    <span class="search-icon">
+                        <i data-lucide="search" style="width: 16px; height: 16px;"></i>
+                    </span>
+                    <input type="text" class="search-input" id="search-input" placeholder="搜索对话或数字人">
                 </div>
-                <div class="top-bar-right">
-                    <div class="status-badge">
-                        <div class="status-dot"></div>
-                        <span>已连接</span>
+            </div>
+
+            <!-- 对话列表 -->
+            <div class="chat-list" id="chat-list">
+                <!-- 对话项将通过JavaScript动态添加 -->
+            </div>
+        </section>
+
+        <!-- 右侧聊天窗口栏 -->
+        <section class="chat-window-panel" id="chat-window-panel">
+            <!-- 顶部标题栏 -->
+            <header class="chat-header">
+                <div class="chat-header-left">
+                    <div class="chat-header-avatar">
+                        <svg class="avatar-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <circle cx="12" cy="9" r="2"></circle>
+                            <path d="M8 19h8M12 15v4"></path>
+                        </svg>
                     </div>
-                    <button class="btn btn-ghost btn-icon" id="console-btn" title="控制台">
-                        <i data-lucide="layout-dashboard" style="width: 18px; height: 18px;"></i>
+                    <div class="chat-header-info">
+                        <div class="chat-header-name" id="chat-header-name">数字人助手</div>
+                        <div class="chat-header-status" id="chat-status">离线</div>
+                    </div>
+                </div>
+                <div class="chat-header-right">
+                    <button class="header-btn" id="teaching-btn" title="教学辅助平台">
+                        <i data-lucide="graduation-cap" style="width: 20px; height: 20px;"></i>
+                    </button>
+                    <button class="header-btn" id="avatar-toggle-btn" title="显示/隐藏数字人">
+                        <i data-lucide="video" style="width: 20px; height: 20px;"></i>
+                    </button>
+                    <button class="header-btn" id="console-btn" title="控制台">
+                        <i data-lucide="layout-dashboard" style="width: 20px; height: 20px;"></i>
                     </button>
                 </div>
             </header>
 
-            <!-- 内容面板容器 -->
-            <div class="panels-container">
-                <!-- 1. 智能对话面板 -->
-                <div class="panel active" id="panel-chat">
-                    <div class="chat-layout">
-                        <!-- 左侧视频区 -->
-                        <div class="video-section">
-                            <div class="video-container">
-                                <div class="video-header">
-                                    <h3>数字人教师 - 小智</h3>
-                                    <span class="video-status">在线</span>
-                                </div>
-                                <div class="video-wrapper">
-                                    <video id="remote-video" autoplay playsinline></video>
-                                    <div class="video-placeholder" id="video-placeholder">
-                                        <i data-lucide="video" style="width: 48px; height: 48px; opacity: 0.3;"></i>
-                                        <span>数字人视频区域</span>
-                                    </div>
-                                </div>
-                                <div class="video-controls">
-                                    <button class="control-btn" id="mic-toggle">
-                                        <i data-lucide="mic" style="width: 18px; height: 18px;"></i>
-                                    </button>
-                                    <button class="control-btn" id="camera-toggle">
-                                        <i data-lucide="video" style="width: 18px; height: 18px;"></i>
-                                    </button>
-                                    <button class="control-btn primary" id="call-toggle">
-                                        <i data-lucide="phone" style="width: 18px; height: 18px;"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 右侧对话区 -->
-                        <div class="chat-section">
-                            <div class="chat-messages" id="chat-messages">
-                                <div class="welcome-card">
-                                    <div class="welcome-icon">
-                                        <i data-lucide="message-circle" style="width: 32px; height: 32px;"></i>
-                                    </div>
-                                    <h3>欢迎回来，蔡同学！</h3>
-                                    <p>我是你的数字人老师小智，还记得上次我们学的三角函数吗？</p>
-                                    <p class="text-muted">你的正确率已经从80%提升到95%了，今天想学点什么？</p>
-                                </div>
-                            </div>
-
-                            <div class="chat-input-area">
-                                <div class="input-wrapper">
-                                    <textarea 
-                                        id="chat-input" 
-                                        placeholder="输入你的问题，或点击语音按钮说话..."
-                                        rows="2"
-                                    ></textarea>
-                                    <div class="input-actions">
-                                        <button class="btn btn-ghost btn-icon" id="voice-btn" title="语音输入">
-                                            <i data-lucide="mic" style="width: 18px; height: 18px;"></i>
-                                        </button>
-                                        <button class="btn btn-primary btn-icon" id="send-btn" title="发送">
-                                            <i data-lucide="send" style="width: 18px; height: 18px;"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+            <!-- 消息显示区域 -->
+            <div class="chat-messages" id="chat-messages">
+                <div class="welcome-message">
+                    <div class="welcome-icon">
+                        <i data-lucide="message-circle" style="width: 32px; height: 32px;"></i>
                     </div>
+                    <div class="welcome-text">开始与数字人对话吧！</div>
                 </div>
+                <!-- 消息将通过JS动态添加 -->
+            </div>
 
-                <!-- 2. 记忆系统面板 -->
-                <div class="panel" id="panel-memory">
-                    <div class="panel-content">
-                        <div class="memory-grid">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4><i data-lucide="user" style="width: 18px; height: 18px;"></i> 基本信息</h4>
-                                </div>
-                                <div class="card-body">
-                                    <div class="info-item">
-                                        <span class="info-label">姓名</span>
-                                        <span class="info-value">蔡同学</span>
-                                    </div>
-                                    <div class="info-item">
-                                        <span class="info-label">年级</span>
-                                        <span class="info-value">初二</span>
-                                    </div>
-                                    <div class="info-item">
-                                        <span class="info-label">学校</span>
-                                        <span class="info-value">大连海事大学附属中学</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4><i data-lucide="brain" style="width: 18px; height: 18px;"></i> 学习画像</h4>
-                                </div>
-                                <div class="card-body">
-                                    <div class="info-item">
-                                        <span class="info-label">掌握知识</span>
-                                        <span class="info-value">Python基础、数据结构、三角函数</span>
-                                    </div>
-                                    <div class="info-item">
-                                        <span class="info-label">薄弱知识</span>
-                                        <span class="info-value text-warning">正弦定理应用、动态规划</span>
-                                    </div>
-                                    <div class="info-item">
-                                        <span class="info-label">学习风格</span>
-                                        <span class="info-value">视觉型（偏好图解）</span>
-                                    </div>
-                                    <div class="info-item">
-                                        <span class="info-label">学习节奏</span>
-                                        <span class="info-value">晚上效率高</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4><i data-lucide="clock" style="width: 18px; height: 18px;"></i> 交互历史</h4>
-                                </div>
-                                <div class="card-body">
-                                    <div class="history-list">
-                                        <div class="history-item">
-                                            <div class="history-date">2026-04-05</div>
-                                            <div class="history-content">问了三角函数问题，卡在第2步</div>
-                                        </div>
-                                        <div class="history-item">
-                                            <div class="history-date">2026-04-06</div>
-                                            <div class="history-content">问了哈夫曼树，理解良好</div>
-                                        </div>
-                                        <div class="history-item">
-                                            <div class="history-date">2026-04-07</div>
-                                            <div class="history-content">正弦定理练习，正确率85%</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4><i data-lucide="heart" style="width: 18px; height: 18px;"></i> 情感状态</h4>
-                                </div>
-                                <div class="card-body">
-                                    <div class="info-item">
-                                        <span class="info-label">最近情绪</span>
-                                        <span class="info-value text-success">积极（测验进步）</span>
-                                    </div>
-                                    <div class="info-item">
-                                        <span class="info-label">信心指数</span>
-                                        <span class="info-value">0.75（良好）</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <!-- 数字人视频窗口（可折叠） -->
+            <div class="avatar-video-panel" id="avatar-video-panel">
+                <div class="avatar-video-header">
+                    <span class="avatar-video-title">数字人视频</span>
+                    <button class="avatar-video-toggle" id="avatar-video-toggle">−</button>
                 </div>
-
-                <!-- 3. 知识图谱面板 -->
-                <div class="panel" id="panel-knowledge">
-                    <div class="panel-content">
-                        <div class="knowledge-header">
-                            <div class="search-box">
-                                <i data-lucide="search" style="width: 18px; height: 18px;"></i>
-                                <input type="text" placeholder="搜索知识点..." class="form-input">
+                <div class="avatar-video-content" id="avatar-video-content">
+                    <div class="avatar-video-wrapper" id="avatar-video-wrapper">
+                        <div class="remote-video-container">
+                            <video class="remote-video" id="remote-video" autoplay playsinline></video>
+                            <canvas class="remote-canvas" id="remote-canvas"></canvas>
+                            <div class="avatar-loading" id="avatar-loading">
+                                <div class="loading-dots">
+                                    <span></span><span></span><span></span>
+                                </div>
+                                <div class="loading-text">连接中请等待</div>
+                            </div>
+                            <!-- 状态提示框 -->
+                            <div class="status-indicator" id="status-indicator">
+                                <div class="status-text" id="status-text"></div>
+                                <div class="status-timer" id="status-timer"></div>
                             </div>
                         </div>
-
-                        <div class="knowledge-graph">
-                            <div class="knowledge-node active">
-                                <div class="node-header">
-                                    <h4>三角函数</h4>
-                                    <span class="node-badge">当前学习</span>
-                                </div>
-                                <div class="node-info">
-                                    <span>难度：中等</span>
-                                    <span>掌握度：75%</span>
-                                </div>
-                            </div>
-
-                            <div class="knowledge-section">
-                                <h5>前置知识</h5>
-                                <div class="relation-list">
-                                    <div class="relation-item mastered">
-                                        <i data-lucide="check-circle" style="width: 16px; height: 16px;"></i>
-                                        <span>直角三角形</span>
-                                        <span class="relation-status">已掌握</span>
-                                    </div>
-                                    <div class="relation-item mastered">
-                                        <i data-lucide="check-circle" style="width: 16px; height: 16px;"></i>
-                                        <span>三角函数定义</span>
-                                        <span class="relation-status">已掌握</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="knowledge-section">
-                                <h5>关联知识</h5>
-                                <div class="relation-list">
-                                    <div class="relation-item learning">
-                                        <i data-lucide="loader" style="width: 16px; height: 16px;"></i>
-                                        <span>正弦定理</span>
-                                        <span class="relation-status">学习中</span>
-                                    </div>
-                                    <div class="relation-item">
-                                        <i data-lucide="circle" style="width: 16px; height: 16px;"></i>
-                                        <span>余弦定理</span>
-                                        <span class="relation-status">未学习</span>
-                                    </div>
-                                    <div class="relation-item">
-                                        <i data-lucide="circle" style="width: 16px; height: 16px;"></i>
-                                        <span>向量</span>
-                                        <span class="relation-status">未学习</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="knowledge-section">
-                                <h5>应用场景</h5>
-                                <div class="relation-list">
-                                    <div class="relation-item">
-                                        <i data-lucide="circle" style="width: 16px; height: 16px;"></i>
-                                        <span>解三角形</span>
-                                    </div>
-                                    <div class="relation-item">
-                                        <i data-lucide="circle" style="width: 16px; height: 16px;"></i>
-                                        <span>物理力学</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 4. 教案生成面板 -->
-                <div class="panel" id="panel-lesson">
-                    <div class="panel-content">
-                        <div class="lesson-layout">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4>生成参数</h4>
-                                </div>
-                                <div class="card-body">
-                                    <div class="form-group">
-                                        <label class="form-label">教学目标</label>
-                                        <input type="text" class="form-input" value="45分钟讲完正弦定理" placeholder="例如：45分钟讲完三角函数">
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">学生水平</label>
-                                        <select class="form-select">
-                                            <option>初二基础</option>
-                                            <option selected>初二中等</option>
-                                            <option>初二进阶</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">课时长度</label>
-                                        <select class="form-select">
-                                            <option>30分钟</option>
-                                            <option selected>45分钟</option>
-                                            <option>60分钟</option>
-                                        </select>
-                                    </div>
-                                    <button class="btn btn-primary w-full" id="generate-lesson-btn">
-                                        <i data-lucide="sparkles" style="width: 16px; height: 16px;"></i>
-                                        生成教案
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="card" id="lesson-result" style="display: none;">
-                                <div class="card-header">
-                                    <h4>生成的教案</h4>
-                                </div>
-                                <div class="card-body">
-                                    <div class="lesson-content">
-                                        <div class="lesson-section">
-                                            <h5>一、导入（5分钟）</h5>
-                                            <p>回顾上节课内容：直角三角形与三角函数定义</p>
-                                            <p>提问：sin30° = ? cos60° = ?</p>
-                                        </div>
-                                        <div class="lesson-section">
-                                            <h5>二、新知讲解（20分钟）</h5>
-                                            <p>1. 正弦定理的公式：a/sinA = b/sinB = c/sinC</p>
-                                            <p>2. 公式推导过程（配图）</p>
-                                            <p>3. 例题讲解：已知两边一角，求第三边</p>
-                                        </div>
-                                        <div class="lesson-section">
-                                            <h5>三、练习巩固（15分钟）</h5>
-                                            <p>基础题：直接套用公式计算</p>
-                                            <p>提高题：结合实际场景应用</p>
-                                        </div>
-                                        <div class="lesson-section">
-                                            <h5>四、总结（5分钟）</h5>
-                                            <p>重点：正弦定理公式及应用条件</p>
-                                            <p>作业：课后习题P45 1-5题</p>
-                                        </div>
-                                    </div>
-                                    <div class="lesson-actions">
-                                        <button class="btn btn-secondary">
-                                            <i data-lucide="presentation" style="width: 16px; height: 16px;"></i>
-                                            生成PPT
-                                        </button>
-                                        <button class="btn btn-secondary">
-                                            <i data-lucide="image" style="width: 16px; height: 16px;"></i>
-                                            生成配图
-                                        </button>
-                                        <button class="btn btn-primary">
-                                            <i data-lucide="download" style="width: 16px; height: 16px;"></i>
-                                            导出教案
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 5. 学习评价面板 -->
-                <div class="panel" id="panel-evaluation">
-                    <div class="panel-content">
-                        <div class="evaluation-grid">
-                            <div class="stat-card">
-                                <div class="stat-icon" style="background: var(--gradient-success);">
-                                    <i data-lucide="check" style="width: 24px; height: 24px;"></i>
-                                </div>
-                                <div class="stat-info">
-                                    <div class="stat-title">课堂表现</div>
-                                    <div class="stat-value">92分</div>
-                                    <div class="stat-desc">积极回答问题，思路清晰</div>
-                                </div>
-                            </div>
-
-                            <div class="stat-card">
-                                <div class="stat-icon" style="background: var(--gradient-primary);">
-                                    <i data-lucide="bar-chart-3" style="width: 24px; height: 24px;"></i>
-                                </div>
-                                <div class="stat-info">
-                                    <div class="stat-title">知识点掌握</div>
-                                    <div class="stat-value">85分</div>
-                                    <div class="stat-desc">三角函数基础良好，正弦定理需加强</div>
-                                </div>
-                            </div>
-
-                            <div class="stat-card">
-                                <div class="stat-icon" style="background: var(--gradient-warning);">
-                                    <i data-lucide="trophy" style="width: 24px; height: 24px;"></i>
-                                </div>
-                                <div class="stat-info">
-                                    <div class="stat-title">进步幅度</div>
-                                    <div class="stat-value">+15分</div>
-                                    <div class="stat-desc">较上月提升明显，继续保持</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card">
-                            <div class="card-header">
-                                <h4>详细分析</h4>
-                            </div>
-                            <div class="card-body">
-                                <div class="chart-list">
-                                    <div class="chart-item">
-                                        <div class="chart-label">三角函数定义</div>
-                                        <div class="chart-bar">
-                                            <div class="chart-fill" style="width: 95%; background: var(--gradient-success);"></div>
-                                        </div>
-                                        <div class="chart-value">95%</div>
-                                    </div>
-                                    <div class="chart-item">
-                                        <div class="chart-label">正弦定理</div>
-                                        <div class="chart-bar">
-                                            <div class="chart-fill" style="width: 75%; background: var(--gradient-warning);"></div>
-                                        </div>
-                                        <div class="chart-value">75%</div>
-                                    </div>
-                                    <div class="chart-item">
-                                        <div class="chart-label">余弦定理</div>
-                                        <div class="chart-bar">
-                                            <div class="chart-fill" style="width: 40%; background: linear-gradient(90deg, #ef4444, #f87171);"></div>
-                                        </div>
-                                        <div class="chart-value">40%</div>
-                                    </div>
-                                    <div class="chart-item">
-                                        <div class="chart-label">向量基础</div>
-                                        <div class="chart-bar">
-                                            <div class="chart-fill" style="width: 60%; background: var(--gradient-primary);"></div>
-                                        </div>
-                                        <div class="chart-value">60%</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card">
-                            <div class="card-header">
-                                <h4><i data-lucide="lightbulb" style="width: 18px; height: 18px;"></i> 学习建议</h4>
-                            </div>
-                            <div class="card-body">
-                                <div class="suggestion-list">
-                                    <div class="suggestion-item">
-                                        <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
-                                        <span>建议多做正弦定理的练习题，特别是应用题</span>
-                                    </div>
-                                    <div class="suggestion-item">
-                                        <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
-                                        <span>可以开始预习余弦定理，与正弦定理对比学习</span>
-                                    </div>
-                                    <div class="suggestion-item">
-                                        <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
-                                        <span>向量是后续重点，建议提前了解基本概念</span>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="local-video-wrapper" id="local-video-wrapper">
+                            <video class="local-video" id="local-video" autoplay muted playsinline></video>
                         </div>
                     </div>
                 </div>
             </div>
-        </main>
+
+            <!-- 输入区域 -->
+            <div class="chat-input-area" id="chat-input-area">
+                <div class="input-toolbar">
+                    <button class="toolbar-btn" id="file-btn" title="文件">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                    </button>
+                    <button class="toolbar-btn" id="emoji-btn" title="表情">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                            <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                            <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                        </svg>
+                    </button>
+                    <button class="toolbar-btn" id="voice-btn" title="语音">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                            <line x1="12" y1="19" x2="12" y2="23"></line>
+                            <line x1="8" y1="23" x2="16" y2="23"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="input-wrapper">
+                    <textarea 
+                        class="chat-input" 
+                        id="chat-input" 
+                        placeholder="输入消息... (Enter发送, Shift+Enter换行)"
+                        rows="1"
+                    ></textarea>
+                </div>
+                <div class="input-actions">
+                    <button class="send-btn" id="chat-send-btn">发送</button>
+                </div>
+            </div>
+
+            <!-- AI回复状态提示 -->
+            <div class="typing-indicator hidden" id="typing-indicator">
+                <div class="typing-dots">
+                    <span></span><span></span><span></span>
+                </div>
+                <span class="typing-text">数字人正在输入...</span>
+            </div>
+        </section>
     </div>
 
-    <!-- 设置弹窗 -->
-    <div class="modal-overlay" id="settings-modal">
-        <div class="modal">
-            <div class="modal-header">
-                <h3 class="modal-title">系统设置</h3>
-                <button class="modal-close" id="close-settings">
-                    <i data-lucide="x" style="width: 18px; height: 18px;"></i>
-                </button>
+    <!-- 操作按钮组（视频控制） -->
+    <div class="video-controls" id="video-controls">
+        <button class="control-btn" id="camera-toggle" title="摄像头">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+        </button>
+        <button class="control-btn" id="mic-toggle" title="麦克风">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="23"></line>
+                <line x1="8" y1="23" x2="16" y2="23"></line>
+            </svg>
+        </button>
+        <button class="control-btn" id="volume-toggle" title="音量">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            </svg>
+        </button>
+        <button class="control-btn" id="call-toggle-btn" title="开始/结束通话">
+            <span class="call-icon">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                </svg>
+            </span>
+            <span class="call-text">开始通话</span>
+        </button>
+    </div>
+
+    <!-- 教学功能弹窗 -->
+    <div class="teaching-modal" id="teaching-memory-modal">
+        <div class="teaching-modal-content">
+            <div class="teaching-modal-header">
+                <h3>记忆系统</h3>
+                <button class="teaching-modal-close" data-close="teaching-memory-modal">&times;</button>
             </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">语言</label>
-                    <select class="form-select">
-                        <option value="zh-CN">简体中文</option>
-                        <option value="en-US">English</option>
-                    </select>
+            <div class="teaching-modal-body">
+                <div class="memory-section">
+                    <h4>学生信息</h4>
+                    <div class="memory-card">
+                        <div class="memory-item"><span class="memory-label">姓名：</span><span class="memory-value">蔡同学</span></div>
+                        <div class="memory-item"><span class="memory-label">年级：</span><span class="memory-value">初二</span></div>
+                        <div class="memory-item"><span class="memory-label">学校：</span><span class="memory-value">大连海事大学附属中学</span></div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">主题</label>
-                    <select class="form-select" id="theme-select">
-                        <option value="dark">深色</option>
-                        <option value="light">浅色</option>
-                    </select>
+                <div class="memory-section">
+                    <h4>学习画像</h4>
+                    <div class="memory-card">
+                        <div class="memory-item"><span class="memory-label">掌握知识：</span><span class="memory-value">Python基础、数据结构、三角函数</span></div>
+                        <div class="memory-item"><span class="memory-label">薄弱知识：</span><span class="memory-value" style="color:#ff6b6b;">正弦定理应用、动态规划</span></div>
+                        <div class="memory-item"><span class="memory-label">学习风格：</span><span class="memory-value">视觉型（偏好图解）</span></div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">数字人性格</label>
-                    <select class="form-select">
-                        <option value="serious">严肃型</option>
-                        <option value="lively" selected>活泼鼓励型</option>
-                        <option value="humorous">幽默型</option>
-                    </select>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" id="cancel-settings">取消</button>
-                <button class="btn btn-primary" id="save-settings">保存</button>
             </div>
         </div>
     </div>
 
-    <!-- 通知容器 -->
-    <div class="toast-container" id="toast-container"></div>
+    <div class="teaching-modal" id="teaching-knowledge-modal">
+        <div class="teaching-modal-content">
+            <div class="teaching-modal-header">
+                <h3>知识图谱</h3>
+                <button class="teaching-modal-close" data-close="teaching-knowledge-modal">&times;</button>
+            </div>
+            <div class="teaching-modal-body">
+                <div class="knowledge-graph">
+                    <div class="knowledge-node active">
+                        <h4>三角函数</h4>
+                        <div class="node-tags"><span class="node-tag">当前学习</span><span class="node-tag">难度：中等</span></div>
+                    </div>
+                    <div class="knowledge-relations">
+                        <h5>前置知识</h5>
+                        <div class="relation-list">
+                            <div class="relation-item mastered"><span class="relation-status">✓</span><span>直角三角形</span></div>
+                            <div class="relation-item mastered"><span class="relation-status">✓</span><span>三角函数定义</span></div>
+                        </div>
+                        <h5>关联知识</h5>
+                        <div class="relation-list">
+                            <div class="relation-item learning"><span class="relation-status">◐</span><span>正弦定理</span></div>
+                            <div class="relation-item"><span class="relation-status">○</span><span>余弦定理</span></div>
+                            <div class="relation-item"><span class="relation-status">○</span><span>向量</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <script src="videochat-teaching.js"></script>
+    <div class="teaching-modal" id="teaching-lesson-modal">
+        <div class="teaching-modal-content">
+            <div class="teaching-modal-header">
+                <h3>教案生成</h3>
+                <button class="teaching-modal-close" data-close="teaching-lesson-modal">&times;</button>
+            </div>
+            <div class="teaching-modal-body">
+                <div class="lesson-form">
+                    <div class="form-group">
+                        <label>教学目标</label>
+                        <input type="text" class="form-input" value="45分钟讲完正弦定理">
+                    </div>
+                    <div class="form-group">
+                        <label>学生水平</label>
+                        <select class="form-select">
+                            <option>初二基础</option>
+                            <option selected>初二中等</option>
+                            <option>初二进阶</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary btn-block" id="generate-lesson-btn">生成教案</button>
+                </div>
+                <div class="lesson-result" id="lesson-result" style="display:none;">
+                    <h4>生成的教案</h4>
+                    <div class="lesson-content">
+                        <div class="lesson-section"><h5>一、导入（5分钟）</h5><p>回顾上节课内容：直角三角形与三角函数定义</p></div>
+                        <div class="lesson-section"><h5>二、新知讲解（20分钟）</h5><p>1. 正弦定理的公式：a/sinA = b/sinB = c/sinC</p></div>
+                        <div class="lesson-section"><h5>三、练习巩固（15分钟）</h5><p>基础题：直接套用公式计算</p></div>
+                        <div class="lesson-section"><h5>四、总结（5分钟）</h5><p>重点：正弦定理公式及应用条件</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="teaching-modal" id="teaching-evaluation-modal">
+        <div class="teaching-modal-content">
+            <div class="teaching-modal-header">
+                <h3>学习评价</h3>
+                <button class="teaching-modal-close" data-close="teaching-evaluation-modal">&times;</button>
+            </div>
+            <div class="teaching-modal-body">
+                <div class="evaluation-overview">
+                    <div class="eval-card">
+                        <div class="eval-icon" style="background:linear-gradient(135deg, #10b981, #34d399);">✓</div>
+                        <div class="eval-info"><h4>课堂表现</h4><p class="eval-score">92分</p></div>
+                    </div>
+                    <div class="eval-card">
+                        <div class="eval-icon" style="background:linear-gradient(135deg, #3b82f6, #60a5fa);">📊</div>
+                        <div class="eval-info"><h4>知识点掌握</h4><p class="eval-score">85分</p></div>
+                    </div>
+                    <div class="eval-card">
+                        <div class="eval-icon" style="background:linear-gradient(135deg, #f59e0b, #fbbf24);">🏆</div>
+                        <div class="eval-info"><h4>进步幅度</h4><p class="eval-score">+15分</p></div>
+                    </div>
+                </div>
+                <div class="evaluation-detail">
+                    <h4>详细分析</h4>
+                    <div class="eval-chart">
+                        <div class="chart-item"><div class="chart-label">三角函数定义</div><div class="chart-bar"><div class="chart-fill" style="width:95%;background:linear-gradient(90deg,#10b981,#34d399);"></div></div><div class="chart-value">95%</div></div>
+                        <div class="chart-item"><div class="chart-label">正弦定理</div><div class="chart-bar"><div class="chart-fill" style="width:75%;background:linear-gradient(90deg,#f59e0b,#fbbf24);"></div></div><div class="chart-value">75%</div></div>
+                        <div class="chart-item"><div class="chart-label">余弦定理</div><div class="chart-bar"><div class="chart-fill" style="width:40%;background:linear-gradient(90deg,#ef4444,#f87171);"></div></div><div class="chart-value">40%</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="api.js"></script>
+    <script src="state.js"></script>
+    <script src="stream-utils.js"></script>
+    <script src="webrtc.js"></script>
+    <script src="ws.js"></script>
+    <script src="player.js"></script>
+    <script src="gaussian-avatar.js"></script>
+    <script src="videochat.js"></script>
 </body>
 </html>

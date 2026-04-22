@@ -50,6 +50,71 @@ class VideoChatManager {
     this.init();
   }
 
+  initTeachingModals() {
+    // 教学功能按钮事件
+    const memoryBtn = document.getElementById('teaching-memory-btn');
+    const knowledgeBtn = document.getElementById('teaching-knowledge-btn');
+    const lessonBtn = document.getElementById('teaching-lesson-btn');
+    const evaluationBtn = document.getElementById('teaching-evaluation-btn');
+
+    if (memoryBtn) {
+      memoryBtn.addEventListener('click', () => this.openModal('teaching-memory-modal'));
+    }
+    if (knowledgeBtn) {
+      knowledgeBtn.addEventListener('click', () => this.openModal('teaching-knowledge-modal'));
+    }
+    if (lessonBtn) {
+      lessonBtn.addEventListener('click', () => this.openModal('teaching-lesson-modal'));
+    }
+    if (evaluationBtn) {
+      evaluationBtn.addEventListener('click', () => this.openModal('teaching-evaluation-modal'));
+    }
+
+    // 关闭按钮事件
+    document.querySelectorAll('.teaching-modal-close').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const modalId = e.target.getAttribute('data-close');
+        this.closeModal(modalId);
+      });
+    });
+
+    // 点击弹窗外部关闭
+    document.querySelectorAll('.teaching-modal').forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          this.closeModal(modal.id);
+        }
+      });
+    });
+
+    // 教案生成按钮
+    const generateBtn = document.getElementById('generate-lesson-btn');
+    if (generateBtn) {
+      generateBtn.addEventListener('click', () => this.generateLesson());
+    }
+  }
+
+  openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.classList.add('active');
+    }
+  }
+
+  closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.classList.remove('active');
+    }
+  }
+
+  generateLesson() {
+    const result = document.getElementById('lesson-result');
+    if (result) {
+      result.style.display = 'block';
+    }
+  }
+
   init() {
     // 增加今日会话计数
     this.incrementSessionCount();
@@ -225,13 +290,8 @@ class VideoChatManager {
       });
     }
 
-    // 教学辅助平台按钮
-    const teachingBtn = document.getElementById('teaching-btn');
-    if (teachingBtn) {
-      teachingBtn.addEventListener('click', () => {
-        window.location.href = '/ui/teaching.html';
-      });
-    }
+    // 教学功能按钮
+    this.initTeachingModals();
 
     // 视频控制按钮
     if (this.elements.cameraToggle) {
