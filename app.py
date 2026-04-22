@@ -209,20 +209,20 @@ class LiteAvatarApp:
         
         if new_index_path.exists() and new_videochat_path.exists() and new_console_path.exists():
             logger.info("=" * 60)
-            logger.info("✅ 使用新的原生HTML/CSS/JS前端（非Vue版本）")
+            logger.info("[OK] 使用新的原生HTML/CSS/JS前端（非Vue版本）")
             logger.info(f"前端路径: {frontend_path}")
             logger.info("=" * 60)
             # 使用 html=True 允许直接访问 index.html
             self.app.mount("/ui", StaticFiles(directory=str(frontend_path), html=True), name="static")
-            # 根路径重定向到前端
+            # 根路径重定向到新的v2页面
             @self.app.get("/")
             async def root():
-                return RedirectResponse(url="/ui/videochat.html")
+                return RedirectResponse(url="/ui/videochat-v2.html")
             
-            # /ui/videochat 直接重定向到 videochat.html（避免通过路由系统）
+            # /ui/videochat 重定向到v2页面
             @self.app.get("/ui/videochat")
             async def videochat_redirect():
-                return RedirectResponse(url="/ui/videochat.html")
+                return RedirectResponse(url="/ui/videochat-v2.html")
         # 回退到dist目录（Vue构建版本）
         elif dist_path.exists():
             logger.warning("=" * 60)
@@ -318,7 +318,7 @@ class LiteAvatarApp:
                     # 替换整行，保持YAML格式
                     lines[i] = ' ' * indent + f'system_prompt: {system_prompt}\n'
                     found = True
-                    logger.info(f"✅ 在第{i+1}行找到system_prompt并替换")
+                    logger.info(f"[OK] 在第{i+1}行找到system_prompt并替换")
                     break
             
             if not found:
@@ -329,7 +329,7 @@ class LiteAvatarApp:
             with open(glut2_path, 'w', encoding='utf-8') as f:
                 f.writelines(lines)
             
-            logger.info(f"✅ 已更新glut2.yaml的system_prompt配置")
+            logger.info(f"[OK] 已更新glut2.yaml的system_prompt配置")
             return True
         except Exception as e:
             logger.error(f"更新glut2.yaml失败: {e}")
@@ -1092,6 +1092,20 @@ class LiteAvatarApp:
         # 设置路由
         self.setup_routes()
         
+        # 集成Teaching API
+        try:
+            from teaching_api.app import app as teaching_app
+            # 将teaching_api的路由挂载到主应用
+            from teaching_api.routes import students, memory, knowledge, lesson, evaluation
+            self.app.include_router(students.router, prefix="/api/students", tags=["学生管理"])
+            self.app.include_router(memory.router, prefix="/api/memory", tags=["记忆系统"])
+            self.app.include_router(knowledge.router, prefix="/api/knowledge", tags=["知识图谱"])
+            self.app.include_router(lesson.router, prefix="/api/lesson", tags=["教案生成"])
+            self.app.include_router(evaluation.router, prefix="/api/evaluation", tags=["学习评价"])
+            logger.info("[OK] Teaching API集成成功")
+        except Exception as e:
+            logger.warning(f"Teaching API集成失败: {e}")
+        
         # 创建 SSL 上下文（如果需要）
         ssl_context = create_ssl_context(self.args, self.service_config)
         
@@ -1100,9 +1114,25 @@ class LiteAvatarApp:
         # 前端页面在 /ui/index.html，根路径会自动重定向
         url = f"{protocol}://{host}:{port}/"
         frontend_url = f"{protocol}://{host}:{port}/ui/index.html"
+        teaching_url = f"{protocol}://{host}:{port}/ui/videochat-teaching.html"
+        videochat_url = f"{protocol}://{host}:{port}/ui/videochat.html"
+        console_url = f"{protocol}://{host}:{port}/ui/console.html"
+        
+        # 打印明显的访问地址
+        print("\n" + "="*80)
+        print("OpenAvatarChat Service Started Successfully!")
+        print("="*80)
+        print(f"\nMain Access URLs:")
+        print(f"   Home:       {url}")
+        print(f"   VideoChat:  {videochat_url}")
+        print(f"   Teaching:   {teaching_url}")
+        print(f"   Console:    {console_url}")
+        print(f"\nNote: Service is listening on {host}:{port}")
+        print("="*80 + "\n")
         
         logger.info(f"Starting LiteAvatar service on {host}:{port}")
         logger.info(f"Frontend will be available at: {frontend_url}")
+        logger.info(f"Teaching assistant: {teaching_url}")
         
         # 延迟打开浏览器，等待服务启动
         def open_browser():
