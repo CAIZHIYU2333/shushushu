@@ -225,6 +225,14 @@ class VideoChatManager {
       });
     }
 
+    // 教学辅助平台按钮
+    const teachingBtn = document.getElementById('teaching-btn');
+    if (teachingBtn) {
+      teachingBtn.addEventListener('click', () => {
+        window.location.href = '/ui/teaching.html';
+      });
+    }
+
     // 视频控制按钮
     if (this.elements.cameraToggle) {
       this.elements.cameraToggle.addEventListener('click', () => {
