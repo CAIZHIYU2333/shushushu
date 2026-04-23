@@ -1,0 +1,76 @@
+<div class="module-content avatar-management">
+  <!-- 数字人管理卡片 -->
+  <div class="management-card">
+    <div class="card-header">
+      <h3>数字人管理</h3>
+      <button class="btn-primary" id="add-avatar-btn">+ 添加数字人</button>
+    </div>
+    <div class="card-body">
+      <div class="table-container">
+        <table class="data-table" id="avatars-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>名称</th>
+              <th>数字人类型</th>
+              <th>包名</th>
+              <th>预览</th>
+              <th>配置</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="avatars-tbody">
+            <tr>
+              <td colspan="7" class="loading">加载中...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 数字人编辑模态框 -->
+  <div class="modal" id="avatar-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="avatar-modal-title">添加数字人</h3>
+        <button class="modal-close" id="avatar-modal-close">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="avatar-form">
+          <div class="form-item">
+            <label>名称 <span class="required">*</span></label>
+            <input type="text" id="avatar-name" placeholder="例如：安那教学老师、藤子律师" required />
+          </div>
+          <div class="form-item">
+            <label>数字人类型 <span class="required">*</span></label>
+            <select id="avatar-type" required>
+              <option value="LiteAvatar">LiteAvatar</option>
+              <option value="muse">muse</option>
+              <option value="LAM">LAM</option>
+            </select>
+          </div>
+          <div class="form-item">
+            <label>数字人形象 <span class="required">*</span></label>
+            <select id="avatar-avatar-name" required>
+              <option value="">请选择数字人形象</option>
+            </select>
+          </div>
+          <div class="form-item">
+            <label>预览（备注/标签）</label>
+            <textarea id="avatar-preview" rows="2" placeholder="输入备注或标签"></textarea>
+          </div>
+          <div class="form-item">
+            <label>配置（提示词） <span class="required">*</span></label>
+            <textarea id="avatar-config" rows="5" placeholder="输入提示词，将替换glut2.yaml的system_prompt" required></textarea>
+            <small style="color: #999; margin-top: 4px; display: block;">此配置将替换config/glut2.yaml第66-67行的system_prompt</small>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="avatar-modal-cancel">取消</button>
+        <button class="btn-primary" id="avatar-modal-submit">确定</button>
+      </div>
+    </div>
+  </div>
+</div>
