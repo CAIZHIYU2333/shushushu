@@ -81,8 +81,8 @@ class VideoChatManager {
       statusText: document.getElementById('status-text'),
       statusTimer: document.getElementById('status-timer'),
       // 视频控制按钮
-      cameraToggle: document.getElementById('camera-toggle'),
-      micToggle: document.getElementById('mic-toggle'),
+      cameraToggle: document.getElementById('camera-toggle-btn'),
+      micToggle: document.getElementById('mic-toggle-btn'),
       volumeToggle: document.getElementById('volume-toggle'),
       endCall: document.getElementById('end-call'),
       // 侧边栏和导航
@@ -242,10 +242,14 @@ class VideoChatManager {
       });
     }
 
-    // 侧边栏设置按钮 - 打开记忆管理
+    // 侧边栏设置按钮
     if (this.elements.sidebarSettingsBtn) {
       this.elements.sidebarSettingsBtn.addEventListener('click', () => {
-        this.openMemoryManager();
+        if (window.router) {
+          window.router.navigate('/console');
+        } else {
+          window.location.href = '/ui/console.html';
+        }
       });
     }
 
