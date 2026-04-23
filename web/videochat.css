@@ -1878,14 +1878,42 @@ body.wechat-layout {
   background: #f9fafb;
   border-radius: 6px;
   font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.relation-item:hover {
+  background: #f3f4f6;
+  transform: translateX(4px);
+}
+
+.relation-item i, .relation-item svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
 }
 
 .relation-item.mastered {
   color: #10b981;
+  background: rgba(16, 185, 129, 0.08);
 }
 
 .relation-item.learning {
   color: #f59e0b;
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.relation-item.mastered i, .relation-item.mastered svg {
+  color: #10b981;
+}
+
+.relation-item.learning i, .relation-item.learning svg {
+  color: #f59e0b;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .relation-status {
