@@ -5,7 +5,12 @@ class ConsoleManager {
     this.collapsed = false;
     this.theme = localStorage.getItem('theme') || 'light';
     this.modules = {
-      dashboard: () => this.loadDashboard(),
+      dashboard: () => this.loadModule('console-dashboard.html'),
+      permissions: () => this.loadModule('console-permissions.html'),
+      avatars: () => this.loadModule('console-avatars.html'),
+      knowledge: () => this.loadModule('console-knowledge.html'),
+      analytics: () => this.loadModule('console-analytics.html'),
+      templates: () => this.loadModule('console-templates.html'),
     };
     this.init();
   }
@@ -14,31 +19,17 @@ class ConsoleManager {
     // 从URL获取当前模块
     const urlParams = new URLSearchParams(window.location.search);
     const module = urlParams.get('module') || 'dashboard';
-    this.currentModule = 'dashboard'; // 只保留dashboard
+    this.currentModule = module;
 
     // 初始化UI
     this.initSidebar();
     this.initHeader();
     this.initMenu();
     this.applyTheme();
-    this.loadDashboard();
+    this.loadModule();
     
     // 初始化Lucide图标
     this.initLucideIcons();
-  }
-
-  loadDashboard() {
-    console.log('✅ 加载控制台仪表盘');
-    // 简单的仪表盘内容
-    const content = document.getElementById('module-content');
-    if (content) {
-      content.innerHTML = `
-        <div style="padding: 24px;">
-          <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 16px;">控制台仪表盘</h1>
-          <p style="color: #666;">欢迎使用OpenAvatarChat控制台</p>
-        </div>
-      `;
-    }
   }
 
   initLucideIcons() {
