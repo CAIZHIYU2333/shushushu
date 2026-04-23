@@ -152,24 +152,25 @@
 
                 <!-- 视频通话区域 -->
                 <div class="avatar-video-panel" id="avatar-video-panel">
-                    <div class="avatar-video-wrapper" id="avatar-video-wrapper">
-                        <video id="avatar-video" autoplay playsinline muted></video>
-                        <div class="video-placeholder" id="video-placeholder">
-                            <svg class="placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polygon points="23 7 16 12 23 17 23 7"></polygon>
-                                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
-                            </svg>
-                            <span class="placeholder-text">数字人视频区域</span>
-                        </div>
+                    <div class="avatar-video-header">
+                        <span class="avatar-video-title">数字人视频</span>
+                        <button class="avatar-video-toggle" id="avatar-video-toggle">−</button>
                     </div>
-                    <div class="local-video-wrapper" id="local-video-wrapper">
-                        <video id="local-video" autoplay playsinline muted></video>
-                        <div class="video-placeholder" id="local-video-placeholder">
-                            <svg class="placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="12" cy="7" r="4"></circle>
-                            </svg>
-                            <span class="placeholder-text">本地摄像头</span>
+                    <div class="avatar-video-content" id="avatar-video-content">
+                        <div class="avatar-video-wrapper" id="avatar-video-wrapper">
+                            <div class="remote-video-container">
+                                <video class="remote-video" id="remote-video" autoplay playsinline></video>
+                                <canvas class="remote-canvas" id="remote-canvas"></canvas>
+                                <div class="avatar-loading" id="avatar-loading">
+                                    <div class="loading-dots">
+                                        <span></span><span></span><span></span>
+                                    </div>
+                                    <span class="loading-text">数字人连接中...</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="local-video-wrapper" id="local-video-wrapper">
+                            <video class="local-video" id="local-video" autoplay muted playsinline></video>
                         </div>
                     </div>
                 </div>
