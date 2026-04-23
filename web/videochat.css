@@ -769,6 +769,7 @@ body.wechat-layout {
 }
 
 /* 右侧聊天窗口栏 */
+/* 聊天窗口面板 - Notion风格多层阴影 */
 .chat-window-panel {
   flex: 1;
   display: flex;
@@ -778,15 +779,16 @@ body.wechat-layout {
   overflow: hidden;
 }
 
-/* 顶部标题栏 */
+/* 顶部标题栏 - Notion风格 */
 .chat-header {
   height: 60px;
   background: white;
-  border-bottom: 1px solid var(--wechat-border);
+  border-bottom: var(--border-whisper);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
 .chat-header-left {
@@ -798,8 +800,9 @@ body.wechat-layout {
 .chat-header-avatar {
   width: 40px;
   height: 40px;
-  border-radius: 6px;
+  border-radius: 8px;
   overflow: hidden;
+  box-shadow: var(--shadow-card);
 }
 
 .chat-header-avatar img {
@@ -815,8 +818,9 @@ body.wechat-layout {
 
 .chat-header-name {
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--wechat-text-primary);
+  letter-spacing: -0.01em;
 }
 
 .chat-header-status {
@@ -829,42 +833,44 @@ body.wechat-layout {
   gap: 8px;
 }
 
+/* Linear风格头部按钮 */
 .header-btn {
   width: 36px;
   height: 36px;
   border: none;
   background: transparent;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 18px;
-  transition: background 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   color: var(--wechat-text-primary);
 }
 
 .header-btn:hover {
   background: var(--wechat-list-item-hover);
+  transform: scale(1.05);
 }
 
-/* 视频通话按钮特殊样式 */
+/* 视频通话按钮 - Linear风格渐变 */
 .video-call-btn {
   background: var(--gradient-primary) !important;
   color: white !important;
   padding: 8px 16px !important;
-  border-radius: 20px !important;
+  border-radius: 999px !important;
   display: flex !important;
   align-items: center !important;
   gap: 6px !important;
   font-weight: 500 !important;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3) !important;
+  box-shadow: var(--shadow-glow) !important;
+  transition: all 0.2s ease !important;
 }
 
 .video-call-btn:hover {
-  background: var(--gradient-secondary) !important;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
-  transform: translateY(-1px);
+  box-shadow: 0 0 24px rgba(94, 106, 210, 0.5) !important;
+  transform: translateY(-1px) scale(1.02) !important;
 }
 
 .video-call-btn .btn-text {
@@ -908,23 +914,23 @@ body.wechat-layout {
   font-size: 14px;
 }
 
-/* 消息气泡 */
+/* 消息气泡 - Notion风格多层阴影 */
 .message-bubble {
   display: flex;
   align-items: flex-start;
   gap: 8px;
   max-width: 70%;
-  animation: fadeIn 0.3s ease;
+  animation: messageSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@keyframes fadeIn {
+@keyframes messageSlideIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(10px) scale(0.98);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -936,9 +942,10 @@ body.wechat-layout {
 .message-bubble .message-avatar {
   width: 32px;
   height: 32px;
-  border-radius: 4px;
+  border-radius: 6px;
   overflow: hidden;
   flex-shrink: 0;
+  box-shadow: var(--shadow-card);
 }
 
 .message-bubble .message-avatar img {
@@ -957,18 +964,34 @@ body.wechat-layout {
   align-items: flex-end;
 }
 
+/* Notion风格消息文本 */
 .message-text {
-  padding: 8px 12px;
-  border-radius: 8px;
+  padding: 10px 14px;
+  border-radius: 12px;
   font-size: 14px;
   line-height: 1.5;
   word-wrap: break-word;
   position: relative;
+  box-shadow: var(--shadow-card);
+  transition: all 0.2s ease;
+}
+
+.message-text:hover {
+  box-shadow: var(--shadow-deep);
+  transform: translateY(-1px);
 }
 
 .message-bubble.received .message-text {
-  background: var(--wechat-msg-receive);
+  background: white;
   color: var(--wechat-text-primary);
+  border-bottom-left-radius: 4px;
+}
+
+.message-bubble.sent .message-text {
+  background: var(--gradient-primary);
+  color: white;
+  border-bottom-right-radius: 4px;
+}
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
@@ -1281,16 +1304,18 @@ body.wechat-layout {
 }
 
 /* 输入区域 */
+/* 输入区域 - Notion风格 */
 .chat-input-area {
   background: white;
-  border-top: 1px solid var(--wechat-border);
+  border-top: var(--border-whisper);
   padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 8px;
   position: relative;
-  z-index: 20; /* 确保输入框在数字人视频面板之上 */
-  min-height: 120px; /* 设置最小高度 */
+  z-index: 20;
+  min-height: 120px;
+  box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.02);
 }
 
 .input-toolbar {
@@ -1303,12 +1328,12 @@ body.wechat-layout {
   height: 36px;
   border: none;
   background: transparent;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   color: var(--wechat-text-secondary);
   padding: 0;
 }
@@ -1323,6 +1348,7 @@ body.wechat-layout {
 .toolbar-btn:hover {
   background: var(--wechat-list-item-hover);
   color: var(--wechat-text-primary);
+  transform: scale(1.05);
 }
 
 .toolbar-btn:hover .icon {
@@ -1339,23 +1365,27 @@ body.wechat-layout {
   align-items: flex-end;
 }
 
+/* Linear风格输入框 */
 .chat-input {
   flex: 1;
   min-height: 36px;
   max-height: 120px;
-  padding: 8px 12px;
-  border: 1px solid var(--wechat-border);
-  border-radius: 6px;
+  padding: 10px 14px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
   font-size: 14px;
-  font-family: inherit;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   resize: none;
   outline: none;
   line-height: 1.5;
   overflow-y: auto;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
 .chat-input:focus {
-  border-color: var(--wechat-primary);
+  border-color: #7170ff;
+  box-shadow: 0 0 0 3px rgba(94, 106, 210, 0.1), 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .input-actions {
@@ -1363,24 +1393,28 @@ body.wechat-layout {
   justify-content: flex-end;
 }
 
+/* Linear风格发送按钮 */
 .send-btn {
-  padding: 8px 24px;
+  padding: 10px 24px;
   border: none;
-  border-radius: 6px;
+  border-radius: 999px;
   background: var(--gradient-primary);
   color: white;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-glow);
 }
 
 .send-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 0 24px rgba(94, 106, 210, 0.5);
 }
 
 .send-btn:active {
+  transform: translateY(0) scale(0.98);
+}
   transform: translateY(0);
 }
 
@@ -1583,7 +1617,7 @@ body.wechat-layout {
   transform: scale(1.05);
 }
 
-/* 教学弹窗 */
+/* 教学弹窗 - Linear/Notion风格 */
 .teaching-modal {
   display: none;
   position: fixed;
@@ -1591,34 +1625,36 @@ body.wechat-layout {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.75);
   z-index: 10000;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .teaching-modal.active {
   display: flex;
 }
 
+/* Linear风格弹窗内容 */
 .teaching-modal-content {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border-radius: 16px;
+  box-shadow: var(--shadow-deep), 0 0 0 1px rgba(0, 0, 0, 0.05);
   max-width: 700px;
   width: 90%;
   max-height: 85vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  animation: modalSlideIn 0.3s ease;
+  animation: modalSlideInV2 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@keyframes modalSlideIn {
+@keyframes modalSlideInV2 {
   from {
     opacity: 0;
-    transform: translateY(-20px) scale(0.95);
+    transform: translateY(20px) scale(0.96);
   }
   to {
     opacity: 1;
@@ -1626,46 +1662,67 @@ body.wechat-layout {
   }
 }
 
+/* Linear风格弹窗头部 */
 .teaching-modal-header {
   padding: 20px 24px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: var(--border-whisper);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--gradient-primary);
   color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.teaching-modal-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+  pointer-events: none;
 }
 
 .teaching-modal-header h3 {
   margin: 0;
   font-size: 20px;
   font-weight: 600;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: -0.02em;
+  position: relative;
+  z-index: 1;
 }
 
 .teaching-modal-close {
   width: 32px;
   height: 32px;
-  border-radius: 50%;
+  border-radius: 8px;
   border: none;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
   color: white;
   font-size: 24px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 1;
 }
 
 .teaching-modal-close:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.05) rotate(90deg);
 }
 
 .teaching-modal-body {
   padding: 24px;
   overflow-y: auto;
   flex: 1;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 /* 记忆系统样式 */
