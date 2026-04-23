@@ -213,7 +213,7 @@ class ClientHandlerRtc(ClientHandlerBase):
         if not has_ui_route:
             if new_index_path.exists() and new_videochat_path.exists() and new_console_path.exists():
                 logger.info("=" * 60)
-                logger.info("✅ ClientHandler: 使用新的原生HTML/CSS/JS前端（非Vue版本）")
+                logger.info("[OK] ClientHandler: 使用新的原生HTML/CSS/JS前端（非Vue版本）")
                 logger.info(f"前端路径: {base_frontend_path}")
                 logger.info("=" * 60)
                 fastapi.mount('/ui', StaticFiles(directory=str(base_frontend_path), html=True), name="static")
@@ -229,7 +229,7 @@ class ClientHandlerRtc(ClientHandlerBase):
                 logger.warning(f"Frontend directory {base_frontend_path} or {dist_path} does not exist")
                 fastapi.add_route('/', RedirectResponse(url='/gradio'))
         else:
-            logger.info("✅ /ui路由已由app.py设置，跳过ClientHandler的静态文件挂载")
+            logger.info("[OK] /ui路由已由app.py设置，跳过ClientHandler的静态文件挂载")
 
         if parent_block is None:
             parent_block = ui
