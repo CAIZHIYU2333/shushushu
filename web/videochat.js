@@ -354,15 +354,15 @@ class VideoChatManager {
     modal.innerHTML = `
       <div class="teaching-modal-content" style="max-width: 900px;">
         <div class="teaching-modal-header">
-          <h3>🧠 记忆管理系统（仿OpenClaw）</h3>
+          <h3><i data-lucide="brain" style="width: 20px; height: 20px; display: inline; vertical-align: middle; margin-right: 8px;"></i>记忆管理系统（仿OpenClaw）</h3>
           <button class="teaching-modal-close" onclick="this.closest('.teaching-modal').remove()">&times;</button>
         </div>
         <div class="teaching-modal-body">
           <div class="memory-manager-tabs">
-            <button class="memory-tab active" data-tab="personality">👤 人格设定</button>
-            <button class="memory-tab" data-tab="long-term">📚 长期记忆</button>
-            <button class="memory-tab" data-tab="short-term">💭 短期记忆</button>
-            <button class="memory-tab" data-tab="students">🎓 学生记忆</button>
+            <button class="memory-tab active" data-tab="personality"><i data-lucide="user" style="width: 16px; height: 16px; display: inline; vertical-align: middle; margin-right: 6px;"></i>人格设定</button>
+            <button class="memory-tab" data-tab="long-term"><i data-lucide="book-open" style="width: 16px; height: 16px; display: inline; vertical-align: middle; margin-right: 6px;"></i>长期记忆</button>
+            <button class="memory-tab" data-tab="short-term"><i data-lucide="message-circle" style="width: 16px; height: 16px; display: inline; vertical-align: middle; margin-right: 6px;"></i>短期记忆</button>
+            <button class="memory-tab" data-tab="students"><i data-lucide="graduation-cap" style="width: 16px; height: 16px; display: inline; vertical-align: middle; margin-right: 6px;"></i>学生记忆</button>
           </div>
           
           <div class="memory-tab-content">
@@ -374,8 +374,8 @@ class VideoChatManager {
               </div>
               <textarea class="memory-textarea" id="personality-editor" placeholder="加载人格设定..."></textarea>
               <div class="memory-editor-actions">
-                <button class="btn btn-secondary" onclick="loadDefaultPersonality()">恢复默认</button>
-                <button class="btn btn-primary" onclick="saveMemory('personality')">💾 保存人格设定</button>
+                <button class="btn btn-secondary" onclick="loadDefaultPersonality()"><i data-lucide="rotate-ccw" style="width: 16px; height: 16px; display: inline; vertical-align: middle; margin-right: 4px;"></i>恢复默认</button>
+                <button class="btn btn-primary" onclick="saveMemory('personality')"><i data-lucide="save" style="width: 16px; height: 16px; display: inline; vertical-align: middle; margin-right: 4px;"></i>保存人格设定</button>
               </div>
             </div>
 
@@ -387,8 +387,8 @@ class VideoChatManager {
               </div>
               <textarea class="memory-textarea" id="long-term-editor" placeholder="加载长期记忆..."></textarea>
               <div class="memory-editor-actions">
-                <button class="btn btn-secondary" onclick="clearMemory('long-term')">🗑️ 清空记忆</button>
-                <button class="btn btn-primary" onclick="saveMemory('long-term')">💾 保存长期记忆</button>
+                <button class="btn btn-secondary" onclick="clearMemory('long-term')"><i data-lucide="trash-2" style="width: 16px; height: 16px; display: inline; vertical-align: middle; margin-right: 4px;"></i>清空记忆</button>
+                <button class="btn btn-primary" onclick="saveMemory('long-term')"><i data-lucide="save" style="width: 16px; height: 16px; display: inline; vertical-align: middle; margin-right: 4px;"></i>保存长期记忆</button>
               </div>
             </div>
 
@@ -400,8 +400,8 @@ class VideoChatManager {
               </div>
               <textarea class="memory-textarea" id="short-term-editor" placeholder="加载短期记忆..."></textarea>
               <div class="memory-editor-actions">
-                <button class="btn btn-secondary" onclick="clearMemory('short-term')">🗑️ 清空记忆</button>
-                <button class="btn btn-primary" onclick="saveMemory('short-term')">💾 保存短期记忆</button>
+                <button class="btn btn-secondary" onclick="clearMemory('short-term')"><i data-lucide="trash-2" style="width: 16px; height: 16px; display: inline; vertical-align: middle; margin-right: 4px;"></i>清空记忆</button>
+                <button class="btn btn-primary" onclick="saveMemory('short-term')"><i data-lucide="save" style="width: 16px; height: 16px; display: inline; vertical-align: middle; margin-right: 4px;"></i>保存短期记忆</button>
               </div>
             </div>
 
@@ -414,10 +414,10 @@ class VideoChatManager {
               <div class="student-list" id="student-list">
                 <div class="student-item active">
                   <span class="student-name">张同学（AI专业大三）</span>
-                  <button class="btn btn-sm btn-ghost" onclick="editStudent('zhang')">✏️ 编辑</button>
+                  <button class="btn btn-sm btn-ghost" onclick="editStudent('zhang')"><i data-lucide="edit-2" style="width: 16px; height: 16px; display: inline; vertical-align: middle; margin-right: 4px;"></i>编辑</button>
                 </div>
               </div>
-              <button class="btn btn-primary btn-block" onclick="addStudent()">+ 添加新学生</button>
+              <button class="btn btn-primary btn-block" onclick="addStudent()"><i data-lucide="plus" style="width: 16px; height: 16px; display: inline; vertical-align: middle; margin-right: 4px;"></i>添加新学生</button>
             </div>
           </div>
         </div>
@@ -425,13 +425,19 @@ class VideoChatManager {
     `;
     document.body.appendChild(modal);
 
+    // 初始化Lucide图标
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+
     // 初始化Tab切换
     modal.querySelectorAll('.memory-tab').forEach(tab => {
       tab.addEventListener('click', (e) => {
-        const tabName = e.target.dataset.tab;
+        const tabBtn = e.target.closest('.memory-tab');
+        const tabName = tabBtn.dataset.tab;
         modal.querySelectorAll('.memory-tab').forEach(t => t.classList.remove('active'));
         modal.querySelectorAll('.memory-tab-panel').forEach(p => p.classList.remove('active'));
-        e.target.classList.add('active');
+        tabBtn.classList.add('active');
         document.getElementById(`panel-${tabName}`).classList.add('active');
         
         // 加载对应记忆内容
