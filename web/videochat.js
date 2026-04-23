@@ -81,8 +81,8 @@ class VideoChatManager {
       statusText: document.getElementById('status-text'),
       statusTimer: document.getElementById('status-timer'),
       // 视频控制按钮
-      cameraToggle: document.getElementById('camera-toggle-btn'),
-      micToggle: document.getElementById('mic-toggle-btn'),
+      cameraToggle: document.getElementById('camera-toggle'),
+      micToggle: document.getElementById('mic-toggle'),
       volumeToggle: document.getElementById('volume-toggle'),
       endCall: document.getElementById('end-call'),
       // 侧边栏和导航
