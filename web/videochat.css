@@ -1,17 +1,22 @@
 /* ============================================
-   微信风格聊天界面 - 企业级渐变配色
+   微信风格聊天界面 - Linear/Notion设计系统优化
    ============================================ */
 
-/* 企业级渐变配色变量 */
+/* 企业级渐变配色变量 - 基于Linear深色主题 */
 :root {
   --wechat-primary: #07c160;
   --wechat-bg: #ededed;
-  --wechat-sidebar-bg: #2e2e2e;
-  --wechat-sidebar-hover: #3a3a3a;
-  --wechat-sidebar-active: #1a1a1a;
-  --wechat-list-bg: #f7f7f7;
-  --wechat-list-item-hover: #e5e5e5;
-  --wechat-list-item-active: #d9d9d9;
+  
+  /* Linear风格深色边栏 */
+  --wechat-sidebar-bg: linear-gradient(180deg, #0f1011 0%, #191a1b 100%);
+  --wechat-sidebar-hover: rgba(255, 255, 255, 0.05);
+  --wechat-sidebar-active: rgba(255, 255, 255, 0.08);
+  
+  /* Notion风格暖白色调 */
+  --wechat-list-bg: #f6f5f4;
+  --wechat-list-item-hover: rgba(0, 0, 0, 0.03);
+  --wechat-list-item-active: rgba(0, 0, 0, 0.06);
+  
   --wechat-chat-bg: #ececec;
   --wechat-msg-send: #95ec69;
   --wechat-msg-receive: #ffffff;
@@ -19,11 +24,21 @@
   --wechat-text-secondary: #888888;
   --wechat-border: #d9d9d9;
   
-  /* 企业级渐变 */
-  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  /* Linear风格品牌色 */
+  --gradient-primary: linear-gradient(135deg, #5e6ad2 0%, #7170ff 100%);
   --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   --gradient-accent: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  --gradient-dark: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  --gradient-dark: linear-gradient(180deg, #0f1011 0%, #191a1b 100%);
+  
+  /* Notion风格超细边框 */
+  --border-whisper: 1px solid rgba(0, 0, 0, 0.05);
+  --border-light: 1px solid rgba(255, 255, 255, 0.05);
+  --border-standard: 1px solid rgba(255, 255, 255, 0.08);
+  
+  /* Notion风格多层阴影 */
+  --shadow-card: rgba(0, 0, 0, 0.04) 0px 4px 18px, rgba(0, 0, 0, 0.027) 0px 2px 8px, rgba(0, 0, 0, 0.02) 0px 1px 3px;
+  --shadow-deep: rgba(0, 0, 0, 0.01) 0px 1px 3px, rgba(0, 0, 0, 0.02) 0px 3px 7px, rgba(0, 0, 0, 0.02) 0px 7px 15px, rgba(0, 0, 0, 0.04) 0px 14px 28px;
+  --shadow-glow: 0 0 20px rgba(94, 106, 210, 0.3);
 }
 
 /* 基础布局 */
@@ -426,6 +441,7 @@ body.wechat-layout {
 }
 
 /* 左侧导航栏 */
+/* 左侧边栏 - Linear风格深色渐变 */
 .sidebar {
   width: 80px;
   height: 100vh;
@@ -434,23 +450,25 @@ body.wechat-layout {
   flex-direction: column;
   align-items: center;
   padding: 12px 0;
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: var(--border-standard);
   position: relative;
+  transition: all 0.3s ease;
 }
 
 .sidebar-avatar {
   width: 56px;
   height: 56px;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
   margin-bottom: 16px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .sidebar-avatar:hover {
   transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 .sidebar-avatar img {
@@ -477,20 +495,22 @@ body.wechat-layout {
   align-items: center;
 }
 
+/* Linear风格导航按钮 */
 .nav-item {
   width: 48px;
   height: 48px;
   border: none;
   background: transparent;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
-  color: rgba(255, 255, 255, 0.6);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  color: rgba(255, 255, 255, 0.5);
   font-size: 20px;
   padding: 0;
+  position: relative;
 }
 
 .nav-item .nav-icon {
@@ -502,17 +522,21 @@ body.wechat-layout {
   transition: all 0.2s ease;
 }
 
+/* 微光hover效果 */
 .nav-item:hover {
   background: var(--wechat-sidebar-hover);
   color: rgba(255, 255, 255, 0.9);
+  transform: scale(1.02);
 }
 
+/* Linear风格激活状态 */
 .nav-item.active {
   background: var(--wechat-sidebar-active);
-  color: white;
+  color: #7170ff;
   position: relative;
 }
 
+/* 激活指示条 - Linear风格 */
 .nav-item.active::before {
   content: '';
   position: absolute;
@@ -523,6 +547,7 @@ body.wechat-layout {
   height: 24px;
   background: var(--gradient-primary);
   border-radius: 0 2px 2px 0;
+  box-shadow: 0 0 8px rgba(94, 106, 210, 0.5);
 }
 
 .sidebar-footer {
