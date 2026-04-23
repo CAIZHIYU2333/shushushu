@@ -560,28 +560,34 @@ body.wechat-layout {
   padding-top: 12px;
 }
 
-/* 中间对话列表栏 */
+/* 中间对话列表栏 - Notion风格暖白色调 */
 .chat-list-panel {
   width: 280px;
   background: var(--wechat-list-bg);
   display: flex;
   flex-direction: column;
-  border-right: 1px solid var(--wechat-border);
+  border-right: var(--border-whisper);
 }
 
 .search-bar {
   padding: 12px;
   background: var(--wechat-list-bg);
-  border-bottom: 1px solid var(--wechat-border);
+  border-bottom: var(--border-whisper);
 }
 
 .search-input-wrapper {
   display: flex;
   align-items: center;
   background: white;
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 8px 12px;
   gap: 8px;
+  box-shadow: var(--shadow-card);
+  transition: all 0.2s ease;
+}
+
+.search-input-wrapper:focus-within {
+  box-shadow: var(--shadow-card), 0 0 0 2px rgba(94, 106, 210, 0.2);
 }
 
 .search-icon {
@@ -608,12 +614,13 @@ body.wechat-layout {
   overflow-x: hidden;
 }
 
+/* Notion风格聊天列表项 */
 .chat-item {
   display: flex;
   padding: 12px;
   cursor: pointer;
-  transition: background 0.2s ease;
-  border-bottom: 1px solid var(--wechat-border);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-bottom: var(--border-whisper);
   position: relative;
 }
 
@@ -627,6 +634,7 @@ body.wechat-layout {
 
 .chat-item.active {
   background: var(--wechat-list-item-active);
+  border-left: 3px solid #7170ff;
 }
 
 .chat-item.pinned {
