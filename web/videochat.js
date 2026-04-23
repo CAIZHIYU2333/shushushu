@@ -217,14 +217,10 @@ class VideoChatManager {
       });
     }
 
-    // 侧边栏设置按钮
+    // 侧边栏设置按钮 - 打开记忆管理
     if (this.elements.sidebarSettingsBtn) {
       this.elements.sidebarSettingsBtn.addEventListener('click', () => {
-        if (window.router) {
-          window.router.navigate('/console');
-        } else {
-          window.location.href = '/ui/console.html';
-        }
+        this.openMemoryManager();
       });
     }
 
@@ -321,6 +317,162 @@ class VideoChatManager {
     const result = document.getElementById('lesson-result');
     if (result) {
       result.style.display = 'block';
+    }
+  }
+
+  // 记忆管理功能（仿OpenClaw）
+  openMemoryManager() {
+    // 创建记忆管理弹窗
+    const modal = document.createElement('div');
+    modal.className = 'teaching-modal active';
+    modal.id = 'memory-manager-modal';
+    modal.innerHTML = `
+      <div class="teaching-modal-content" style="max-width: 900px;">
+        <div class="teaching-modal-header">
+          <h3>🧠 记忆管理系统（仿OpenClaw）</h3>
+          <button class="teaching-modal-close" onclick="this.closest('.teaching-modal').remove()">&times;</button>
+        </div>
+        <div class="teaching-modal-body">
+          <div class="memory-manager-tabs">
+            <button class="memory-tab active" data-tab="personality">👤 人格设定</button>
+            <button class="memory-tab" data-tab="long-term">📚 长期记忆</button>
+            <button class="memory-tab" data-tab="short-term">💭 短期记忆</button>
+            <button class="memory-tab" data-tab="students">🎓 学生记忆</button>
+          </div>
+          
+          <div class="memory-tab-content">
+            <!-- 人格设定 -->
+            <div class="memory-tab-panel active" id="panel-personality">
+              <div class="memory-editor-header">
+                <h4>AI教师人格设定</h4>
+                <p class="memory-editor-desc">定义数字人教师的性格、教学风格和沟通方式</p>
+              </div>
+              <textarea class="memory-textarea" id="personality-editor" placeholder="加载人格设定..."></textarea>
+              <div class="memory-editor-actions">
+                <button class="btn btn-secondary" onclick="loadDefaultPersonality()">恢复默认</button>
+                <button class="btn btn-primary" onclick="saveMemory('personality')">💾 保存人格设定</button>
+              </div>
+            </div>
+
+            <!-- 长期记忆 -->
+            <div class="memory-tab-panel" id="panel-long-term">
+              <div class="memory-editor-header">
+                <h4>长期记忆</h4>
+                <p class="memory-editor-desc">记录学生的持久信息：学习画像、知识掌握、重要事件</p>
+              </div>
+              <textarea class="memory-textarea" id="long-term-editor" placeholder="加载长期记忆..."></textarea>
+              <div class="memory-editor-actions">
+                <button class="btn btn-secondary" onclick="clearMemory('long-term')">🗑️ 清空记忆</button>
+                <button class="btn btn-primary" onclick="saveMemory('long-term')">💾 保存长期记忆</button>
+              </div>
+            </div>
+
+            <!-- 短期记忆 -->
+            <div class="memory-tab-panel" id="panel-short-term">
+              <div class="memory-editor-header">
+                <h4>短期记忆</h4>
+                <p class="memory-editor-desc">记录最近对话和临时信息，定期整理到长期记忆</p>
+              </div>
+              <textarea class="memory-textarea" id="short-term-editor" placeholder="加载短期记忆..."></textarea>
+              <div class="memory-editor-actions">
+                <button class="btn btn-secondary" onclick="clearMemory('short-term')">🗑️ 清空记忆</button>
+                <button class="btn btn-primary" onclick="saveMemory('short-term')">💾 保存短期记忆</button>
+              </div>
+            </div>
+
+            <!-- 学生记忆 -->
+            <div class="memory-tab-panel" id="panel-students">
+              <div class="memory-editor-header">
+                <h4>学生记忆</h4>
+                <p class="memory-editor-desc">管理多个学生的记忆文件</p>
+              </div>
+              <div class="student-list" id="student-list">
+                <div class="student-item active">
+                  <span class="student-name">张同学（AI专业大三）</span>
+                  <button class="btn btn-sm btn-ghost" onclick="editStudent('zhang')">✏️ 编辑</button>
+                </div>
+              </div>
+              <button class="btn btn-primary btn-block" onclick="addStudent()">+ 添加新学生</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    // 初始化Tab切换
+    modal.querySelectorAll('.memory-tab').forEach(tab => {
+      tab.addEventListener('click', (e) => {
+        const tabName = e.target.dataset.tab;
+        modal.querySelectorAll('.memory-tab').forEach(t => t.classList.remove('active'));
+        modal.querySelectorAll('.memory-tab-panel').forEach(p => p.classList.remove('active'));
+        e.target.classList.add('active');
+        document.getElementById(`panel-${tabName}`).classList.add('active');
+        
+        // 加载对应记忆内容
+        if (tabName === 'personality') loadMemory('personality');
+        else if (tabName === 'long-term') loadMemory('long-term');
+        else if (tabName === 'short-term') loadMemory('short-term');
+      });
+    });
+
+    // 加载默认人格设定
+    loadMemory('personality');
+  }
+
+  async loadMemory(type) {
+    const editorMap = {
+      'personality': 'personality-editor',
+      'long-term': 'long-term-editor',
+      'short-term': 'short-term-editor'
+    };
+    const editor = document.getElementById(editorMap[type]);
+    if (!editor) return;
+
+    editor.value = '加载中...';
+    
+    try {
+      const response = await fetch(`/api/memory/default/${type}.txt`);
+      if (response.ok) {
+        const text = await response.text();
+        editor.value = text;
+      } else {
+        editor.value = `# ${type}记忆\n# 暂无内容，请编辑后保存\n`;
+      }
+    } catch (e) {
+      // 如果API不可用，使用默认内容
+      const defaults = {
+        'personality': document.querySelector('#personality-editor')?.value || '',
+        'long-term': '# 长期记忆\n# 记录学生的持久信息\n',
+        'short-term': '# 短期记忆\n# 记录最近对话和临时信息\n'
+      };
+      editor.value = defaults[type] || '';
+    }
+  }
+
+  async saveMemory(type) {
+    const editorMap = {
+      'personality': 'personality-editor',
+      'long-term': 'long-term-editor',
+      'short-term': 'short-term-editor'
+    };
+    const editor = document.getElementById(editorMap[type]);
+    if (!editor) return;
+
+    try {
+      const response = await fetch(`/api/memory/default/${type}.txt`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'text/plain' },
+        body: editor.value
+      });
+      
+      if (response.ok) {
+        alert('✅ 记忆已保存');
+      } else {
+        alert('❌ 保存失败，请检查后端服务');
+      }
+    } catch (e) {
+      alert('⚠️ 后端服务不可用，记忆仅在本地有效');
     }
   }
 

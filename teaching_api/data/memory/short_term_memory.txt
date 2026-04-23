@@ -1,0 +1,23 @@
+# 短期记忆
+# 记录最近对话和临时信息，类似OpenClaw的每日记忆文件
+# 定期整理到长期记忆，过时信息自动淘汰
+
+## 最近对话（最近7天）
+- 2026-04-20 14:30：学生询问Self-Attention的Q/K/V矩阵物理意义，解释了查询/键/值的概念
+- 2026-04-20 14:45：学生问为什么需要缩放因子（√d_k），解释了防止梯度消失的原因
+- 2026-04-20 15:00：学生表示理解了，开始看代码实现
+
+## 临时信息
+- 学生明天有机器学习考试（2026-04-21）
+- 学生说最近在看"Attention Is All You Need"论文
+- 学生对Multi-Head Attention还有疑问
+
+## 当前学习进度
+- 正在学习：Transformer架构
+- 当前位置：Self-Attention机制 → Multi-Head Attention
+- 下一步：Positional Encoding → Encoder-Decoder架构
+
+## 情绪状态
+- 最近情绪：积极（理解了Self-Attention）
+- 信心指数：0.7（中等偏上）
+- 学习状态：专注

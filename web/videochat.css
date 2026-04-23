@@ -2034,3 +2034,134 @@ body.wechat-layout {
   color: #1f2937;
 }
 
+/* ============================================
+   记忆管理系统样式（仿OpenClaw）
+   ============================================ */
+
+.memory-manager-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 12px;
+}
+
+.memory-tab {
+  padding: 10px 20px;
+  border: none;
+  background: #f3f4f6;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  color: #6b7280;
+}
+
+.memory-tab:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.memory-tab.active {
+  background: var(--gradient-primary);
+  color: white;
+  box-shadow: 0 2px 8px rgba(94, 106, 210, 0.3);
+}
+
+.memory-tab-panel {
+  display: none;
+}
+
+.memory-tab-panel.active {
+  display: block;
+}
+
+.memory-editor-header {
+  margin-bottom: 16px;
+}
+
+.memory-editor-header h4 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #1f2937;
+}
+
+.memory-editor-desc {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.memory-textarea {
+  width: 100%;
+  min-height: 400px;
+  padding: 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  resize: vertical;
+  background: #f9fafb;
+  color: #1f2937;
+  transition: all 0.2s ease;
+}
+
+.memory-textarea:focus {
+  outline: none;
+  border-color: #7170ff;
+  box-shadow: 0 0 0 3px rgba(94, 106, 210, 0.1);
+  background: white;
+}
+
+.memory-editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.student-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.student-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+}
+
+.student-item:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.student-item.active {
+  background: var(--primary-bg);
+  border-color: var(--primary);
+}
+
+.student-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.btn-block {
+  width: 100%;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
