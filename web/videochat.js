@@ -217,6 +217,31 @@ class VideoChatManager {
       });
     }
 
+    // 侧边栏折叠按钮
+    const collapseBtn = document.getElementById('sidebar-collapse-btn');
+    if (collapseBtn) {
+      collapseBtn.addEventListener('click', () => {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('collapsed');
+        localStorage.setItem('sidebar-collapsed', sidebar.classList.contains('collapsed'));
+        this.initLucideIcons();
+      });
+      
+      // 恢复折叠状态
+      const wasCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
+      if (wasCollapsed) {
+        document.getElementById('sidebar').classList.add('collapsed');
+      }
+    }
+
+    // 侧边栏记忆系统按钮 - 打开记忆管理
+    const memoryBtn = document.getElementById('sidebar-memory-btn');
+    if (memoryBtn) {
+      memoryBtn.addEventListener('click', () => {
+        this.openMemoryManager();
+      });
+    }
+
     // 侧边栏设置按钮 - 打开记忆管理
     if (this.elements.sidebarSettingsBtn) {
       this.elements.sidebarSettingsBtn.addEventListener('click', () => {

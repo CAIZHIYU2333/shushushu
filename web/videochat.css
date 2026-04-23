@@ -443,100 +443,143 @@ body.wechat-layout {
 /* 左侧导航栏 */
 /* 左侧边栏 - Linear风格深色渐变 */
 .sidebar {
-  width: 80px;
+  width: 240px;
   height: 100vh;
   background: var(--wechat-sidebar-bg);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 12px 0;
   border-right: var(--border-standard);
   position: relative;
-  transition: all 0.3s ease;
-}
-
-.sidebar-avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
-  margin-bottom: 16px;
+}
+
+.sidebar.collapsed {
+  width: 72px;
+}
+
+.sidebar-header {
+  padding: 16px;
+  border-bottom: var(--border-standard);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.logo-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--gradient-primary);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.logo-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+.sidebar.collapsed .logo-text {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+.sidebar-collapse-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.5);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
-.sidebar-avatar:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-}
-
-.sidebar-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.sidebar-avatar .avatar-icon {
-  width: 100%;
-  height: 100%;
-  stroke: white;
-  stroke-width: 2;
-  padding: 12px;
-  box-sizing: border-box;
+.sidebar-collapse-btn:hover {
+  background: var(--wechat-sidebar-hover);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .sidebar-nav {
   flex: 1;
+  padding: 12px 8px;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  width: 100%;
-  align-items: center;
+  gap: 4px;
 }
 
 /* Linear风格导航按钮 */
 .nav-item {
-  width: 48px;
-  height: 48px;
+  width: 100%;
+  height: 44px;
   border: none;
   background: transparent;
   border-radius: 10px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 12px;
+  padding: 0 12px;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   color: rgba(255, 255, 255, 0.5);
-  font-size: 20px;
-  padding: 0;
+  font-size: 14px;
+  font-weight: 500;
   position: relative;
+  white-space: nowrap;
 }
 
-.nav-item .nav-icon {
+.nav-item i, .nav-item svg {
   width: 20px;
   height: 20px;
-  stroke: currentColor;
-  stroke-width: 2;
-  fill: none;
-  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.nav-label {
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+.sidebar.collapsed .nav-label {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
 }
 
 /* 微光hover效果 */
 .nav-item:hover {
   background: var(--wechat-sidebar-hover);
   color: rgba(255, 255, 255, 0.9);
-  transform: scale(1.02);
 }
 
 /* Linear风格激活状态 */
 .nav-item.active {
   background: var(--wechat-sidebar-active);
   color: #7170ff;
-  position: relative;
 }
 
-/* 激活指示条 - Linear风格 */
 .nav-item.active::before {
   content: '';
   position: absolute;
@@ -548,6 +591,20 @@ body.wechat-layout {
   background: var(--gradient-primary);
   border-radius: 0 2px 2px 0;
   box-shadow: 0 0 8px rgba(94, 106, 210, 0.5);
+}
+
+.nav-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 8px 12px;
+}
+
+.sidebar-footer {
+  padding: 12px 8px;
+  border-top: var(--border-standard);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .sidebar-footer {
