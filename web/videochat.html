@@ -262,7 +262,7 @@
 
     <!-- 记忆系统 Modal -->
     <div class="teaching-modal" id="teaching-memory-modal">
-        <div class="teaching-modal-content" style="max-width:850px;">
+        <div class="teaching-modal-content" style="max-width:900px;">
             <div class="teaching-modal-header">
                 <h3>记忆管理</h3>
                 <button class="teaching-modal-close" data-close="teaching-memory-modal">&times;</button>
@@ -270,22 +270,23 @@
             <div class="teaching-modal-body">
                 <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
                     <label style="font-size:13px;color:#666;white-space:nowrap;">学生：</label>
-                    <select class="form-select" id="memory-student-select" style="width:200px;" onchange="window.memoryManager.loadStudent()">
+                    <select class="form-select" id="memory-student-select" style="width:220px;" onchange="window.memoryManager.loadStudent()">
                         <option value="">选择学生...</option>
                     </select>
                     <button class="btn btn-primary" style="padding:6px 14px;font-size:12px;" id="memory-profile-btn" onclick="window.memoryManager.generateProfile()" title="基于记忆生成学习画像">生成画像</button>
                 </div>
 
                 <div class="memory-manager-tabs">
-                    <button class="memory-tab active" data-tab="personality"><span style="margin-right:4px;">🧠</span>系统提示词</button>
-                    <button class="memory-tab" data-tab="long-term"><span style="margin-right:4px;">📖</span>长期记忆</button>
-                    <button class="memory-tab" data-tab="short-term"><span style="margin-right:4px;">💬</span>短期记忆</button>
+                    <button class="memory-tab active" data-tab="personality"><i data-lucide="user-cog" style="width:16px;height:16px;display:inline;vertical-align:middle;margin-right:4px;"></i>教师人格设定</button>
+                    <button class="memory-tab" data-tab="long-term"><i data-lucide="book-open" style="width:16px;height:16px;display:inline;vertical-align:middle;margin-right:4px;"></i>长期记忆</button>
+                    <button class="memory-tab" data-tab="short-term"><i data-lucide="message-circle" style="width:16px;height:16px;display:inline;vertical-align:middle;margin-right:4px;"></i>短期记忆</button>
+                    <button class="memory-tab" data-tab="students"><i data-lucide="users" style="width:16px;height:16px;display:inline;vertical-align:middle;margin-right:4px;"></i>学生库</button>
                 </div>
 
                 <div class="memory-tab-content">
                     <div class="memory-tab-panel active" id="mem-panel-personality">
                         <div class="memory-editor-header">
-                            <h4>系统提示词（来自配置文件 glut2.yaml）</h4>
+                            <h4>教师人格设定（来自配置文件 glut2.yaml）</h4>
                             <p class="memory-editor-desc">当前大模型的人格设定，如需修改请编辑 config/glut2.yaml 中的 system_prompt 字段后重启服务</p>
                         </div>
                         <textarea class="memory-textarea" id="mem-editor-personality" readonly placeholder="加载中..." style="background:#f8f9fc;color:#555;"></textarea>
@@ -311,6 +312,31 @@
                             <button class="btn btn-secondary" onclick="window.memoryManager.clearMemory('short-term')">清空</button>
                             <button class="btn btn-primary" onclick="window.memoryManager.saveMemory('short-term')">保存短期记忆</button>
                         </div>
+                    </div>
+                    <div class="memory-tab-panel" id="mem-panel-students" style="padding:8px 0;">
+                        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+                            <button class="btn btn-primary" id="mem-add-student-btn" onclick="document.getElementById('mem-student-form').style.display='block'"><i data-lucide="user-plus" style="width:16px;height:16px;display:inline;vertical-align:middle;margin-right:4px;"></i>添加学生</button>
+                            <a class="btn btn-secondary" href="/api/students/template/download" download style="text-decoration:none;"><i data-lucide="download" style="width:16px;height:16px;display:inline;vertical-align:middle;margin-right:4px;"></i>下载模板</a>
+                            <button class="btn btn-secondary" onclick="document.getElementById('mem-csv-import').click()"><i data-lucide="upload" style="width:16px;height:16px;display:inline;vertical-align:middle;margin-right:4px;"></i>导入CSV</button>
+                            <input type="file" id="mem-csv-import" accept=".csv" style="display:none;" onchange="window.memoryManager.importCSV(this.files[0])">
+                        </div>
+                        <div id="mem-student-form" style="display:none;background:#f8f9fc;border:1px solid #e0e0e0;border-radius:10px;padding:14px;margin-bottom:12px;">
+                            <div class="form-row">
+                                <div class="form-group" style="flex:2;"><label class="form-label">姓名</label><input class="form-input" id="mem-s-name" placeholder="输入姓名"></div>
+                                <div class="form-group" style="flex:1;"><label class="form-label">年级</label><input class="form-input" id="mem-s-grade" placeholder="如: 大三"></div>
+                                <div class="form-group" style="flex:2;"><label class="form-label">学校</label><input class="form-input" id="mem-s-school" placeholder="输入学校名称"></div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group" style="flex:1;"><label class="form-label">邮箱</label><input class="form-input" id="mem-s-email" placeholder="可选"></div>
+                                <div class="form-group" style="flex:1;"><label class="form-label">电话</label><input class="form-input" id="mem-s-phone" placeholder="可选"></div>
+                            </div>
+                            <div class="form-group"><label class="form-label">备注</label><input class="form-input" id="mem-s-notes" placeholder="如：学习偏好、特点"></div>
+                            <div style="display:flex;gap:8px;justify-content:flex-end;">
+                                <button class="btn btn-secondary" onclick="document.getElementById('mem-student-form').style.display='none'">取消</button>
+                                <button class="btn btn-primary" onclick="window.memoryManager.addStudent()">保存</button>
+                            </div>
+                        </div>
+                        <div id="mem-student-list" style="max-height:350px;overflow-y:auto;"></div>
                     </div>
                 </div>
             </div>
