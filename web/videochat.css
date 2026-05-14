@@ -2298,3 +2298,25 @@ body.wechat-layout {
 
 .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; margin-right: 6px; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== 知识图谱样式 ===== */
+.kg-tabs { display: flex; gap: 6px; margin-bottom: 16px; border-bottom: 2px solid #eee; padding-bottom: 0; }
+.kg-tab-btn { padding: 10px 18px; border: none; background: none; font-size: 14px; color: #888; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+.kg-tab-btn.active { color: #7170ff; border-bottom-color: #7170ff; font-weight: 600; }
+.kg-tab-btn:hover { color: #555; }
+.kg-tab-panel { padding: 8px 0; }
+
+.kg-detail-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 16px; }
+.kg-detail-card h4 { margin: 0 0 8px 0; color: #333; font-size: 16px; }
+.kg-detail-card h5 { margin: 12px 0 6px 0; color: #666; font-size: 13px; }
+.kg-detail-tags { display: flex; gap: 6px; margin-bottom: 10px; }
+.kg-tag { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+.kg-tag-core { background: #eef0ff; color: #7170ff; }
+.kg-tag-basic { background: #e6f7ee; color: #22c55e; }
+.kg-tag-advanced { background: #fef3c7; color: #d97706; }
+.kg-tag-application { background: #dbeafe; color: #3b82f6; }
+.kg-tag-level { background: #f3f4f6; color: #888; }
+.kg-detail-desc { color: #555; font-size: 14px; line-height: 1.6; }
+.kg-detail-edges { margin-top: 10px; }
+.kg-edge-item { padding: 5px 0; font-size: 13px; color: #666; border-bottom: 1px solid #f0f0f0; }
+.kg-edge-type { color: #999; font-size: 12px; margin-left: 8px; background: #f5f5f5; padding: 1px 8px; border-radius: 8px; }

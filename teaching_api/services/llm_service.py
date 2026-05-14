@@ -84,18 +84,26 @@ class LLMService:
     
     @staticmethod
     async def generate_knowledge_graph(subject: str, topic: str) -> dict:
-        """
-        生成知识图谱（提取知识点关系）
-        """
-        prompt = KNOWLEDGE_GRAPH_PROMPT.format(subject=subject, topic=topic)
-        
+        """生成知识图谱（提取知识点关系 - 学科主题版）"""
+        input_text = f"学科：{subject}\n主题：{topic}"
+        prompt = KNOWLEDGE_GRAPH_PROMPT.format(input_text=input_text)
         result = await LLMService.generate_text(prompt)
-        
         if result.get("success"):
             json_data = LLMService._extract_json(result["text"])
             if json_data:
                 result["data"] = json_data
-        
+        return result
+
+    @staticmethod
+    async def generate_knowledge_from_text(text_content: str, source_type: str = "对话总结") -> dict:
+        """从文本内容提取知识图谱（对话记录/文件内容）"""
+        input_text = f"内容来源：{source_type}\n\n文本内容：\n{text_content[:4000]}"
+        prompt = KNOWLEDGE_GRAPH_PROMPT.format(input_text=input_text)
+        result = await LLMService.generate_text(prompt)
+        if result.get("success"):
+            json_data = LLMService._extract_json(result["text"])
+            if json_data:
+                result["data"] = json_data
         return result
     
     @staticmethod

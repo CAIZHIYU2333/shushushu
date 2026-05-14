@@ -261,6 +261,11 @@ class VideoChatManager {
       window.lessonWizard = new LessonWizard();
     }
 
+    // 初始化知识图谱
+    if (!window.kgViewer) {
+      window.kgViewer = new KnowledgeGraphViewer();
+    }
+
     // 视频控制按钮
     if (this.elements.cameraToggle) {
       this.elements.cameraToggle.addEventListener('click', () => {

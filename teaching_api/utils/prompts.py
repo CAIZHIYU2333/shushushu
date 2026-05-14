@@ -28,29 +28,28 @@ STUDENT_PROFILE_PROMPT = """你是一个专业的教育分析师。请根据学�
 2. 分析要具体、有针对性
 3. 建议要可操作"""
 
-# 知识图谱生成提示词
-KNOWLEDGE_GRAPH_PROMPT = """你是一个知识图谱专家。请分析学科主题，提取知识点及其关系。
+# 知识图谱生成提示词（学科主题版）
+KNOWLEDGE_GRAPH_PROMPT = """你是一个知识图谱专家。请分析学科主题，提取知识点及其关系，用于渲染交互式知识图谱。
 
-## 学科主题
-学科：{subject}
-主题：{topic}
+输入信息：{input_text}
 
-## 输出要求
-请输出JSON格式：
+输出要求 - 只输出纯JSON，不要markdown代码块：
 {{
+  "center_topic": "中心主题名称",
   "nodes": [
-    {{"id": "node1", "name": "知识点名称", "difficulty": "easy/medium/hard", "status": "mastered/learning/unlearned"}}
+    {{"id": "n1", "label": "知识点名称", "group": "core/basic/advanced/application", "level": 1, "desc": "一句话描述这个知识点"}}
   ],
   "edges": [
-    {{"source": "node1", "target": "node2", "relation": "prerequisite/related/application"}}
+    {{"source": "n1", "target": "n2", "label": "前置依赖/核心组成/关联知识/实际应用", "type": "prerequisite/component/related/application"}}
   ]
 }}
 
-注意：
-1. 包含8-12个核心知识点
-2. 明确标注前置知识和关联知识
-3. 难度分为easy/medium/hard三级
-4. 只输出JSON，不要其他内容"""
+规则：
+1. 至少12-20个节点，覆盖核心概念、基础前置知识、进阶方向、应用场景四个group
+2. 每个节点必须有id(n1,n2...)、label、group、level(1核心/2基础/3进阶)、desc
+3. 边要有方向性source->target，label用中文(如"前置依赖""核心组成""实际应用")，type用英文
+4. 中心主题放在nodes第一个，其他节点围绕它展开
+5. 只输出JSON，不要任何解释"""
 
 # 教案生成提示词
 LESSON_OUTLINE_PROMPT = """你是一个经验丰富的教研专家。请根据教学要求，生成详细的结构化教案提纲，内容要足够充实以支持生成约20页PPT。

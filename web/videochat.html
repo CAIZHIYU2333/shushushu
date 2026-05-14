@@ -6,6 +6,9 @@
     <title>数字人聊天 - OpenAvatarChat</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- vis.js 知识图谱可视化 -->
+    <script src="https://unpkg.com/vis-network@9.1.6/standalone/umd/vis-network.min.js"></script>
+    <script src="https://unpkg.com/vis-data@7.1.9/standalone/umd/vis-data.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="videochat.css">
@@ -309,66 +312,67 @@
         </div>
     </div>
 
+    <!-- 知识图谱 Modal（vis.js 力导向图） -->
     <div class="teaching-modal" id="teaching-knowledge-modal">
-        <div class="teaching-modal-content">
+        <div class="teaching-modal-content" style="max-width:950px;">
             <div class="teaching-modal-header">
-                <h3>知识图谱 - Transformer架构</h3>
+                <h3>知识图谱</h3>
                 <button class="teaching-modal-close" data-close="teaching-knowledge-modal">&times;</button>
             </div>
             <div class="teaching-modal-body">
-                <div class="knowledge-graph">
-                    <div class="knowledge-node active">
-                        <div class="node-header">
-                            <h4>Transformer架构</h4>
-                            <span class="node-badge">当前学习</span>
-                        </div>
-                        <div class="node-info">
-                            <span>难度：困难</span>
-                            <span>掌握度：60%</span>
-                        </div>
-                    </div>
-                    <div class="knowledge-section">
-                        <h5>前置知识</h5>
-                        <div class="relation-list">
-                            <div class="relation-item mastered"><i data-lucide="check-circle" style="width: 16px; height: 16px;"></i><span>Python编程基础</span></div>
-                            <div class="relation-item mastered"><i data-lucide="check-circle" style="width: 16px; height: 16px;"></i><span>线性代数（矩阵运算）</span></div>
-                            <div class="relation-item mastered"><i data-lucide="check-circle" style="width: 16px; height: 16px;"></i><span>概率论与数理统计</span></div>
-                            <div class="relation-item mastered"><i data-lucide="check-circle" style="width: 16px; height: 16px;"></i><span>机器学习基础</span></div>
-                            <div class="relation-item mastered"><i data-lucide="check-circle" style="width: 16px; height: 16px;"></i><span>神经网络基础（MLP）</span></div>
-                            <div class="relation-item mastered"><i data-lucide="check-circle" style="width: 16px; height: 16px;"></i><span>卷积神经网络(CNN)</span></div>
-                            <div class="relation-item mastered"><i data-lucide="check-circle" style="width: 16px; height: 16px;"></i><span>循环神经网络(RNN/LSTM)</span></div>
-                        </div>
-                    </div>
-                    <div class="knowledge-section">
-                        <h5>核心知识点</h5>
-                        <div class="relation-list">
-                            <div class="relation-item learning"><i data-lucide="loader" style="width: 16px; height: 16px;"></i><span>Self-Attention机制</span></div>
-                            <div class="relation-item learning"><i data-lucide="loader" style="width: 16px; height: 16px;"></i><span>Multi-Head Attention</span></div>
-                            <div class="relation-item learning"><i data-lucide="loader" style="width: 16px; height: 16px;"></i><span>Positional Encoding</span></div>
-                            <div class="relation-item"><i data-lucide="circle" style="width: 16px; height: 16px;"></i><span>Encoder-Decoder架构</span></div>
-                            <div class="relation-item"><i data-lucide="circle" style="width: 16px; height: 16px;"></i><span>Layer Normalization</span></div>
-                            <div class="relation-item"><i data-lucide="circle" style="width: 16px; height: 16px;"></i><span>残差连接(Residual Connection)</span></div>
-                        </div>
-                    </div>
-                    <div class="knowledge-section">
-                        <h5>扩展知识</h5>
-                        <div class="relation-list">
-                            <div class="relation-item"><i data-lucide="circle" style="width: 16px; height: 16px;"></i><span>BERT（双向Encoder）</span></div>
-                            <div class="relation-item"><i data-lucide="circle" style="width: 16px; height: 16px;"></i><span>GPT系列（Decoder-only）</span></div>
-                            <div class="relation-item"><i data-lucide="circle" style="width: 16px; height: 16px;"></i><span>T5（Encoder-Decoder）</span></div>
-                            <div class="relation-item"><i data-lucide="circle" style="width: 16px; height: 16px;"></i><span>Vision Transformer(ViT)</span></div>
-                        </div>
-                    </div>
-                    <div class="knowledge-section">
-                        <h5>应用场景</h5>
-                        <div class="relation-list">
-                            <div class="relation-item"><i data-lucide="circle" style="width: 16px; height: 16px;"></i><span>机器翻译</span></div>
-                            <div class="relation-item"><i data-lucide="circle" style="width: 16px; height: 16px;"></i><span>文本生成</span></div>
-                            <div class="relation-item"><i data-lucide="circle" style="width: 16px; height: 16px;"></i><span>问答系统</span></div>
-                            <div class="relation-item"><i data-lucide="circle" style="width: 16px; height: 16px;"></i><span>图像分类(ViT)</span></div>
-                        </div>
+                <!-- Tab 导航 -->
+                <div class="kg-tabs">
+                    <button class="kg-tab-btn active" data-tab="subject">学科主题</button>
+                    <button class="kg-tab-btn" data-tab="text">文本提取</button>
+                    <button class="kg-tab-btn" data-tab="conversation">对话总结</button>
+                    <button class="kg-tab-btn" data-tab="file">文件上传</button>
+                </div>
+
+                <!-- 加载动画 -->
+                <div id="kg-loading" style="display:none;text-align:center;padding:30px;">
+                    <span class="spinner" style="border-color:rgba(113,112,255,0.3);border-top-color:#7170ff;width:32px;height:32px;"></span>
+                    <p id="kg-loading-text" style="margin-top:12px;color:#666;">正在生成知识图谱...</p>
+                </div>
+
+                <!-- Tab 1: 学科主题 -->
+                <div class="kg-tab-panel" id="kg-tab-subject" style="display:block;">
+                    <div style="display:flex;gap:8px;margin-bottom:12px;">
+                        <select class="form-select" id="kg-subject" style="width:140px;">
+                            <option value="数学">数学</option><option value="物理">物理</option>
+                            <option value="化学">化学</option><option value="语文">语文</option>
+                            <option value="英语">英语</option><option value="编程" selected>编程/AI</option>
+                        </select>
+                        <input type="text" class="form-input" id="kg-topic" placeholder="输入主题，如：Transformer架构" style="flex:1;">
+                        <button class="btn btn-primary" onclick="window.kgViewer.generateFromSubject()" style="white-space:nowrap;">生成图谱</button>
                     </div>
                 </div>
+
+                <!-- Tab 2: 文本提取 -->
+                <div class="kg-tab-panel" id="kg-tab-text" style="display:none;">
+                    <textarea class="form-input" id="kg-text-input" rows="6" placeholder="粘贴一段文本内容（课程笔记、文章、概念说明等），AI将自动提取知识点和关联关系..." style="margin-bottom:8px;"></textarea>
+                    <button class="btn btn-primary btn-block" onclick="window.kgViewer.extractFromText()">从文本提取知识图谱</button>
+                </div>
+
+                <!-- Tab 3: 对话总结 -->
+                <div class="kg-tab-panel" id="kg-tab-conversation" style="display:none;">
+                    <textarea class="form-input" id="kg-conv-input" rows="6" placeholder="粘贴课堂对话记录或输入教学总结文本，AI将提取核心知识点和层级关系..." style="margin-bottom:8px;"></textarea>
+                    <button class="btn btn-primary btn-block" onclick="window.kgViewer.extractFromConversation()">从对话提取知识图谱</button>
+                </div>
+
+                <!-- Tab 4: 文件上传 -->
+                <div class="kg-tab-panel" id="kg-tab-file" style="display:none;">
+                    <div style="border:2px dashed #ddd;border-radius:12px;padding:30px;text-align:center;margin-bottom:12px;">
+                        <p style="color:#999;margin-bottom:12px;">支持上传 .txt/.md/.json/代码文件</p>
+                        <input type="file" id="kg-file-input" accept=".txt,.md,.json,.py,.java,.cpp,.js,.ts,.html,.css" style="display:block;margin:0 auto 12px;">
+                        <button class="btn btn-primary" onclick="window.kgViewer.extractFromFile()">上传并提取知识图谱</button>
+                    </div>
+                </div>
+
+                <!-- vis.js 画布 -->
+                <div id="kg-network-container" style="width:100%;height:420px;border:1px solid #e0e0e0;border-radius:10px;background:#fafbff;display:none;margin-top:12px;"></div>
+
+                <!-- 节点详情面板 -->
+                <div id="kg-node-detail" style="display:none;margin-top:12px;"></div>
             </div>
         </div>
     </div>
@@ -536,5 +540,6 @@
     <script src="stream-utils.js"></script>
     <script src="videochat.js"></script>
     <script src="js/teaching-lesson.js"></script>
+    <script src="js/teaching-knowledge.js"></script>
 </body>
 </html>
