@@ -1,0 +1,939 @@
+================================================================================
+   OpenAvatarChat -- 左边栏(视频通话页)功能 生产级完整规划方案
+================================================================================
+
+日期：2026年5月14日
+目标：将 videochat.html 左边栏 4 个教学功能从占位符改造为生产级交互
+
+现状诊断：
+  - videochat.html 侧边栏 4 个教学按钮：记忆系统、知识图谱、教案生成、学习评价
+  - 全部是 HTML 硬编码的静态占位数据（假数据），点击后弹出一个静态 Modal
+  - 后端 teaching_api/ 已具备完整 API 能力（5 个路由模块），但前端未对接
+  - videochat.js 中记忆管理弹窗有动态 Tab 切换，但 API 调用逻辑为空白
+
+================================================================================
+ 第一部分：教案生成（核心重点功能，优先级最高）
+================================================================================
+
+一、用户设想的完整流程
+
+  老师操作步骤：
+  1. 点击侧边栏"教案生成"按钮 --> 弹出教案生成面板
+  2. 填写表单：教学目标、学科、年级/难度、课时(分钟)、学生水平
+  3. 点击"生成大纲" --> 大模型生成结构化教案提纲(JSON)
+  4. 前端渲染提纲预览（可编辑），老师确认/修改后点击"确认并生成"
+  5. 系统并发调用：文生图 API + PPT 生成引擎
+  6. 完成后展示最终结果，提供下载入口
+
+二、后端改造方案（已有基础，需要增量开发）
+
+  2.1 现有能力（teaching_api/routes/lesson.py 已实现）
+  - POST /api/lesson/generate：两阶段生成（提纲 + 并发插图）
+  - 提纲结构包含：标题、章节列表（每章含时长、内容、need_image、image_prompt）
+  - 图文生成使用百炼 wanx-v1，支持 asyncio.gather 并发
+
+  2.2 需要新增：教案从"确认提纲"到"完稿"的完整链路
+
+  修改 lesson.py 增加以下端点：
+
+  (1) POST /api/lesson/generate_outline
+      功能：仅生成提纲，不产生插图
+      入参：
+        {
+          "objective": "教学目标",
+          "subject": "学科",
+          "level": "初中/高中/大学",
+          "duration": 45,
+          "student_level": "基础/中等/优秀",
+          "style": "严谨/活泼/互动式"
+        }
+      返回：
+        {
+          "lesson_id": "uuid",
+          "title": "教案标题",
+          "sections": [
+            {
+              "id": "sec_1",
+              "title": "导入环节",
+              "duration": 5,
+              "content": "通过...引入新课",
+              "need_image": false,
+              "image_prompt": null
+            },
+            ...
+          ],
+          "total_duration": 45,
+          "status": "outline"
+        }
+
+  (2) POST /api/lesson/confirm_outline
+      功能：老师确认/修改提纲后，触发并发生成插图和 PPT
+      入参：修改后的 sections 数组 + lesson_id
+      流程：
+        a. 接收前端回传的 sections（可能被老师修改过）
+        b. 提取 need_image=true 的 sections
+        c. 并发调用 wanx-v1 生成插图（每张约 8-12 秒，4 张并发生成可压缩到约 15 秒）
+        d. 将图片 URL 关联到对应 section
+        e. 调用 PPT 生成引擎（详见下一节）
+        f. 保存生成结果到 data/lessons/{lesson_id}.json
+      返回：
+        {
+          "lesson_id": "uuid",
+          "sections": [...],     // 已关联 image_url 的完整数据
+          "ppt_url": "/api/lesson/{lesson_id}/ppt",
+          "status": "completed"
+        }
+
+  (3) GET /api/lesson/{lesson_id}/ppt
+      功能：下载生成的 PPT 文件
+      返回：Content-Type: application/vnd.openxmlformats-officedocument.presentationml.presentation
+
+  (4) GET /api/lesson/{lesson_id}/image/{section_id}
+      功能：代理下载文生图生成的插图（如果百炼返回的是临时 URL）
+      避免 CORS 问题，也在服务端做本地缓存
+
+三、PPT 生成方案（重点回答用户疑问）
+
+  问题：制作 PPT 这一步怎么完成？需要加入开源生成 PPT 项目吗？
+
+  答案：不需要引入复杂的开源 PPT 项目。推荐使用 python-pptx 库自建生成引擎。
+
+  方案对比分析：
+
+  ┌──────────────┬────────────────────┬──────────┬──────────┐
+  │   方案        │ 方式                │ 复杂度   │ 推荐度    │
+  ├──────────────┼────────────────────┼──────────┼──────────┤
+  │ python-pptx   │ Python 纯代码生成   │ 中       │ ★★★★★    │
+  │               │ .pptx 文件          │          │ (首选)    │
+  ├──────────────┼────────────────────┼──────────┼──────────┤
+  │ Marp          │ Markdown 转 PPT     │ 低       │ ★★★      │
+  │               │ (需 Node.js)        │          │           │
+  ├──────────────┼────────────────────┼──────────┼──────────┤
+  │ Slidev        │ Vue + Markdown 转   │ 高       │ ★★       │
+  │               │ 演示 (需 Node.js)   │          │           │
+  ├──────────────┼────────────────────┼──────────┼──────────┤
+  │ PptxGenJS     │ 前端 JS 生成        │ 中       │ ★★★      │
+  │               │ (浏览器端)          │          │           │
+  ├──────────────┼────────────────────┼──────────┼──────────┤
+  │ reveal.js     │ HTML 在线演示       │ 低       │ ★        │
+  │               │ (非 .pptx)          │          │           │
+  └──────────────┴────────────────────┴──────────┴──────────┘
+
+  推荐方案：python-pptx（纯 Python，无外部依赖服务，与现有 FastAPI 后端天然契合）
+
+  3.1 python-pptx 实现方案
+      新增文件：teaching_api/services/ppt_service.py
+
+      核心能力：
+      - 模板系统：预置 3 套 PPT 模板（教学演示/学术报告/简约白板）
+        每套模板定义了：
+        * 封面页布局（标题、副标题、日期、作者）
+        * 目录页布局
+        * 内容页布局（标题 + 正文 + 可选的占位图位置）
+        * 总结页布局
+      - 智能排版：
+        * 根据每段文字的多少自动调整字号
+        * 插图自动缩放适配到占位图区域
+        * 支持中文标点、数学符号
+      - 样式方案：
+        * 颜色主题：蓝色学术/绿色清新/紫色科技
+        * 字体：黑体(标题) + 宋体(正文)
+
+      生成流程（核心代码逻辑）：
+      ```
+      1. from pptx import Presentation
+      2. prs = Presentation(template_path)  或从零创建
+      3. 封面页：slide = prs.slides.add_slide(prs.slide_layouts[0])
+                 slide.shapes.title.text = lesson_title
+                 slide.shapes.placeholders[1].text = "AI教学助手自动生成"
+      4. 目录页：遍历 sections，生成编号列表
+      5. 内容页（每个 section 一页）：
+                添加标题 shape
+                添加正文 text_frame（自动换行/分栏）
+                如有 image_url：下载图片并插入到图片占位区域
+      6. 总结页
+      7. prs.save(f"data/lessons/{lesson_id}.pptx")
+      ```
+
+      性能预估：
+      - 10 页 PPT 生成 < 5 秒（不含图片下载）
+      - 图片下载+嵌入额外 2-3 秒/张
+
+  3.2 兜底方案：如果 python-pptx 样式不够美观
+      可以在前端再做一个"美化导出"选项：
+      - 前端拿到 sections 数据后，用 PptxGenJS 在浏览器端生成
+      - 优势：前端有更多 CSS 经验，可以做更丰富的排版
+      - 劣势：图片跨域问题需要后端代理解决
+
+四、前端改造方案（videochat.html + videochat.js）
+
+  4.1 将静态 Modal 替换为动态三步交互面板
+
+  原 Modal 结构：
+    <div id="teaching-lesson-modal">
+      输入框 + 下拉框 + 按钮 + 静态假数据
+    </div>
+
+  新 Modal 结构（三步向导模式）：
+  
+  步骤 1 -- 表单填写
+  ┌──────────────────────────────────────────────┐
+  │ 教案生成                                [ x ] │
+  ├──────────────────────────────────────────────┤
+  │                                              │
+  │  学科：[下拉框：数学/物理/化学/语文/英语/编程] │
+  │  教学主题：[文本框：例如Transformer架构]       │
+  │  教学目标：[多行文本框]                        │
+  │  年级水平：[基础/中等/优秀]                    │
+  │  课时(分)：[42 / 45 / 其他]                   │
+  │  风格：[严谨学术/活泼互动/案例驱动]            │
+  │                                              │
+  │              [ 生成大纲 ]                     │
+  │                                              │
+  └──────────────────────────────────────────────┘
+
+  步骤 2 -- 提纲预览与编辑（大纲生成后自动进入）
+  ┌──────────────────────────────────────────────┐
+  │ 教案大纲 -- 《主题名称》                [ x ] │
+  ├──────────────────────────────────────────────┤
+  │                                              │
+  │ ┌─ 导入环节 (5分钟) ──────────────────────┐  │
+  │ │ [内容文本,可编辑]                       │  │
+  │ │ ☐ 需要配图   [配图描述输入框]           │  │
+  │ └─────────────────────────────────────────┘  │
+  │ ┌─ 新知讲授 (15分钟) ─────────────────────┐  │
+  │ │ [内容文本,可编辑]                       │  │
+  │ │ ☑ 需要配图   [直观展示Transformer结构图] │  │
+  │ └─────────────────────────────────────────┘  │
+  │ ┌─ 互动练习 (10分钟) ─────────────────────┐  │
+  │ │ ...                                     │  │
+  │ └─────────────────────────────────────────┘  │
+  │ ┌─ 课堂总结 (5分钟) ──────────────────────┐  │
+  │ │ ...                                     │  │
+  │ └─────────────────────────────────────────┘  │
+  │                                              │
+  │    [ 返回修改 ]      [ 确认并生成完整教案 ]   │
+  │                                              │
+  └──────────────────────────────────────────────┘
+
+  步骤 3 -- 生成中 + 结果展示
+  ┌──────────────────────────────────────────────┐
+  │ 教案生成中...                          [ x ] │
+  ├──────────────────────────────────────────────┤
+  │                                              │
+  │  ✓ 创建教案大纲 (完成)                       │
+  │  ⏳ 正在生成教学插图 (3/4)...                 │
+  │     [进度条 ████████░░ 75%]                  │
+  │  ○ 正在生成 PPT...                           │
+  │                                              │
+  │ --- 完成后切换为结果展示 ---                  │
+  │                                              │
+  │  ✓ 全部完成！                                │
+  │                                              │
+  │  ┌──────────────────────────────────────┐    │
+  │  │ 📄 教案标题                           │    │
+  │  │ ├── 导入环节 (5分钟)                  │    │
+  │  │ ├── 新知讲授 (15分钟)  🖼 [插图缩略]  │    │
+  │  │ ├── 互动练习 (10分钟)  🖼 [插图缩略]  │    │
+  │  │ └── 课堂总结 (5分钟)                  │    │
+  │  └──────────────────────────────────────┘    │
+  │                                              │
+  │  [ 下载教案 Word ]  [ 下载 PPT ]  [ 重新生成 ] │
+  │                                              │
+  └──────────────────────────────────────────────┘
+
+  4.2 技术实现要点（JS 侧）
+
+  使用 SSE（Server-Sent Events）或轮询实现进度状态：
+  - confirm_outline 返回后，前端每秒轮询 GET /api/lesson/{lesson_id}/status
+  - 或者后端用 SSE streaming 推送进度事件
+
+  ```javascript
+  async generateOutline(formData) {
+    // 步骤1: 生成大纲
+    const res = await fetch('/api/lesson/generate_outline', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(formData)
+    });
+    const data = await res.json();
+    this.currentLessonId = data.lesson_id;
+    this.renderOutline(data.sections);
+  }
+
+  async confirmAndGenerate(modifiedSections) {
+    // 步骤2: 确认并触发生成
+    const res = await fetch('/api/lesson/confirm_outline', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        lesson_id: this.currentLessonId,
+        sections: modifiedSections
+      })
+    });
+    // 步骤3: SSE 或轮询进度
+    this.pollProgress(this.currentLessonId);
+  }
+  ```
+
+================================================================================
+ 第二部分：知识图谱（需要看起来真实，但无需真正用于实际）
+================================================================================
+
+一、设计定位
+
+  根据用户要求：知识图谱需要"看着真实一点但是无需真正用于实际"，即
+  前端展示效果要够专业，但后端可以走模拟数据或简化的 LLM 生成路线。
+
+  理解：这里不是要做一个百万节点的 Neo4j 生产集群，而是做一个"演示级
+  但视觉效果好"的知识图谱功能，用于项目答辩和论文展示。
+
+二、后端方案
+
+  2.1 现有能力（teaching_api/routes/knowledge.py）
+  - POST /api/knowledge/generate：传入学科+主题，LLM 生成 8-12 个节点
+    和关系边
+  - GET /api/knowledge/graph/{subject}/{topic}：读取已缓存的知识图谱
+  - GET /api/knowledge/subjects：返回预设的 6 个学科列表
+
+  2.2 增强方案
+
+  针对"看起来真实"的需求，做以下增强：
+
+  (1) 预置知识图谱缓存
+  - 预先用 LLM 生成 6 个学科、每个学科 3-5 个主题的完整知识图谱，
+    存为 JSON 文件在 data/knowledge_graphs/{subject}/{topic}.json
+  - 前端请求时直接返回缓存，无需每次等 LLM（300ms 内响应）
+  - 这样演示体验非常流畅，不会出现"等 10 秒才出图"
+
+  (2) 节点元数据增强
+  每个知识节点增加更多字段让前端展示内容更丰富：
+  ```json
+  {
+    "id": "transformer_arch",
+    "name": "Transformer 架构",
+    "difficulty": "hard",
+    "status": "learning",
+    "description": "基于自注意力机制的序列到序列模型架构，由 Vaswani 等人在 2017 年提出，彻底改变了自然语言处理领域",
+    "examples": ["BERT", "GPT", "T5"],
+    "related_courses": ["深度学习", "自然语言处理"],
+    "learning_suggestions": "建议先掌握 RNN 和 LSTM 后再学习"
+  }
+  ```
+
+  (3) 关系类型丰富
+  ```json
+  {
+    "source": "self_attention",
+    "target": "transformer_arch",
+    "relation": "core_component",
+    "label": "核心组件",
+    "description": "Self-Attention 是 Transformer 最核心的机制"
+  }
+  ```
+
+三、前端展示方案（推荐方案）
+
+  重点：不要在 Canvas 上自绘！用成熟的可视化库，效果专业且开发快。
+
+  推荐使用 vis.js Network（或 cytoscape.js）：
+
+  3.1 为什么选 vis.js
+  - 纯 JS，无需 React/Vue 框架依赖（项目当前是原生 HTML）
+  - 内置力导向布局、节点拖拽、缩放、点击高亮
+  - 中文支持好，节点标签不乱码
+  - CDN 引入即可：<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js">
+
+  3.2 展示效果设计
+
+  ┌──────────────────────────────────────────────┐
+  │ 知识图谱 -- Transformer 架构            [ x ] │
+  ├──────────────────────────────────────────────┤
+  │                                              │
+  │  学科：[数学 ▾]  主题：[Transformer架构 ▾]    │
+  │                                              │
+  │  ┌──────────────────────────────────────┐    │
+  │  │                                      │    │
+  │  │    (注意力)───→(Transformer)          │    │
+  │  │       ↓           ↓                  │    │
+  │  │  (Q/K/V)    (Self-Attn)──→(多头注意) │    │
+  │  │       ↓           ↓         ↓        │    │
+  │  │  (缩放因子)  (位置编码)  (残差连接)   │    │
+  │  │                                      │    │
+  │  │  [力导向布局 + 节点可拖拽 + 缩放]     │    │
+  │  │                                      │    │
+  │  └──────────────────────────────────────┘    │
+  │                                              │
+  │  [已掌握] [学习中] [未学习]                  │
+  │    绿        黄       灰                     │
+  │                                              │
+  │  点击节点查看详情：                           │
+  │  ┌──────────────────────────────────────┐    │
+  │  │ 📍 Self-Attention (核心组件)          │    │
+  │  │ 难度: 困难    状态: 学习中             │    │
+  │  │ 描述: 允许模型在处理每个词时关注到     │    │
+  │  │ 输入序列中的所有其他词...              │    │
+  │  │ 前置知识: 注意力机制 → Q/K/V 矩阵     │    │
+  │  │ 关联课程: 深度学习、NLP               │    │
+  │  └──────────────────────────────────────┘    │
+  │                                              │
+  └──────────────────────────────────────────────┘
+
+  3.3 交互设计
+  - 节点颜色：绿(已掌握)/黄(学习中)/灰(未学习)/蓝(核心概念)
+  - 边样式：实线(前置依赖)/虚线(关联)/点线(应用)
+  - 点击节点：右侧或下方展开详细面板
+  - 双击节点：高亮所有与它相连的节点和边
+  - 滚轮缩放、鼠标拖拽画布
+
+四、前端改造清单（videochat.html 知识图谱 Modal）
+
+  1. 删除 L312-L374 的静态占位 HTML
+  2. 替换为新的动态 Modal 结构（学科/主题选择器 + vis.js 容器 + 详情面板）
+  3. 在 videochat.js 中实现：
+     - loadKnowledgeGraph(subject, topic)：调 POST /api/knowledge/generate
+       获取 JSON 数据
+     - renderNetwork(nodes, edges)：用 vis.js Network 渲染力导向图
+     - showNodeDetail(nodeId)：点击展示节点详情
+  4. CDN 引入 vis.js（在 videochat.html <head> 中加一行 script 标签）
+
+
+================================================================================
+ 第三部分：记忆系统（仿 OpenClaw 设计，需要对接后端 API）
+================================================================================
+
+一、现状
+
+  videochat.js:L352-L456 已经实现了一个"动态记忆管理弹窗"，包含 4 个 Tab：
+  人格设定 / 长期记忆 / 短期记忆 / 学生记忆
+
+  但问题：
+  - 没有对接后端 API（没有 fetch 调用）
+  - textarea 中显示的是占位文字
+  - 保存按钮没有实际写入逻辑
+
+二、改造方案
+
+  2.1 前端改造（videochat.js 的 openMemoryManager 函数）
+
+  在现有 4 个 Tab 基础上增加以下功能：
+
+  (1) 学生选择器
+  顶部增加一个下拉框：`<select id="memory-student-select">`
+  选项从 GET /api/students 动态加载
+
+  (2) 加载记忆
+  切换学生后自动调后端 API 加载对应记忆：
+  - 人格设定：GET /api/memory/{student_id}/personality  -> content
+  - 长期记忆：GET /api/memory/{student_id}/long_term   -> content
+  - 短期记忆：GET /api/memory/{student_id}/short_term   -> content
+  - 学生记忆：GET /api/memory/{student_id}/files        -> 文件列表
+
+  (3) 保存记忆
+  每个 textarea 下方"保存"按钮绑定 PUT 请求：
+  - PUT /api/memory/{student_id}/personality  body: {content: "..."}
+  - 同理处理 long_term / short_term
+
+  (4) 生成画像按钮
+  - POST /api/memory/{student_id}/generate_profile
+  - 显示加载动画，完成后刷新长期记忆显示
+
+  (5) 附加功能
+  - 保存后显示 toast 提示"保存成功"
+  - 头像/姓名等基本信息展示
+
+  2.2 后端 ready 状态
+  teaching_api/routes/memory.py 已有完整 CRUD 端点，无需后端改动。
+  配置文件中需设置正确的 DASHSCOPE_API_KEY（已从 app.py 的 glut2.yaml 读取）。
+
+
+================================================================================
+ 第四部分：学习评价（对接后端 API）
+================================================================================
+
+一、现状
+
+  videochat.html L422-L482 的弹窗是纯静态假数据（硬编码的 88 分、
+  75 分等）。后端 teaching_api/routes/evaluation.py 已有 POST
+  /api/evaluation/generate 端点但无前端对接。
+
+二、前端改造方案
+
+  ┌──────────────────────────────────────────────┐
+  │ 学习评价                                [ x ] │
+  ├──────────────────────────────────────────────┤
+  │                                              │
+  │  选择学生：[张同学 ▾]                         │
+  │                                              │
+  │  评价维度（LLM 自动生成）：                    │
+  │  ┌──────────────────────────────────────┐    │
+  │  │ 课堂表现    ████████░░  85/100         │    │
+  │  │ 知识点掌握  ██████░░░░  72/100         │    │
+  │  │ 学习态度    ████████░░  88/100         │    │
+  │  │ 创新思维    ██████░░░░  68/100         │    │
+  │  │ 合作能力    ███████░░░  78/100         │    │
+  │  └──────────────────────────────────────┘    │
+  │                                              │
+  │  进步趋势（最近 5 次）：                      │
+  │  [折线图：知识点掌握度 65→68→70→75→72]       │
+  │                                              │
+  │  教师评语（LLM 生成）：                       │
+  │  ┌──────────────────────────────────────┐    │
+  │  │ 张同学在课堂讨论中表现活跃，对         │    │
+  │  │ Transformer 架构的理解有显著进步...    │    │
+  │  └──────────────────────────────────────┘    │
+  │                                              │
+  │  改进建议：                                   │
+  │  ┌──────────────────────────────────────┐    │
+  │  │ 1. 建议加强编码实践，将理论落地为...   │    │
+  │  │ 2. 多关注 Attention 可视化工具...      │    │
+  │  └──────────────────────────────────────┘    │
+  │                                              │
+  │  [ 刷新评价 ]  [ 导出报告 ]                   │
+  │                                              │
+  └──────────────────────────────────────────────┘
+
+  前端关键 JS 逻辑：
+  ```javascript
+  async loadEvaluation(studentId) {
+    // 方案A: 从学生已有对话历史生成
+    const memoryRes = await fetch(`/api/memory/${studentId}`);
+    const memory = await memoryRes.json();
+    const evalRes = await fetch('/api/evaluation/generate', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        student_id: studentId,
+        student_name: this.currentStudent.name,
+        conversation_history: memory.short_term_content.split('\n')
+      })
+    });
+    const evaluation = await evalRes.json();
+    this.renderEvaluation(evaluation);
+  }
+  ```
+
+  对于真实场景，后端需要保存每次评价的历史记录（目前只生成不存储），
+  建议在 data_service.py 中增加 get_evaluations()/save_evaluations()，
+  按 student_id 存储评价历史。
+
+
+================================================================================
+ 第五部分：独立功能 -- 学生管理（侧边栏新增）
+================================================================================
+
+一、定位
+
+  目前 videochat.html 无"学生管理"按钮，但用户规划文档中明确列出了
+  学生管理作为核心模块。建议在侧边栏"教案生成"按钮下方新增"学生管理"。
+
+二、弹窗设计
+
+  ┌──────────────────────────────────────────────┐
+  │ 学生管理                                [ x ] │
+  ├──────────────────────────────────────────────┤
+  │                                   [ 添加学生 ] │
+  │                                              │
+  │  ┌────┬────────┬────────┬────────┬────────┐  │
+  │  │ ID │ 姓名    │ 年级    │ 学校    │ 操作    │  │
+  │  ├────┼────────┼────────┼────────┼────────┤  │
+  │  │  1 │ 张同学  │ 大三    │ 大连海事│ 编辑 删除│  │
+  │  │  2 │ 李同学  │ 大二    │ 大连海事│ 编辑 删除│  │
+  │  └────┴────────┴────────┴────────┴────────┘  │
+  │                                              │
+  └──────────────────────────────────────────────┘
+
+  后端 teaching_api/routes/students.py 已完整实现 CRUD。
+
+三、侧边栏 HTML 新增
+
+  在 videochat.html 侧边栏 nav 中，学习评价按钮之后增加：
+  ```html
+  <button class="nav-item" id="teaching-students-btn" title="学生管理">
+      <i data-lucide="graduation-cap" style="width: 20px; height: 20px;"></i>
+      <span class="nav-label">学生管理</span>
+  </button>
+  ```
+
+
+================================================================================
+ 第六部分：侧边栏整体重构总结
+
+一、改造前 vs 改造后对比
+
+┌──────────────────────┬──────────────────────────────┐
+│  改造前（现状）        │  改造后（目标）               │
+├──────────────────────┼──────────────────────────────┤
+│ 记忆系统：静态假数据   │ Tab切换 + API加载 + 编辑保存   │
+│ 知识图谱：静态假数据   │ vis.js力导向图 + 点击详情      │
+│ 教案生成：表单+假数据  │ 三步向导 + LLM生成 + 插图+PPT │
+│ 学习评价：静态假数据   │ 动态评分条 + 折线图 + LLM评语  │
+│ 学生管理：不存在       │ 列表CRUD + 添加表单           │
+└──────────────────────┴──────────────────────────────┘
+
+二、实施优先级（按重要性排列）
+
+│ 优先级 │ 功能         │ 工作量  │ 理由                              │
+├──────┼────────────┼─────────┼───────────────────────────────────┤
+│  P0   │ 教案生成      │ 5 天    │ 大创项目核心模块，演示亮点          │
+│       │ (含PPT生成)   │         │ 包含：提纲生成/插图/PPT引擎         │
+├──────┼────────────┼─────────┼───────────────────────────────────┤
+│  P1   │ 知识图谱      │ 3 天    │ 视觉效果好，答辩/论文必备            │
+│       │               │         │ 包含：vis.js集成/预置图谱缓存       │
+├──────┼────────────┼─────────┼───────────────────────────────────┤
+│  P2   │ 学习评价      │ 2 天    │ 大创核心功能之一，需对接LLM          │
+│       │               │         │ 包含：评分/趋势图/评语生成          │
+├──────┼────────────┼─────────┼───────────────────────────────────┤
+│  P3   │ 记忆系统      │ 2 天    │ 已有后端API和前端骨架，对接即可      │
+├──────┼────────────┼─────────┼───────────────────────────────────┤
+│  P4   │ 学生管理      │ 1 天    │ 后端已有，前端CRUD表单即可          │
+└──────┴────────────┴─────────┴───────────────────────────────────┘
+
+建议按 P0 -> P1 -> P2 -> P3 -> P4 顺序实施，每完成一个即可在视频通话页
+的侧边栏中看到实际效果，逐步积累演示素材。
+
+
+================================================================================
+ 第七部分：技术选型与依赖
+
+一、新增 Python 依赖（teaching_api/requirements.txt）
+
+  dashscope>=1.13.0             # 百炼 API（已有）
+  python-pptx>=0.6.23            # PPT 生成（新增，约 200KB）
+  Pillow>=10.0.0                 # 图片处理（python-pptx 的依赖）
+  requests>=2.31.0               # 下载远程图片（已有）
+
+二、新增前端依赖（通过 CDN 引入，无需 npm）
+
+  vis-network 9.1.6              # 知识图谱力导向可视化
+  Chart.js 4.4.0                # 评价趋势折线图/RADAR图（可选）
+
+三、文件变更清单
+
+  【后端新建】
+  teaching_api/services/ppt_service.py             # PPT 生成引擎（~200行）
+  teaching_api/services/ppt_templates/             # PPT 模板目录
+  ├── academic.json                                # 学术风格配置
+  ├── fresh.json                                   # 清新风格配置
+  └── tech.json                                    # 科技风格配置
+  teaching_api/data/knowledge_graphs/              # 预置知识图谱缓存
+  ├── math/函数.json
+  ├── physics/力学.json
+  └── ...
+
+  【后端修改】
+  teaching_api/routes/lesson.py    # 新增 3 个端点 + PPT 生成调用
+  teaching_api/routes/evaluation.py# 增加评价历史存储
+  teaching_api/services/data_service.py # 增加评价历史读写方法
+
+  【前端新建】
+  web/js/teaching-lesson.js       # 教案生成三步向导逻辑
+  web/js/teaching-knowledge.js    # 知识图谱 vis.js 渲染逻辑
+  web/js/teaching-evaluation.js   # 学习评价图表逻辑
+  web/js/teaching-memory.js       # 记忆系统 API 对接逻辑
+  web/js/teaching-students.js     # 学生管理 CRUD 逻辑
+
+  【前端修改】
+  web/videochat.html    # 删除 4 个静态 Modal，替换为动态结构
+                        # 新增学生管理侧边栏按钮
+                        # <head> 中新增 vis.js + Chart.js CDN
+  web/videochat.js      # 删除 openMemoryManager 中占位逻辑
+                        # 新增各教学功能的事件绑定和 API 调用
+  web/videochat.css     # 新增 Modal 三步向导样式
+                        # 新增知识图谱容器样式
+                        # 新增评价卡片样式
+
+  【配置文件】
+  teaching_api/config.py # 新增 PPT 模板路径配置
+
+
+================================================================================
+ 第八部分：教案生成 -- PPT 生成引擎详细设计（python-pptx 核心代码骨架）
+================================================================================
+
+文件：teaching_api/services/ppt_service.py
+
+```python
+"""
+PPT 生成服务
+基于 python-pptx 从教案 JSON 生成 .pptx 文件
+"""
+import os
+import json
+from io import BytesIO
+from typing import List, Dict, Optional
+from pptx import Presentation
+from pptx.util import Inches, Pt, Emu
+from pptx.dml.color import RGBColor
+from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
+from PIL import Image
+import requests
+from loguru import logger
+
+
+class PPTStyle:
+    ACADEMIC = {
+        "bg_color": RGBColor(0xFF, 0xFF, 0xFF),
+        "title_color": RGBColor(0x1A, 0x3C, 0x6D),
+        "text_color": RGBColor(0x33, 0x33, 0x33),
+        "accent_color": RGBColor(0x2B, 0x7A, 0xC2),
+        "title_font": "Microsoft YaHei",
+        "body_font": "Microsoft YaHei",
+    }
+    FRESH = {
+        "bg_color": RGBColor(0xFA, 0xFC, 0xFF),
+        "title_color": RGBColor(0x2D, 0x8C, 0x5A),
+        "text_color": RGBColor(0x44, 0x44, 0x44),
+        "accent_color": RGBColor(0x5B, 0xB3, 0x81),
+        "title_font": "Microsoft YaHei",
+        "body_font": "Microsoft YaHei",
+    }
+    TECH = {
+        "bg_color": RGBColor(0x0D, 0x11, 0x17),
+        "title_color": RGBColor(0x71, 0x70, 0xFF),
+        "text_color": RGBColor(0xE0, 0xE0, 0xE0),
+        "accent_color": RGBColor(0x9D, 0x71, 0xFF),
+        "title_font": "Microsoft YaHei",
+        "body_font": "Microsoft YaHei",
+    }
+
+
+class PPTGenerator:
+    def __init__(self, style_name: str = "academic"):
+        self.styles = {
+            "academic": PPTStyle.ACADEMIC,
+            "fresh": PPTStyle.FRESH,
+            "tech": PPTStyle.TECH,
+        }
+        self.style = self.styles.get(style_name, PPTStyle.ACADEMIC)
+        self.prs = Presentation()
+        self.prs.slide_width = Inches(13.333)
+        self.prs.slide_height = Inches(7.5)
+
+    def _download_image(self, url: str) -> Optional[BytesIO]:
+        try:
+            resp = requests.get(url, timeout=30)
+            if resp.status_code == 200:
+                return BytesIO(resp.content)
+        except Exception as e:
+            logger.warning(f"下载图片失败 {url}: {e}")
+        return None
+
+    def _add_background(self, slide):
+        background = slide.background
+        fill = background.fill
+        fill.solid()
+        fill.fore_color.rgb = self.style["bg_color"]
+
+    def add_cover_slide(self, title: str, subtitle: str = ""):
+        slide = self.prs.slides.add_slide(self.prs.slide_layouts[6])
+        self._add_background(slide)
+        left = Inches(1.5)
+        top = Inches(2.5)
+        width = Inches(10)
+        height = Inches(1.2)
+        txBox = slide.shapes.add_textbox(left, top, width, height)
+        tf = txBox.text_frame
+        p = tf.paragraphs[0]
+        p.text = title
+        p.font.size = Pt(40)
+        p.font.bold = True
+        p.font.color.rgb = self.style["title_color"]
+        p.font.name = self.style["title_font"]
+        p.alignment = PP_ALIGN.CENTER
+
+        if subtitle:
+            top2 = Inches(3.8)
+            txBox2 = slide.shapes.add_textbox(left, top2, width, Inches(0.8))
+            tf2 = txBox2.text_frame
+            p2 = tf2.paragraphs[0]
+            p2.text = subtitle
+            p2.font.size = Pt(18)
+            p2.font.color.rgb = self.style["accent_color"]
+            p2.alignment = PP_ALIGN.CENTER
+
+    def add_content_slide(self, section_title: str, content: str,
+                          image_url: Optional[str] = None):
+        slide = self.prs.slides.add_slide(self.prs.slide_layouts[6])
+        self._add_background(slide)
+
+        left = Inches(0.8)
+        top = Inches(0.5)
+        width = Inches(11.5)
+        txBox = slide.shapes.add_textbox(left, top, width, Inches(0.7))
+        tf = txBox.text_frame
+        p = tf.paragraphs[0]
+        p.text = section_title
+        p.font.size = Pt(28)
+        p.font.bold = True
+        p.font.color.rgb = self.style["title_color"]
+
+        content_left = Inches(0.8)
+        content_top = Inches(1.5)
+        if image_url:
+            content_width = Inches(6.5)
+            img_left = Inches(7.8)
+            img_top = Inches(1.5)
+            img_data = self._download_image(image_url)
+            if img_data:
+                slide.shapes.add_picture(img_data, img_left, img_top,
+                                         width=Inches(4.8))
+        else:
+            content_width = Inches(11.5)
+
+        content_height = Inches(5.0)
+        txBox2 = slide.shapes.add_textbox(content_left, content_top,
+                                          content_width, content_height)
+        tf2 = txBox2.text_frame
+        tf2.word_wrap = True
+        paragraphs = content.split('\n')
+        for i, para_text in enumerate(paragraphs):
+            if i == 0:
+                p = tf2.paragraphs[0]
+            else:
+                p = tf2.add_paragraph()
+            p.text = para_text.strip()
+            p.font.size = Pt(16)
+            p.font.color.rgb = self.style["text_color"]
+            p.space_after = Pt(8)
+
+    def add_toc_slide(self, sections: List[Dict]):
+        slide = self.prs.slides.add_slide(self.prs.slide_layouts[6])
+        self._add_background(slide)
+
+        txBox = slide.shapes.add_textbox(Inches(1.5), Inches(0.8),
+                                         Inches(10), Inches(0.7))
+        tf = txBox.text_frame
+        p = tf.paragraphs[0]
+        p.text = "课程大纲"
+        p.font.size = Pt(32)
+        p.font.bold = True
+        p.font.color.rgb = self.style["title_color"]
+
+        content_tf = slide.shapes.add_textbox(Inches(1.5), Inches(2.0),
+                                              Inches(10), Inches(4.5))
+        tf2 = content_tf.text_frame
+        for i, section in enumerate(sections):
+            if i == 0:
+                p = tf2.paragraphs[0]
+            else:
+                p = tf2.add_paragraph()
+            p.text = f"{i+1}. {section.get('title', '')} ({section.get('duration', 0)}分钟)"
+            p.font.size = Pt(18)
+            p.font.color.rgb = self.style["text_color"]
+            p.space_after = Pt(12)
+
+    def generate(self, lesson_data: Dict) -> str:
+        title = lesson_data.get("title", "AI 生成教案")
+        sections = lesson_data.get("sections", [])
+
+        self.add_cover_slide(title, "AI 教学助手自动生成")
+        self.add_toc_slide(sections)
+
+        for section in sections:
+            self.add_content_slide(
+                section_title=section.get("title", ""),
+                content=section.get("content", ""),
+                image_url=section.get("image_url"),
+            )
+
+        output_dir = lesson_data.get("output_dir", "data/lessons")
+        os.makedirs(output_dir, exist_ok=True)
+        output_path = os.path.join(output_dir, f"{lesson_data.get('lesson_id')}.pptx")
+        self.prs.save(output_path)
+        return output_path
+```
+
+================================================================================
+ 第九部分：实施路线图
+
+ 第 1 周（教案生成 P0）
+  D1: 后端 -- ppt_service.py 编写 + 测试（200行）
+  D2: 后端 -- lesson.py 新增 3 个端点 + 串联 PPT 生成
+  D3: 前端 -- 教案生成三步向导 HTML + CSS
+  D4: 前端 -- 教案生成 API 对接 + 进度轮询
+  D5: 联调测试 + 修复样式细节
+
+ 第 2 周（知识图谱 P1 + 学习评价 P2）
+  D1: 后端 -- 预置知识图谱 JSON 缓存生成
+  D2: 前端 -- vis.js 集成 + 力导向图渲染
+  D3: 前端 -- 节点点击详情 + 交互完善
+  D4: 学习评价前端改造（动态数据 + 图表）
+  D5: 联调测试
+
+ 第 3 周（记忆系统 P3 + 学生管理 P4）
+  D1: 前端 -- 记忆系统 API 对接
+  D2: 前端 -- 记忆管理弹窗完善 + 保存/刷新
+  D3: 学生管理弹窗 HTML + CSS
+  D4: 学生管理 API 对接 + CRUD 表单
+  D5: 全功能联调 + 回归测试
+
+ 3 周总计工作量：约 15 人天
+
+
+================================================================================
+ 附录A：与用户规划文档（项目说明 - 预期成果与创新性.md）的对照
+
+│ 规划文档模块         │ 本方案对应章节     │ 实施状态              │
+├──────────────────┼──────────────────┼─────────────────────┤
+│ 教案自动生成        │ 第一部分           │ 后端已有基础，方案完整  │
+│ PPT 自动输出        │ 第一·三节          │ 新建 python-pptx 引擎 │
+│ 文生图导入          │ 第一·二节(2)       │ 后端已有（wanx-v1）   │
+│ 知识图谱            │ 第二部分           │ vis.js 展示方案      │
+│ 记忆系统            │ 第三部分           │ 后端已有，前端需对接   │
+│ 教师智能评价        │ 第四部分           │ 后端已有，前端需改造   │
+│ 个性化学习路径      │ 后续阶段（未展开） │ 需记忆+评价数据积累后  │
+│ 数字人定制          │ 控制台已实现       │ console-templates   │
+│ 学习成效分析        │ 后续阶段（未展开） │ 需行为数据积累后      │
+
+
+ 附录B：关键决策记录
+
+  1. PPT 生成：选用 python-pptx（不引入开源PPT项目）
+     理由：纯 Python 零额外服务依赖，与 FastAPI 天然契合，
+     安装包仅 200KB，10页PPT生成 < 5秒。
+
+  2. 知识图谱：选用 vis.js Network（不引入 Neo4j 图数据库）
+     理由：演示级需求不需要真实图数据库，vis.js CDN引入即可，
+     力导向布局效果专业，适合答辩/论文展示。
+
+  3. 图片下载代理：后端统一代理下载文生图URL
+     理由：百炼返的是临时URL（可能带CORS限制），后端下载后
+     本地托管可避免前端跨域问题，同时做图片本地缓存。
+
+  4. 教案生成前端：三步向导而非单页大表单
+     理由：分步引导降低老师操作门槛，提纲确认环节支持人工审核
+     再进入耗时生成阶段，避免一步生成后发现提纲不满意而重来。
+
+  5. 前端架构：保持原生 HTML/JS（不引入 Vue/React）
+     理由：项目已有完整的原生前端体系，引入框架会增加构建系统
+     复杂度。新增 JS 文件采用模块化 class 风格，与现有 videochat.js
+     的 VideoChatApp class 保持一致。
+
+
+ 附录C：OpenAvatarChat 与 Teaching API 的关系说明
+
+  当前架构中，app.py（主服务 8282 端口）在 run() 方法中通过 FastAPI
+  的 include_router 机制将 teaching_api 的 5 个路由模块注册到主应用：
+
+  app.py:L1096-L1104
+  ```
+  self.app.include_router(students.router, prefix="/api/students")
+  self.app.include_router(memory.router, prefix="/api/memory")
+  self.app.include_router(knowledge.router, prefix="/api/knowledge")
+  self.app.include_router(lesson.router, prefix="/api/lesson")
+  self.app.include_router(evaluation.router, prefix="/api/evaluation")
+  ```
+
+  这意味着：
+  - 不需要单独启动 teaching_api（它是作为插件集成到主服务的）
+  - 所有 API 都在同一个 8282 端口下可用
+  - teaching_api 从 app.py 的 glut2.yaml 配置加载时获取 API Key
+    （虽然 teaching_api/config.py 有独立的 API Key 配置，但实际
+    运行时优先读取环境变量 DASHSCOPE_API_KEY）
+
+  前端 videochat.html 通过这些 API 路径访问教学功能，无需跨域。
+
+================================================================================
+ 文档版本：v1.0
+ 创建日期：2026年5月14日
+ 文件路径：docs/2026-05-12/左边栏功能_生产级完整规划方案.txt
+ 基于：项目说明 - 预期成果与创新性.md + 实际代码审查
+================================================================================

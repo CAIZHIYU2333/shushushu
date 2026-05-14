@@ -51,7 +51,6 @@ const TYVoiceChatState = {
     })();
   }
 })();
-const SimpleEventEmitter = window.SimpleEventEmitter;
 
 class GaussianAvatar extends SimpleEventEmitter {
   constructor(options) {

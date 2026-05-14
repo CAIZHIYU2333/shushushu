@@ -1,0 +1,51 @@
+{
+  "title": "理解人工智能中的卷积神经网络",
+  "sections": [
+    {
+      "duration": 5,
+      "content": "通过简短介绍人工智能在现代社会的应用来激发学生的兴趣，强调卷积神经网络（CNN）作为AI图像识别背后的关键技术之一的重要性。",
+      "image_prompt": "A collage showing various applications of AI in daily life, such as self-driving cars, facial recognition systems, and medical imaging analysis.",
+      "title": "课程导入",
+      "id": "sec_1",
+      "need_image": true,
+      "image_url": null
+    },
+    {
+      "duration": 20,
+      "content": "解释卷积神经网络的基本概念、结构组成及其工作原理。包括卷积层的作用、池化层如何减少数据维度而不丢失重要信息、以及全连接层是如何做出最终预测的。",
+      "image_prompt": "A diagram illustrating the architecture of a typical CNN, clearly labeling each layer (convolutional, pooling, fully connected) and briefly explaining their functions with text boxes.",
+      "title": "新知讲解",
+      "id": "sec_2",
+      "need_image": true,
+      "image_url": null
+    },
+    {
+      "duration": 15,
+      "content": "引导学生参与一个简单的动手实验或案例分析，使用Python和TensorFlow/Keras框架创建一个基础的CNN模型，并尝试对MNIST手写数字数据集进行分类。",
+      "title": "练习巩固",
+      "id": "sec_3",
+      "need_image": false,
+      "image_prompt": null,
+      "image_url": null
+    },
+    {
+      "duration": 5,
+      "content": "回顾本节课的重点内容，即CNN的主要组成部分及其作用；鼓励学生思考未来可能遇到的问题及解决方案。",
+      "title": "课堂总结",
+      "id": "sec_4",
+      "need_image": false,
+      "image_prompt": null,
+      "image_url": null
+    }
+  ],
+  "lesson_id": "lesson_5bf0caab9b",
+  "status": "outline",
+  "style": "严谨学术",
+  "params": {
+    "objective": "理解人工智能通识课程",
+    "subject": "编程",
+    "level": "大学",
+    "duration": 45,
+    "student_level": "中等"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "lesson_id": "lesson_7ad30a099d",
+  "title": "CNN与GNN原理详解",
+  "sections": [
+    {
+      "title": "课程介绍与目标设定",
+      "duration": 5,
+      "content": "本节课将深入探讨卷积神经网络(CNN)和图神经网络(GNN)的基本原理及其在现代计算机视觉、自然语言处理等领域中的应用。通过本节课的学习，学生能够理解这两种模型的工作机制，掌握它们各自的优势以及适用场景，并能够基于这些知识进行简单的项目实践。\n- CNN定义: 一种模仿生物视觉感知机制设计的深度学习模型\n- GNN概述: 用于处理具有复杂结构数据如社交网络、分子结构等的神经网络架构\n- 学习成果预期: 能够识别并描述两种模型的关键组成部分；了解如何根据问题选择合适的模型类型。",
+      "need_image": false,
+      "image_prompt": "",
+      "image_url": null
+    },
+    {
+      "title": "CNN基础概念",
+      "duration": 10,
+      "content": "卷积神经网络由多个层组成，主要包括输入层、卷积层、池化层、全连接层等。每种类型的层都有其特定的功能，共同作用于图像或其他形式的数据上以提取特征信息。\n- 输入层: 接收原始数据作为输入\n- 卷积层: 使用卷积核对输入执行卷积操作，从而捕捉局部特征\n- 池化层: 降低特征图的空间维度，减少计算量同时保留重要信息\n- 全连接层: 将前面所有层学到的信息整合起来做出最终预测或分类",
+      "need_image": true,
+      "image_prompt": "A clear educational diagram showing the architecture of a typical Convolutional Neural Network. The illustration should include four main parts: Input Layer, Convolutional Layers (with kernels shown), Pooling Layers (demonstrating max pooling or average pooling), and Fully Connected Layers at the end. Use soft colors like light blue for background and orange to highlight key components. Include arrows indicating data flow direction.",
+      "image_url": "https://dashscope-result-wlcb-acdr-1.oss-cn-wulanchabu-acdr-1.aliyuncs.com/7d/54/20260514/df38e33f/ea6b492e-c8de-9a92-8e6c-798154d0047b4169868449.png?Expires=1779347962&OSSAccessKeyId=LTAI5tKPD3TMqf2Lna1fASuh&Signature=sDXLkPgFcoSTA8GRDpBERsxpYGQ%3D"
+    },
+    {
+      "title": "CNN工作流程解析",
+      "duration": 8,
+      "content": "从输入到输出，CNN经历了一系列变换过程。首先，输入图像经过若干个卷积层和池化层，期间会逐渐增加通道数而减少空间尺寸。接着，通过扁平化处理将多维张量转换成一维向量，然后送入全连接层进行分类或回归任务。整个过程中，卷积层负责发现局部特征模式，而池化层则有助于增强模型对于小位移和平移变化的鲁棒性。\n- 数据预处理: 图像标准化、缩放等\n- 特征提取: 通过卷积运算识别边缘、纹理等低级特征\n- 维度缩减: 利用池化技术减少参数数量\n- 决策制定: 在全连接层中综合所有信息作出判断",
+      "need_image": true,
+      "image_prompt": "An educational illustration depicting the workflow of a Convolutional Neural Network. It should start with an image input, followed by several stages including Convolution (show kernels sliding over the image), Pooling (illustrate downsampling effect), Flattening (transforming 3D tensor into 1D vector), and finally Classification via Fully Connected Layers. Use soft pastel colors and ensure each step is clearly labeled.",
+      "image_url": null
+    },
+    {
+      "title": "GNN入门指南",
+      "duration": 7,
+      "content": "与传统的神经网络不同，图神经网络专门针对非欧几里得数据（例如图）进行了优化。它通过节点之间的消息传递机制来学习表示，适用于诸如推荐系统、化学分子分析等多种应用场景。GNN的核心思想是利用邻居节点的信息来更新当前节点的状态，进而实现全局信息的有效传播。\n- 图数据的特点: 无序、可变大小\n- 消息传递框架: 如何收集并聚合来自邻居节点的信息\n- 应用领域: 社交网络分析、蛋白质结构预测等",
+      "need_image": true,
+      "image_prompt": "A clean educational diagram illustrating the basics of Graph Neural Networks. On one side, show a simple graph with nodes and edges. In the center, depict the message passing process where information flows from node to node. Highlight how each node aggregates information from its neighbors. On the other side, provide examples of real-world applications such as social networks, molecular structures. Use a soft color palette and textbook style illustrations.",
+      "image_url": "https://dashscope-result-wlcb-acdr-1.oss-cn-wulanchabu-acdr-1.aliyuncs.com/7d/b8/20260514/df38e33f/7ece2fe6-5ad2-9c47-8556-e8ba4f38f26d2639180311.png?Expires=1779347962&OSSAccessKeyId=LTAI5tKPD3TMqf2Lna1fASuh&Signature=lSXzlTTS8%2BycF%2FFogzjUBiCl3M0%3D"
+    },
+    {
+      "title": "GNN关键技术点",
+      "duration": 8,
+      "content": "要构建有效的GNN模型，有几个关键的技术点需要注意。首先是邻接矩阵的选择，它决定了哪些节点之间可以交换信息。其次是聚合函数的设计，用来决定如何合并来自不同邻居的信息。最后，还涉及到状态更新规则，即如何根据新收到的信息调整节点自身的表示。这些因素共同影响着GNN的表现能力。\n- 邻接矩阵的意义: 定义了图的拓扑结构\n- 聚合策略: 平均池化、最大池化、加权求和等方法\n- 更新公式: 如何基于邻居贡献更新节点嵌入",
+      "need_image": true,
+      "image_prompt": "An educational illustration focusing on the key technical aspects of Graph Neural Networks. Show a graph on the left, with adjacency matrix alongside. In the middle, illustrate various aggregation methods like mean pooling, max pooling, etc. On the right, demonstrate the node update rule using a simple equation. Use soft colors and maintain a consistent visual style throughout.",
+      "image_url": null
+    },
+    {
+      "title": "比较与讨论：CNN vs GNN",
+      "duration": 7,
+      "content": "尽管CNN和GNN都是强大的深度学习工具，但它们解决的问题类型存在显著差异。CNN擅长处理网格状数据，如图片；而GNN则更适合处理非结构化数据，比如图。此外，在计算效率方面，由于GNN需要处理任意形状的图，因此通常比CNN更耗时。然而，对于某些特定的任务，GNN能够提供更加准确的结果。\n- 结构对比: 网格vs图\n- 性能考量: 时间复杂度、内存占用\n- 应用场景匹配: 根据问题特性选择合适模型",
+      "need_image": false,
+      "image_prompt": "",
+      "image_url": null
+    }
+  ],
+  "status": "completed",
+  "style": "academic",
+  "params": {},
+  "ppt_path": "f:\\BaiduNetdiskDownload\\OpenAvatarChat-250916\\OpenAvatarChat\\teaching_api\\services\\..\\data\\lessons\\lesson_7ad30a099d.pptx"
+}

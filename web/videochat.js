@@ -256,6 +256,11 @@ class VideoChatManager {
     // 教学功能按钮
     this.initTeachingModals();
 
+    // 初始化教案生成三步向导
+    if (!window.lessonWizard) {
+      window.lessonWizard = new LessonWizard();
+    }
+
     // 视频控制按钮
     if (this.elements.cameraToggle) {
       this.elements.cameraToggle.addEventListener('click', () => {
@@ -343,9 +348,9 @@ class VideoChatManager {
   }
 
   generateLesson() {
-    const result = document.getElementById('lesson-result');
-    if (result) {
-      result.style.display = 'block';
+    // 由 LessonWizard 类接管，此方法保留兼容
+    if (window.lessonWizard) {
+      window.lessonWizard.resetForm();
     }
   }
 

@@ -1,0 +1,51 @@
+{
+  "title": "Python基础入门",
+  "sections": [
+    {
+      "duration": 5,
+      "content": "通过一个简单的计算机程序案例展示编程的魅力，激发学生兴趣。解释为什么学习Python对于未来的职业发展很重要。",
+      "image_prompt": "A computer screen displaying a simple Python program that prints 'Hello, World!' to the console. The background should be a classroom setting with students looking at the screen.",
+      "title": "课程导入",
+      "id": "sec_1",
+      "need_image": true,
+      "image_url": null
+    },
+    {
+      "duration": 20,
+      "content": "介绍Python的基本语法，包括变量、数据类型（整型、浮点型、字符串）、列表和字典的概念与使用方法。每介绍一种类型后，都给出实际例子来加深理解。",
+      "image_prompt": "A diagram showing different data types in Python (int, float, str, list, dict) with examples next to each type. For instance, int: 10, float: 3.14, str: 'hello', list: [1, 2, 3], dict: {'name': 'Alice', 'age': 20}.",
+      "title": "新知讲解",
+      "id": "sec_2",
+      "need_image": true,
+      "image_url": null
+    },
+    {
+      "duration": 15,
+      "content": "设计几个小任务让学生动手实践今天学到的知识点，如创建并打印出自己的个人信息字典，或者编写一段代码生成一系列随机数并将它们存储在列表中。",
+      "title": "练习巩固",
+      "id": "sec_3",
+      "need_image": false,
+      "image_prompt": null,
+      "image_url": null
+    },
+    {
+      "duration": 5,
+      "content": "回顾本节课所学的主要内容，并强调掌握这些基础知识的重要性。鼓励学生们课后继续探索Python编程。",
+      "title": "课堂总结",
+      "id": "sec_4",
+      "need_image": false,
+      "image_prompt": null,
+      "image_url": null
+    }
+  ],
+  "lesson_id": "lesson_b523016f94",
+  "status": "outline",
+  "style": "严谨学术",
+  "params": {
+    "objective": "",
+    "subject": "编程",
+    "level": "大学",
+    "duration": 45,
+    "student_level": "中等"
+  }
+}

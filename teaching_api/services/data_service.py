@@ -106,6 +106,19 @@ class DataService:
         filepath = os.path.join(DATA_DIR, "lessons.json")
         DataService._write_json(filepath, {"lessons": lessons})
     
+    # 教案提纲缓存（独立文件存储，每份教案一个JSON文件）
+    @staticmethod
+    def save_lesson_outline(lesson_id: str, data: Dict):
+        filepath = os.path.join(DATA_DIR, "lessons", f"{lesson_id}.json")
+        DataService._write_json(filepath, data)
+
+    @staticmethod
+    def get_lesson_outline(lesson_id: str) -> Optional[Dict]:
+        filepath = os.path.join(DATA_DIR, "lessons", f"{lesson_id}.json")
+        if not os.path.exists(filepath):
+            return None
+        return DataService._read_json(filepath)
+
     # 知识图谱数据
     @staticmethod
     def get_knowledge_graphs() -> Dict:

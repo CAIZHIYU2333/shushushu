@@ -1,0 +1,42 @@
+{
+  "lesson_id": "lesson_d7c2531060",
+  "title": "理解人工智能之大模型底座：以CNN为例",
+  "sections": [
+    {
+      "title": "导入",
+      "duration": 5,
+      "content": "通过简短介绍什么是人工智能以及它在现代社会中的应用来吸引学生的兴趣。然后引入本节课的主题——卷积神经网络（CNN），解释其重要性及其在图像识别等领域的广泛应用。",
+      "need_image": true,
+      "image_prompt": "A collage of images showing various applications of AI, such as self-driving cars, facial recognition systems, and smart home devices. The images should be colorful and engaging to capture students' attention.",
+      "image_url": null
+    },
+    {
+      "title": "新知讲解",
+      "duration": 20,
+      "content": "详细介绍卷积神经网络的基本概念，包括但不限于卷积层的工作原理、池化操作的目的及作用、激活函数的选择与影响。同时，通过具体的例子来说明这些组件是如何协同工作处理图像数据的。",
+      "need_image": true,
+      "image_prompt": "A diagram illustrating the architecture of a Convolutional Neural Network, clearly labeling each part like input layer, convolutional layers, pooling layers, fully connected layers, and output layer. Use arrows to show the flow of data through the network.",
+      "image_url": null
+    },
+    {
+      "title": "练习巩固",
+      "duration": 15,
+      "content": "设计一些基于Python的小型编程练习，让学生动手实现简单的卷积层或使用预训练的CNN模型进行图片分类实验。鼓励学生探索不同的参数设置对模型性能的影响。",
+      "need_image": true,
+      "image_prompt": "",
+      "image_url": null
+    },
+    {
+      "title": "总结",
+      "duration": 5,
+      "content": "回顾本节课的主要知识点，强调卷积神经网络的核心概念及其在实际问题解决中的价值。鼓励学生们思考如何将所学知识应用于更广泛的领域。",
+      "need_image": true,
+      "image_prompt": "",
+      "image_url": null
+    }
+  ],
+  "status": "completed",
+  "style": "academic",
+  "params": {},
+  "ppt_path": "F:\\BaiduNetdiskDownload\\OpenAvatarChat-250916\\OpenAvatarChat\\teaching_api\\services\\..\\data\\lessons\\lesson_d7c2531060.pptx"
+}

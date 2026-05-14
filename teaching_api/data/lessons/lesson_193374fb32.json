@@ -1,0 +1,58 @@
+{
+  "lesson_id": "lesson_193374fb32",
+  "title": "深入理解CNN与GNN：结构、应用及区别",
+  "sections": [
+    {
+      "title": "课程介绍与目标设定",
+      "duration": 5,
+      "content": "本节课将带领大家探索两种非常重要的神经网络模型——卷积神经网络（Convolutional Neural Networks, CNN）和图神经网络（Graph Neural Networks, GNN）。通过对比这两种模型的基本概念、应用场景以及它们之间的主要差异，我们将更深刻地理解在处理不同类型数据时选择合适模型的重要性。这不仅有助于提高编程技能，还能增强对复杂问题解决能力的理解。",
+      "need_image": false,
+      "image_prompt": "",
+      "image_url": null
+    },
+    {
+      "title": "卷积神经网络(CNN)基础",
+      "duration": 10,
+      "content": "- 卷积层作用：提取图像局部特征，通过滑动窗口机制实现权重共享，有效减少参数量。\n- 池化层功能：降低空间维度，帮助模型识别更加抽象的特征。\n- 全连接层角色：将前面层次输出转换为最终分类或回归结果。\n- 应用实例：图像分类、物体检测等视觉任务中广泛使用，如VGGNet、ResNet等经典架构。",
+      "need_image": true,
+      "image_prompt": "A detailed educational illustration showing the architecture of a Convolutional Neural Network, including convolutional layers, pooling layers, and fully connected layers, with labels for each component.",
+      "image_url": "https://dashscope-result-bj.oss-cn-beijing.aliyuncs.com/1d/e9/20260514/c70535fc/f600e255-fdee-4fce-9850-7f58f438fa83-1.png?Expires=1778825468&OSSAccessKeyId=STS.NZn1CtLdd8PKnPCFVXK2cuTyF&Signature=Wkc0W6FIXv7uf%2B%2FsT%2FK%2FQuuVc6w%3D&security-token=CAIS0QJ1q6Ft5B2yfSjIr5nbevnAobtFj5KgbHbyolYNR71PmpHSpDz2IHhMeXFoBO8fsf8%2Bnm9S7%2F0flrp6SJtIXleCZtF94oxN9h2gb4fb4zR3MzSO08%2FLI3OaLjKm9u2wCryLYbGwU%2FOpbE%2B%2B5U0X6LDmdDKkckW4OJmS8%2FBOZcgWWQ%2FKBlgvRq0hRG1YpdQdKGHaONu0LxfumRCwNkdzvRdmgm4NgsbWgO%2Fks0SD0gall7ZO%2FNiqfcL%2FMvMBZskvD42Hu8VtbbfE3SJq7BxHybx7lqQs%2B02c5onAWwEMvEzZaLuOrYc2d1JjG68iFqhBrf7w0PJxpuHMnpWy0wxKMfGOwYkswiYwqiGtN5RKVr5RHd6TUxxGIogKnFPaHSkQwGPJFcK7Siswq0V6ffgGIN%2FU5KEJdp4kzKnt5Sarfm9Utbgx%2BzHCmbwuT9JKFtPCuU5wGoABDFC3J17nTSRc25R%2FHyAkDZrjjWk0VzcGH6QrXkGyD%2BYtsz1czv2zjBbJvaX8KgQQIZcQ0THATb5SURWpGCVmfTwNxXEtqaBJe61bTVlEDzzF%2Fw%2BdL8KN2wSajQ5tRHWvlyk1cTVZIER2eaKt4F8GVjdsGgWKDCY9Fn3Go8FoVZ8gAA%3D%3D"
+    },
+    {
+      "title": "图神经网络(GNN)入门",
+      "duration": 10,
+      "content": "- 图节点表示：每个节点可以代表一个实体，边则表示实体间的关系。\n- 消息传递机制：节点之间通过边交换信息以更新其状态，形成新的表示。\n- 聚合操作：收集邻居节点的信息，并将其整合到当前节点的状态中。\n- 变种类型：包括GCN(图卷积网络)、GAT(图注意力网络)等，适用于不同场景下的图数据处理。",
+      "need_image": true,
+      "image_prompt": "An educational diagram illustrating the concept of Graph Neural Networks, highlighting nodes, edges, message passing, and aggregation operations within a graph structure.",
+      "image_url": "https://dashscope-result-bj.oss-cn-beijing.aliyuncs.com/1d/5a/20260514/c70535fc/aa1f8a8d-67a2-4da2-b59c-7da7593a81b8-1.png?Expires=1778825494&OSSAccessKeyId=STS.NYKma5NYxr311UsJUUb5fwY2C&Signature=EccSLliqqGWiQHSRRY7IFEX7sPs%3D&security-token=CAIS0QJ1q6Ft5B2yfSjIr5r%2BJtuBo4ZZxfHaM3PCrlUAbrpKmJyZoTz2IHhMeXFoBO8fsf8%2Bnm9S7%2F0flrp6SJtIXleCZtF94oxN9h2gb4fb4yh8UzSO08%2FLI3OaLjKm9u2wCryLYbGwU%2FOpbE%2B%2B5U0X6LDmdDKkckW4OJmS8%2FBOZcgWWQ%2FKBlgvRq0hRG1YpdQdKGHaONu0LxfumRCwNkdzvRdmgm4NgsbWgO%2Fks0SD0gall7ZO%2FNiqfcL%2FMvMBZskvD42Hu8VtbbfE3SJq7BxHybx7lqQs%2B02c5onAWwEMvEzZaLuOrYc2d1JjG68iFqhBrf7w0PJxpuHMnpWy0wxKMfGOwYkswiYwqiGtN5RKVr5RHd6TUxxGUlEa7hkMansbe4QdDgFERdQX%2BIMAZtfUovgr615%2BKZEDu95Cknl8CWBcOuAWsL6QFrHRTxUL%2B9LCuU5wGoABmjCYTxyR6PSxnSpBoFcALyK9xwHY%2FZUVJI82UheOoSzUkdVkzD2Gw%2Fag3pebJhSKkPyS4yB209ZbRchWvjCuRBayl3DXa21Tk6m3zLAp%2F2DAJLq%2FIpi26VpsFYYyMycBZAMcr%2B3e3hEWxtTvQFF17sVcmSb4cf3UqG%2BGO9qFRJggAA%3D%3D"
+    },
+    {
+      "title": "CNN与GNN比较",
+      "duration": 10,
+      "content": "- 数据类型差异：CNN专为欧几里得空间设计，如图像；而GNN适用于非欧几里得空间，例如社交网络、分子结构等。\n- 计算方式不同：前者依赖于固定大小的感受野来捕捉局部特征；后者利用动态调整的感受野来适应不规则形状的数据。\n- 应用范围对比：虽然两者都可用于模式识别，但GNN因其灵活性更强，在推荐系统、自然语言处理等领域展现出独特优势。",
+      "need_image": true,
+      "image_prompt": "A comparison chart or Venn diagram that visually represents the differences and similarities between Convolutional Neural Networks (CNNs) and Graph Neural Networks (GNNs), focusing on aspects such as data types, computational methods, and application scenarios.",
+      "image_url": null
+    },
+    {
+      "title": "实践环节：动手实验",
+      "duration": 5,
+      "content": "通过实际编写代码，尝试构建简单的CNN和GNN模型，分别应用于手写数字识别任务和社交网络分析任务。此部分旨在加深理论知识的理解，并培养解决问题的能力。",
+      "need_image": false,
+      "image_prompt": "",
+      "image_url": null
+    },
+    {
+      "title": "总结与展望",
+      "duration": 5,
+      "content": "回顾今天所学内容，强调掌握CNN与GNN各自特点及其适用领域的重要性。鼓励同学们继续深入研究相关领域，探索更多可能性。同时，提出一些开放性问题供课后思考，激发进一步学习的兴趣。",
+      "need_image": false,
+      "image_prompt": "",
+      "image_url": null
+    }
+  ],
+  "status": "completed",
+  "style": "academic",
+  "params": {},
+  "ppt_path": "f:\\BaiduNetdiskDownload\\OpenAvatarChat-250916\\OpenAvatarChat\\teaching_api\\services\\..\\data\\lessons\\lesson_193374fb32.pptx"
+}

@@ -1,0 +1,51 @@
+{
+  "title": "Python基础入门：变量与数据类型",
+  "sections": [
+    {
+      "duration": 5,
+      "content": "通过一个简单的例子（如打印'Hello, World!'）来激发学生对编程的兴趣，同时介绍Python语言的基本概念。",
+      "image_prompt": "A screenshot of a simple Python code in an IDE or text editor, showing the line 'print('Hello, World!')', with the output 'Hello, World!' displayed below.",
+      "title": "导入",
+      "id": "sec_1",
+      "need_image": true,
+      "image_url": null
+    },
+    {
+      "duration": 20,
+      "content": "详细介绍Python中的基本数据类型（整数、浮点数、字符串等）及如何定义变量。使用实例演示不同类型的操作方法。",
+      "image_prompt": "An infographic breaking down different data types in Python (int, float, str) with examples for each. Include visual representations of variables being assigned values and manipulated.",
+      "title": "新知讲解",
+      "id": "sec_2",
+      "need_image": true,
+      "image_url": null
+    },
+    {
+      "duration": 15,
+      "content": "给定几个小任务让学生尝试自己编写代码解决，比如计算两个数字之和、将字符串转换为大写等。教师巡视指导并解答疑问。",
+      "title": "练习巩固",
+      "id": "sec_3",
+      "need_image": false,
+      "image_prompt": null,
+      "image_url": null
+    },
+    {
+      "duration": 5,
+      "content": "回顾本节课所学内容，强调变量声明的重要性以及选择合适的数据类型对于程序效率的影响。鼓励学生课后继续探索更多关于Python的知识。",
+      "title": "总结",
+      "id": "sec_4",
+      "need_image": false,
+      "image_prompt": null,
+      "image_url": null
+    }
+  ],
+  "lesson_id": "lesson_7a382669e2",
+  "status": "outline",
+  "style": "严谨学术",
+  "params": {
+    "objective": "???????",
+    "subject": "??",
+    "level": "??",
+    "duration": 45,
+    "student_level": "??"
+  }
+}

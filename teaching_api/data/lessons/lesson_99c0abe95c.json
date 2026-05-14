@@ -1,0 +1,51 @@
+{
+  "title": "理解大模型底座之CNN",
+  "sections": [
+    {
+      "duration": 5,
+      "content": "通过简短介绍人工智能的历史及其在现代社会中的应用来激发学生兴趣，引出本次课程的主题——卷积神经网络(CNN)作为深度学习领域的重要组成部分。",
+      "image_prompt": "A timeline showing the evolution of AI, with key milestones highlighted. The image should include text labels for each milestone and a brief description of how it contributed to the development of AI.",
+      "title": "导入",
+      "id": "sec_1",
+      "need_image": true,
+      "image_url": null
+    },
+    {
+      "duration": 20,
+      "content": "详细介绍CNN的基本概念、工作原理以及它与传统神经网络的区别。解释卷积层、池化层等关键组件的作用，并通过实例说明它们是如何处理图像数据的。",
+      "image_prompt": "An illustration depicting the architecture of a CNN, clearly labeling its components such as convolutional layers, pooling layers, and fully connected layers. Include arrows to show the flow of data through the network, along with sample input (an image) and output (classification).",
+      "title": "新知讲解",
+      "id": "sec_2",
+      "need_image": true,
+      "image_url": null
+    },
+    {
+      "duration": 15,
+      "content": "提供几个简单的编程任务或问题让学生尝试使用所学知识解决问题。例如，可以让学生编写代码实现一个基本的CNN模型用于手写数字识别。",
+      "title": "练习巩固",
+      "id": "sec_3",
+      "need_image": false,
+      "image_prompt": null,
+      "image_url": null
+    },
+    {
+      "duration": 5,
+      "content": "回顾本节课的主要知识点，强调CNN的重要性及其在实际项目中的广泛应用。鼓励学生课后继续探索相关资料加深理解。",
+      "title": "总结",
+      "id": "sec_4",
+      "need_image": false,
+      "image_prompt": null,
+      "image_url": null
+    }
+  ],
+  "lesson_id": "lesson_99c0abe95c",
+  "status": "outline",
+  "style": "严谨学术",
+  "params": {
+    "objective": "理解人工智能通识课程",
+    "subject": "编程",
+    "level": "大学",
+    "duration": 45,
+    "student_level": "中等"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "lesson_id": "lesson_031c06e8ee",
+  "title": "Python基础编程入门",
+  "sections": [
+    {
+      "title": "导入",
+      "duration": 5,
+      "content": "通过一个简单的程序例子（如打印'Hello, World!'）引入今天的主题——Python的基础语法。解释为什么学习Python对未来的软件开发、数据分析等领域非常重要。",
+      "need_image": true,
+      "image_prompt": "A computer screen displaying the output of a Python program that prints 'Hello, World!'. The background should be clean and minimalistic to avoid distraction.",
+      "image_url": null
+    },
+    {
+      "title": "新知讲解",
+      "duration": 20,
+      "content": "介绍变量的定义与使用方法；基本数据类型（整型int, 浮点型float, 字符串str）及其转换；条件语句if-else结构；循环语句for和while的基本用法。",
+      "need_image": true,
+      "image_prompt": "A diagram showing examples of variable declaration, data type conversion, if-else statements, and for/while loops in Python. Each example should have clear labels and color coding for different elements like keywords, variables, etc.",
+      "image_url": null
+    },
+    {
+      "title": "练习巩固",
+      "duration": 15,
+      "content": "设计几个小练习让学生实践所学知识，比如编写一个小程序来判断用户输入的年份是否为闰年；或者创建一个简单的数字猜谜游戏等。",
+      "need_image": false,
+      "image_prompt": "",
+      "image_url": null
+    },
+    {
+      "title": "总结",
+      "duration": 5,
+      "content": "回顾今天学到的关键概念，并强调这些基础知识对于进一步学习更复杂编程技巧的重要性。鼓励学生课后继续探索Python的相关资源。",
+      "need_image": false,
+      "image_prompt": "",
+      "image_url": null
+    }
+  ],
+  "status": "completed",
+  "style": "academic",
+  "params": {},
+  "ppt_path": "f:\\BaiduNetdiskDownload\\OpenAvatarChat-250916\\OpenAvatarChat\\teaching_api\\services\\..\\data\\lessons\\lesson_031c06e8ee.pptx"
+}

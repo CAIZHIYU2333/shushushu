@@ -22,7 +22,7 @@ default:
         enable_fast_mode: false
         fps: 20
         module: avatar/liteavatar/avatar_handler_liteavatar
-        use_gpu: true
+        use_gpu: false
       RtcClient:
         module: client/rtc_client/client_handler_rtc
       SenseVoice:

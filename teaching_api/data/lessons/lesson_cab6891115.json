@@ -1,0 +1,60 @@
+{
+  "title": "Python基础编程入门",
+  "sections": [
+    {
+      "duration": 5,
+      "content": "介绍本节课将学习Python语言的基本概念，包括变量、数据类型以及简单的控制结构。通过一个简短的演示（比如使用Python打印'Hello, World!'）来激发学生兴趣。",
+      "title": "课程导入",
+      "id": "sec_1",
+      "need_image": false,
+      "image_prompt": null,
+      "image_url": null
+    },
+    {
+      "duration": 10,
+      "content": "解释什么是变量及如何在Python中声明和使用变量；介绍主要的数据类型如整数(int)、浮点数(float)、字符串(str)等，并通过实例展示每种类型的用途。",
+      "image_prompt": "A diagram showing the different data types in Python with examples. Include int, float, and str, each with a brief description and an example.",
+      "title": "新知讲解 - 变量与数据类型",
+      "id": "sec_2",
+      "need_image": true,
+      "image_url": null
+    },
+    {
+      "duration": 10,
+      "content": "讲解条件语句(if-else)和循环(for, while)的概念及其在编程中的重要性。提供几个具体的例子来说明这些控制结构是如何工作的。",
+      "image_prompt": "Flowcharts illustrating the logic of if-else statements and for/while loops. Each flowchart should clearly show how control passes through the structure under different conditions.",
+      "title": "新知讲解 - 控制结构",
+      "id": "sec_3",
+      "need_image": true,
+      "image_url": null
+    },
+    {
+      "duration": 15,
+      "content": "分发一份包含多个小问题的工作表，让学生尝试编写代码解决问题。这些问题应该涵盖今天学到的所有知识点。老师巡视指导，帮助遇到困难的学生。",
+      "title": "练习巩固",
+      "id": "sec_4",
+      "need_image": false,
+      "image_prompt": null,
+      "image_url": null
+    },
+    {
+      "duration": 5,
+      "content": "回顾今天所学的关键概念：变量、数据类型、if-else条件判断、for/while循环。强调这些基础知识对于进一步学习Python的重要性。",
+      "title": "课堂总结",
+      "id": "sec_5",
+      "need_image": false,
+      "image_prompt": null,
+      "image_url": null
+    }
+  ],
+  "lesson_id": "lesson_cab6891115",
+  "status": "outline",
+  "style": "严谨学术",
+  "params": {
+    "objective": "",
+    "subject": "编程",
+    "level": "大学",
+    "duration": 45,
+    "student_level": "中等"
+  }
+}

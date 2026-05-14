@@ -1,0 +1,42 @@
+{
+  "lesson_id": "lesson_d0bbb20039",
+  "title": "理解人工智能通识课程 - 编程：大模型底座如CNN部分",
+  "sections": [
+    {
+      "title": "导入环节",
+      "duration": 5,
+      "content": "通过简短介绍机器学习在当今社会的应用实例来激发学生兴趣，比如自动驾驶、图像识别等。接着引入本节课的主题——卷积神经网络(CNN)及其作为AI模型基础的重要性。",
+      "need_image": true,
+      "image_prompt": "A collage showing various applications of machine learning, including self-driving cars, facial recognition systems, and medical imaging analysis. The images should be modern and visually engaging.",
+      "image_url": null
+    },
+    {
+      "title": "新知讲解",
+      "duration": 20,
+      "content": "详细解释什么是卷积神经网络（Convolutional Neural Networks, CNN），包括其结构特点（卷积层、池化层）、工作原理以及为何适用于处理图像数据等问题。同时，简要对比其他类型的神经网络，强调CNN的优势。",
+      "need_image": true,
+      "image_prompt": "An infographic illustrating the structure of a Convolutional Neural Network, clearly labeling each layer (input, convolution, pooling, fully connected, output). Include simple diagrams or icons to represent neurons and connections between layers.",
+      "image_url": null
+    },
+    {
+      "title": "练习巩固",
+      "duration": 15,
+      "content": "设计一些基于案例的学习活动，让学生尝试使用Python编程语言实现一个简单的CNN模型。提供必要的代码片段和数据集链接，并鼓励学生调整参数观察结果变化。",
+      "need_image": false,
+      "image_prompt": "",
+      "image_url": null
+    },
+    {
+      "title": "总结回顾",
+      "duration": 5,
+      "content": "回顾今天所学内容的关键点，再次强调CNN的特点及应用场景。邀请几位同学分享他们的实践体验或遇到的问题与解决方案。",
+      "need_image": true,
+      "image_prompt": "",
+      "image_url": null
+    }
+  ],
+  "status": "completed",
+  "style": "academic",
+  "params": {},
+  "ppt_path": "F:\\BaiduNetdiskDownload\\OpenAvatarChat-250916\\OpenAvatarChat\\teaching_api\\services\\..\\data\\lessons\\lesson_d0bbb20039.pptx"
+}

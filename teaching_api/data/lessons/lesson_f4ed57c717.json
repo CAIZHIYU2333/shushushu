@@ -1,0 +1,58 @@
+{
+  "lesson_id": "lesson_f4ed57c717",
+  "title": "理解CNN与GNN原理",
+  "sections": [
+    {
+      "title": "引言：深度学习概览",
+      "duration": 5,
+      "content": "本节将简要介绍深度学习的基本概念，包括神经网络的结构、工作原理以及为何它在处理复杂数据时如此有效。通过回顾监督学习与无监督学习的区别，我们将为后续讨论卷积神经网络(CNN)和图神经网络(GNN)打下基础。\n- 深度学习简介: 定义及发展历程\n- 神经网络基本架构: 输入层、隐藏层、输出层的作用\n- 监督学习与非监督学习对比: 应用场景与优缺点分析\n- 从传统机器学习到深度学习: 技术进步带来的变化",
+      "need_image": true,
+      "image_prompt": "A detailed educational illustration showing the basic architecture of a neural network, including input layer, hidden layers, and output layer, with arrows indicating data flow.",
+      "image_url": null
+    },
+    {
+      "title": "卷积神经网络(CNN)概述",
+      "duration": 10,
+      "content": "本部分深入探讨了CNN的核心概念及其在图像识别中的应用。首先定义了卷积操作的本质，并解释了如何利用卷积核提取特征；接着介绍了池化层的功能，即减少参数数量同时保留重要信息；最后，讨论了全连接层如何整合所有提取的信息以做出最终决策。\n- 卷积运算解析: 特征提取机制\n- 池化过程详解: 下采样技术\n- 全连接层作用: 分类任务中的角色\n- CNN的应用领域: 从面部识别到医学影像分析",
+      "need_image": true,
+      "image_prompt": "An illustration that clearly shows the process of convolution in a CNN, including an example of a small image being processed by multiple filters, followed by pooling operations, and finally passing through fully connected layers.",
+      "image_url": null
+    },
+    {
+      "title": "案例研究：使用CNN进行手写数字识别",
+      "duration": 5,
+      "content": "通过一个具体的例子——MNIST数据集上的手写数字分类问题，展示CNN的实际应用。此环节不仅涵盖了模型构建步骤（如选择合适的架构、调整超参数），还强调了训练过程中遇到的挑战及解决方案。\n- MNIST数据集介绍: 数据准备阶段\n- 构建适合MNIST的CNN模型: 层次设计原则\n- 超参数调优策略: 学习率、批次大小等的选择\n- 训练过程中的常见问题及解决方法: 过拟合、梯度消失等问题",
+      "need_image": false,
+      "image_prompt": "",
+      "image_url": null
+    },
+    {
+      "title": "图神经网络(GNN)入门",
+      "duration": 10,
+      "content": "本节开始探索GNN这一新兴领域，旨在让学生理解其独特之处。GNN允许直接对图结构数据进行操作，这使得它们非常适合社交网络分析或分子化学等领域。我们将讨论GNN的工作方式，包括消息传递机制和聚合函数，以及这些组件如何共同作用来捕获节点间的关系。\n- 图数据的特点: 不规则性和高维度\n- GNN核心思想: 消息传递框架\n- 聚合函数的作用: 汇总邻居信息\n- GNN适用范围: 社交媒体、生物信息学等",
+      "need_image": true,
+      "image_prompt": "A diagram illustrating the message passing mechanism in GNNs, showing how information is aggregated from neighboring nodes to update node representations, with examples of social networks or molecular structures.",
+      "image_url": null
+    },
+    {
+      "title": "实战演练：基于GNN的社会关系预测",
+      "duration": 5,
+      "content": "通过一个实际项目，学生将有机会亲手实现一个简单的GNN模型用于预测社会网络中的人物关系。这不仅帮助巩固理论知识，也提供了宝贵的实践经验。项目涉及数据预处理、模型创建、训练直至评估整个流程。\n- 准备社会网络数据: 清洗与格式转换\n- 设计适用于该任务的GNN架构: 选取适当的层类型\n- 实施训练循环: 包括前向传播与反向传播\n- 性能评估指标: 准确率、召回率等",
+      "need_image": false,
+      "image_prompt": "",
+      "image_url": null
+    },
+    {
+      "title": "总结与展望",
+      "duration": 5,
+      "content": "课程结束之际，我们将回顾今天学到的所有内容，确保每位同学都掌握了CNN与GNN的基本原理。此外，还将简要介绍这两种技术未来可能的发展方向，激发大家对未来研究的兴趣。\n- 今日所学要点回顾: CNN与GNN的关键区别\n- 当前面临的主要挑战: 如何改进现有算法\n- 未来发展趋势: 新兴应用场景和技术突破\n- 结语: 鼓励持续学习与创新",
+      "need_image": true,
+      "image_prompt": "A summary infographic highlighting the main differences between CNNs and GNNs, along with potential future developments in both fields, such as new applications and technological advancements.",
+      "image_url": null
+    }
+  ],
+  "status": "completed",
+  "style": "academic",
+  "params": {},
+  "ppt_path": "f:\\BaiduNetdiskDownload\\OpenAvatarChat-250916\\OpenAvatarChat\\teaching_api\\services\\..\\data\\lessons\\lesson_f4ed57c717.pptx"
+}

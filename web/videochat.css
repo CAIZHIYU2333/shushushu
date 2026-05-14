@@ -2250,3 +2250,51 @@ body.wechat-layout {
   font-weight: 500;
 }
 
+
+/* ===== 教案生成三步向导样式 ===== */
+.form-row { display: flex; gap: 12px; margin-bottom: 12px; }
+.form-row .form-group { margin-bottom: 0; }
+.form-input { width: 100%; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 14px; transition: border-color 0.2s; }
+.form-input:focus { border-color: #7170ff; outline: none; box-shadow: 0 0 0 3px rgba(113,112,255,0.1); }
+.form-label { display: block; margin-bottom: 6px; font-weight: 500; color: #555; font-size: 13px; }
+.form-select { width: 100%; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 14px; background: #fff; cursor: pointer; }
+.btn-block { width: 100%; margin-top: 12px; }
+
+/* 大纲编辑区 */
+.outline-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.outline-header h4 { margin: 0; font-size: 18px; color: #333; }
+.outline-section { background: #f8f9fc; border: 1px solid #e8e8ef; border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+.outline-section-header { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+.outline-section-title { flex: 1; }
+.outline-title-input { width: 100%; padding: 6px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-weight: 600; color: #333; }
+.outline-section-duration { white-space: nowrap; font-size: 13px; color: #777; }
+.outline-duration-input { width: 50px; padding: 4px 6px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; text-align: center; }
+.outline-content-input { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; line-height: 1.6; resize: vertical; min-height: 80px; }
+.outline-section-image { margin-top: 8px; font-size: 13px; }
+.outline-section-image label { display: flex; align-items: center; gap: 6px; cursor: pointer; color: #666; }
+.outline-image-prompt { width: 100%; margin-top: 8px; padding: 6px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; color: #555; }
+
+/* 进度提示 */
+.progress-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; margin-bottom: 6px; background: #f5f6fa; border-radius: 8px; font-size: 14px; }
+.progress-item.done { background: #f0faf0; }
+.progress-item.active { background: #f0f0ff; animation: pulse 1.5s infinite; }
+.progress-icon { font-size: 16px; width: 24px; text-align: center; }
+.progress-item.done .progress-icon { color: #22c55e; }
+.progress-item.active .progress-icon { color: #7170ff; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+/* 结果展示 */
+.result-section { background: #fff; border: 1px solid #e8e8ef; border-radius: 10px; padding: 16px; margin-bottom: 12px; }
+.result-section h5 { margin: 0 0 8px 0; color: #1a3c6d; font-size: 15px; }
+.result-section p { color: #555; font-size: 14px; line-height: 1.7; margin: 0; }
+.result-image { margin-top: 12px; }
+.result-actions { display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+
+.btn { padding: 10px 24px; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: 500; transition: all 0.2s; display: inline-block; text-decoration: none; }
+.btn-primary { background: linear-gradient(135deg, #7170ff, #9d71ff); color: #fff; }
+.btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(113,112,255,0.4); }
+.btn-secondary { background: #f0f0f5; color: #555; }
+.btn-secondary:hover { background: #e0e0ea; }
+
+.spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; margin-right: 6px; }
+@keyframes spin { to { transform: rotate(360deg); } }

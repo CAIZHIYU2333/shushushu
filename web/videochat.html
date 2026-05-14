@@ -373,48 +373,95 @@
         </div>
     </div>
 
+    <!-- 教案生成 Modal（三步向导） -->
     <div class="teaching-modal" id="teaching-lesson-modal">
-        <div class="teaching-modal-content">
+        <div class="teaching-modal-content" style="max-width:750px;">
             <div class="teaching-modal-header">
-                <h3>教案生成 - Self-Attention机制</h3>
+                <h3>教案生成</h3>
                 <button class="teaching-modal-close" data-close="teaching-lesson-modal">&times;</button>
             </div>
             <div class="teaching-modal-body">
-                <div class="lesson-form">
-                    <div class="form-group">
-                        <label class="form-label">教学主题</label>
-                        <input type="text" class="form-input" value="Self-Attention机制详解">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">学生水平</label>
-                        <select class="form-select">
-                            <option>AI基础入门</option>
-                            <option selected>AI专业大三</option>
-                            <option>AI研究生</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">课时长度</label>
-                        <select class="form-select">
-                            <option>45分钟</option>
-                            <option selected>90分钟</option>
-                            <option>120分钟</option>
-                        </select>
-                    </div>
-                    <button class="btn btn-primary btn-block" id="generate-lesson-btn">
-                        <i data-lucide="sparkles" style="width: 16px; height: 16px;"></i>
-                        生成教案
-                    </button>
+
+                <!-- 步骤1：表单填写 -->
+                <div id="lesson-step-1">
+                    <form id="lesson-generate-form" onsubmit="return false;">
+                        <div class="form-row">
+                            <div class="form-group" style="flex:1;">
+                                <label class="form-label">学科</label>
+                                <select class="form-select" name="subject" id="lesson-subject">
+                                    <option value="数学">数学</option><option value="物理">物理</option>
+                                    <option value="化学">化学</option><option value="语文">语文</option>
+                                    <option value="英语">英语</option><option value="编程" selected>编程/AI</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="flex:2;">
+                                <label class="form-label">教学主题</label>
+                                <input type="text" class="form-input" name="topic" id="lesson-topic"
+                                    placeholder="如：Transformer架构、Self-Attention机制">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">教学目标</label>
+                            <textarea class="form-input" name="objective" id="lesson-objective"
+                                placeholder="如：让学生理解Transformer的核心原理，掌握Self-Attention的计算过程" rows="2"></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group" style="flex:1;">
+                                <label class="form-label">年级水平</label>
+                                <select class="form-select" name="level" id="lesson-level">
+                                    <option value="初中">初中</option><option value="高中">高中</option>
+                                    <option value="大学" selected>大学</option><option value="研究生">研究生</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="flex:1;">
+                                <label class="form-label">学生水平</label>
+                                <select class="form-select" name="student_level" id="lesson-student-level">
+                                    <option value="基础">基础</option><option value="中等" selected>中等</option>
+                                    <option value="优秀">优秀</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="flex:1;">
+                                <label class="form-label">课时(分钟)</label>
+                                <select class="form-select" name="duration" id="lesson-duration">
+                                    <option value="30">30分钟</option><option value="45" selected>45分钟</option>
+                                    <option value="60">60分钟</option><option value="90">90分钟</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-primary btn-block" id="lesson-generate-btn">
+                            生成大纲
+                        </button>
+                    </form>
                 </div>
-                <div class="lesson-result" id="lesson-result" style="display:none;">
-                    <h4>生成的教案</h4>
-                    <div class="lesson-content">
-                        <div class="lesson-section"><h5>一、引入（10分钟）</h5><p>回顾RNN/LSTM的局限性：序列依赖、无法并行</p><p>引入Attention思想的直观理解</p></div>
-                        <div class="lesson-section"><h5>二、Self-Attention原理（30分钟）</h5><p>1. Q/K/V矩阵的物理意义</p><p>2. 注意力分数计算：softmax(QK^T/√d_k)</p><p>3. 缩放因子的作用：防止梯度消失</p></div>
-                        <div class="lesson-section"><h5>三、代码实现（30分钟）</h5><p>使用PyTorch实现Self-Attention层</p><p>可视化注意力权重矩阵</p></div>
-                        <div class="lesson-section"><h5>四、总结与作业（20分钟）</h5><p>重点：Self-Attention的并行计算优势</p><p>作业：实现Multi-Head Attention</p></div>
+
+                <!-- 步骤2：提纲预览与编辑 -->
+                <div id="lesson-step-2" style="display:none;">
+                    <div id="lesson-progress-container"></div>
+                    <div class="outline-header">
+                        <h4 id="lesson-outline-title">教案大纲</h4>
+                        <div class="form-group" style="width:180px;">
+                            <label class="form-label">PPT风格</label>
+                            <select class="form-select" id="lesson-ppt-style">
+                                <option value="academic">学术蓝</option>
+                                <option value="fresh">清新绿</option>
+                                <option value="tech">科技紫</option>
+                                <option value="warm">暖橙</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="lesson-outline-container"></div>
+                    <div style="margin-top:16px;text-align:center;display:flex;gap:12px;justify-content:center;">
+                        <button class="btn btn-secondary" onclick="window.lessonWizard.showStep('step1');window.lessonWizard.setLoading(false);">返回修改</button>
+                        <button class="btn btn-primary" id="lesson-confirm-btn" onclick="window.lessonWizard.confirmAndGenerate()">确认并生成完整教案</button>
                     </div>
                 </div>
+
+                <!-- 步骤3：结果展示 -->
+                <div id="lesson-step-3" style="display:none;">
+                    <div id="lesson-progress-container-2" style="display:none;"></div>
+                    <div id="lesson-result-container"></div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -488,5 +535,6 @@
     <script src="state.js"></script>
     <script src="stream-utils.js"></script>
     <script src="videochat.js"></script>
+    <script src="js/teaching-lesson.js"></script>
 </body>
 </html>

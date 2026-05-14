@@ -1,0 +1,51 @@
+{
+  "title": "Python基础编程入门",
+  "sections": [
+    {
+      "duration": 5,
+      "content": "通过一个简单的例子（打印'Hello, World!'）介绍为什么学习Python对于现代软件开发很重要。简述Python的历史及其在不同领域的应用。",
+      "image_prompt": "A collage showing Python being used in various fields such as web development, data science, artificial intelligence, and more. Include logos or symbols representing these areas.",
+      "title": "课程导入",
+      "id": "sec_1",
+      "need_image": true,
+      "image_url": null
+    },
+    {
+      "duration": 20,
+      "content": "介绍Python的基本语法，包括变量定义、数据类型（整型、浮点型、字符串）、基本运算符以及条件语句的使用方法。通过实例演示如何编写简单的程序来解决实际问题。",
+      "image_prompt": "A diagram showing the basic structure of a Python program, including how variables are defined, different data types, and an example of a simple if-else statement. Use clear labels and arrows to show flow.",
+      "title": "新知讲解",
+      "id": "sec_2",
+      "need_image": true,
+      "image_url": null
+    },
+    {
+      "duration": 15,
+      "content": "学生分组进行小项目实践，如创建一个简单的计算器或根据用户输入输出问候语等。教师巡视指导，并鼓励学生们相互帮助解决问题。",
+      "title": "练习巩固",
+      "id": "sec_3",
+      "need_image": false,
+      "image_prompt": null,
+      "image_url": null
+    },
+    {
+      "duration": 5,
+      "content": "回顾今天所学的知识点，强调Python语言的特点和优势。邀请几位同学分享他们的编程体验及遇到的问题与解决方案。",
+      "title": "课堂总结",
+      "id": "sec_4",
+      "need_image": false,
+      "image_prompt": null,
+      "image_url": null
+    }
+  ],
+  "lesson_id": "lesson_41559778ef",
+  "status": "outline",
+  "style": "严谨学术",
+  "params": {
+    "objective": "",
+    "subject": "编程",
+    "level": "大学",
+    "duration": 45,
+    "student_level": "中等"
+  }
+}

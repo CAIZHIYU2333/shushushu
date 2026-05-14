@@ -1,0 +1,60 @@
+{
+  "title": "Python基础语法入门",
+  "sections": [
+    {
+      "duration": 5,
+      "content": "介绍本节课将学习Python的基础语法，包括变量、数据类型以及基本的控制结构。通过一个简单的程序示例来激发学生的学习兴趣。",
+      "image_prompt": "A screenshot of a simple Python program running in an IDE, displaying 'Hello, World!' on the console.",
+      "title": "课程导入",
+      "id": "sec_1",
+      "need_image": true,
+      "image_url": null
+    },
+    {
+      "duration": 10,
+      "content": "解释什么是变量，如何在Python中定义变量，并介绍主要的数据类型如整型(int)、浮点型(float)和字符串(str)等。",
+      "title": "新知讲解-变量与数据类型",
+      "id": "sec_2",
+      "need_image": false,
+      "image_prompt": null,
+      "image_url": null
+    },
+    {
+      "duration": 10,
+      "content": "教授if...else...结构的基本用法，通过实例演示如何根据不同的条件执行相应的代码块。",
+      "image_prompt": "A flowchart illustrating the logic of an if-else statement, with clear labels for each step and condition.",
+      "title": "新知讲解-条件语句",
+      "id": "sec_3",
+      "need_image": true,
+      "image_url": null
+    },
+    {
+      "duration": 15,
+      "content": "提供几个编程题目让学生实践所学知识，比如编写小程序判断输入数字是奇数还是偶数，或者基于用户输入的不同值打印不同信息。",
+      "title": "练习巩固",
+      "id": "sec_4",
+      "need_image": false,
+      "image_prompt": null,
+      "image_url": null
+    },
+    {
+      "duration": 5,
+      "content": "回顾今天学到的关键概念，强调变量的作用、常用的数据类型以及条件语句的重要性。鼓励学生们课后继续探索更多关于Python的知识。",
+      "title": "课堂总结",
+      "id": "sec_5",
+      "need_image": false,
+      "image_prompt": null,
+      "image_url": null
+    }
+  ],
+  "lesson_id": "lesson_605bc2d6d5",
+  "status": "outline",
+  "style": "严谨学术",
+  "params": {
+    "objective": "",
+    "subject": "编程",
+    "level": "大学",
+    "duration": 45,
+    "student_level": "中等"
+  }
+}

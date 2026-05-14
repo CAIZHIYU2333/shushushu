@@ -65,6 +65,7 @@ os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
 os.environ["HF_HOME"] = str(project_root / "models")
 os.environ["TORCH_HOME"] = str(project_root / "models")
 os.environ["MODELSCOPE_CACHE"] = str(project_root)
+os.environ["DASHSCOPE_API_KEY"] = os.environ.get("DASHSCOPE_API_KEY", "sk-88dd7955b608436b852996e446023a69")
 
 from src.service.service_utils.service_config_loader import load_configs
 from src.service.service_utils.ssl_helpers import create_ssl_context
@@ -99,6 +100,7 @@ class LiteAvatarApp:
         self.app = FastAPI(title="OpenAvatarChat LiteAvatar Service")
         self.service_config = None
         self.engine_config = None
+        self._ngrok_proc = None
 
     def load_config(self, config_path: str = "config/glut2.yaml", host: str = None, port: int = None, env: str = "default"):
         """加载配置文件"""
@@ -217,12 +219,12 @@ class LiteAvatarApp:
             # 根路径重定向到新的v2页面
             @self.app.get("/")
             async def root():
-                return RedirectResponse(url="/ui/videochat-v2.html")
+                return RedirectResponse(url="/ui/videochat.html")
             
-            # /ui/videochat 重定向到v2页面
+            # /ui/videochat 直接访问videochat.html
             @self.app.get("/ui/videochat")
             async def videochat_redirect():
-                return RedirectResponse(url="/ui/videochat-v2.html")
+                return RedirectResponse(url="/ui/videochat.html")
         # 回退到dist目录（Vue构建版本）
         elif dist_path.exists():
             logger.warning("=" * 60)
@@ -1082,6 +1084,40 @@ class LiteAvatarApp:
                 }
             })
 
+    def _start_ngrok(self, port: int):
+        """启动 ngrok 内网穿透隧道，返回公网URL或None"""
+        ngrok_exe = project_root / "ngrok.exe"
+        if not ngrok_exe.exists():
+            logger.warning("ngrok.exe 未找到，跳过内网穿透")
+            return None
+        try:
+            self._ngrok_proc = subprocess.Popen(
+                [str(ngrok_exe), "http", str(port), "--log=stdout"],
+                stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                cwd=str(project_root),
+                creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0,
+            )
+            import urllib.request
+            for _ in range(20):
+                time.sleep(1)
+                try:
+                    resp = urllib.request.urlopen(
+                        "http://127.0.0.1:4040/api/tunnels", timeout=3
+                    )
+                    data = json.loads(resp.read().decode())
+                    tunnels = data.get("tunnels", [])
+                    for t in tunnels:
+                        if t.get("proto") == "https":
+                            logger.info(f"ngrok 公网地址: {t['public_url']}")
+                            return t["public_url"]
+                except Exception:
+                    continue
+            logger.warning("ngrok 启动超时(20s)，请检查网络或手动运行: .\\ngrok.exe http " + str(port))
+            return None
+        except Exception as e:
+            logger.warning(f"ngrok 启动失败: {e}")
+            return None
+
     def run(self, host: str = None, port: int = None):
         """运行服务"""
         if not host:
@@ -1095,7 +1131,6 @@ class LiteAvatarApp:
         # 集成Teaching API
         try:
             from teaching_api.app import app as teaching_app
-            # 将teaching_api的路由挂载到主应用
             from teaching_api.routes import students, memory, knowledge, lesson, evaluation
             self.app.include_router(students.router, prefix="/api/students", tags=["学生管理"])
             self.app.include_router(memory.router, prefix="/api/memory", tags=["记忆系统"])
@@ -1109,43 +1144,40 @@ class LiteAvatarApp:
         # 创建 SSL 上下文（如果需要）
         ssl_context = create_ssl_context(self.args, self.service_config)
         
-        # 确定访问协议
         protocol = "https" if ssl_context else "http"
-        # 前端页面在 /ui/index.html，根路径会自动重定向
         url = f"{protocol}://{host}:{port}/"
-        frontend_url = f"{protocol}://{host}:{port}/ui/index.html"
-        teaching_url = f"{protocol}://{host}:{port}/ui/videochat-teaching.html"
         videochat_url = f"{protocol}://{host}:{port}/ui/videochat.html"
         console_url = f"{protocol}://{host}:{port}/ui/console.html"
+
+        # 启动 ngrok 获取公网地址
+        public_url = self._start_ngrok(port)
         
-        # 打印明显的访问地址
+        # 打印访问地址
         print("\n" + "="*80)
         print("OpenAvatarChat Service Started Successfully!")
         print("="*80)
-        print(f"\nMain Access URLs:")
-        print(f"   Home:       {url}")
-        print(f"   VideoChat:  {videochat_url}")
-        print(f"   Teaching:   {teaching_url}")
-        print(f"   Console:    {console_url}")
-        print(f"\nNote: Service is listening on {host}:{port}")
+        print(f"\n  本地访问 Local Access:")
+        print(f"    VideoChat:  {videochat_url}")
+        print(f"    Console:    {console_url}")
+        if public_url:
+            print(f"\n  外网访问 Public Access (ngrok):")
+            print(f"    VideoChat:  {public_url}/ui/videochat.html")
+            print(f"    Console:    {public_url}/ui/console.html")
+        print(f"\n  服务监听: {host}:{port}")
         print("="*80 + "\n")
         
         logger.info(f"Starting LiteAvatar service on {host}:{port}")
-        logger.info(f"Frontend will be available at: {frontend_url}")
-        logger.info(f"Teaching assistant: {teaching_url}")
+        if public_url:
+            logger.info(f"Public URL: {public_url}")
         
-        # 延迟打开浏览器，等待服务启动
+        # 打开浏览器
         def open_browser():
-            time.sleep(3)  # 等待服务完全启动
+            time.sleep(3)
             try:
                 webbrowser.open(url)
-                logger.info(f"已自动打开浏览器: {url}")
-                logger.info(f"如果页面未正确加载，请访问: {frontend_url}")
-            except Exception as e:
-                logger.warning(f"无法自动打开浏览器: {e}")
-                logger.info(f"请手动访问: {url} 或 {frontend_url}")
+            except Exception:
+                pass
         
-        # 在后台线程中打开浏览器
         browser_thread = threading.Thread(target=open_browser, daemon=True)
         browser_thread.start()
         

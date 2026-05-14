@@ -1,0 +1,443 @@
+================================================================================
+       OpenAvatarChat 数字人无法对话 -- 逐层故障排除计划
+================================================================================
+
+日期：2026年5月12日
+目标：系统性地排查数字人"不能对话"的根本原因并逐一修复
+
+
+零、前置代码审查结论（已完成）
+
+通过对 app.py、chat_engine.py、handler_manager.py、glut2.yaml、LLM Handler、
+TTS Handler 等核心文件的完整审查，发现以下关键信息：
+
+[发现1] API Key 硬编码暴露
+  glut2.yaml 中 LLM_Bailian 和 CosyVoice 两个 Handler 均使用相同的 API Key：
+    api_key: sk-88dd7955b608436b852996e446023a69
+  该 Key 直接写在 config/glut2.yaml 中而非通过 .env 环境变量注入。
+  【风险评估：极高】如果该 Key 欠费/过期/被泄露后被禁用，LLM和TTS会同时失效，
+  表现为"数字人能听但不能说"或"数字人完全无反应"。
+
+[发现2] 项目根目录不存在 .env 文件
+  load_dotenv() 在 chat_engine.py:29 被调用，但项目根目录无 .env 文件。
+  所有 API Key 依赖全部落在 glut2.yaml 中硬编码的 Key 上，没有后备方案。
+
+[发现3] 服务绑定地址为 127.0.0.1
+  仅限本机访问。如果你从其他设备访问，需要修改 host 配置。
+
+[发现4] LLM Handler 的代码级潜在问题
+  llm_handler_openai_compatible.py 第226-237行的异常处理中：
+  如果异常不是 APIStatusError 类型，response 变量未初始化，会导致
+  UnboundLocalError 二次异常，可能直接导致 Handler 线程崩溃。
+
+[发现5] TTS Handler 的代码级潜在问题
+  tts_handler_cosyvoice_bailian.py 的 on_error 回调第225行使用了
+  ${message} 而非 f-string 的 {message}，这是一个日志格式错误，
+  但不影响功能。
+
+综合判断：最可能的原因是【API Key 欠费/过期】，建议优先排查。
+
+
+一、第一层：确认服务是否正常启动
+
+这一步的目标是确认 app.py 能否正常启动所有 Handler，服务端口是否在监听。
+
+操作步骤：
+  1. 双击运行 01运行程序-lam.bat 或 02运行程序-liteavatar.bat
+     或在命令行运行：python app.py
+
+  2. 观察终端窗口的启动日志，重点检查以下关键信息：
+     a. 是否出现 "Chat engine initialized successfully"
+     b. 是否出现每个 Handler 的 "Registered handler XXX" 日志
+     c. 是否出现 "OpenAvatarChat Service Started Successfully!"
+     d. 是否出现任何红色的 ERROR 日志
+
+  3. 如果启动过程中出现 "Failed to import handler module" 错误：
+     a. 检查对应 Handler 的 Python 模块文件是否存在
+     b. 检查模块依赖是否全部安装（运行 uv sync --all-packages）
+     c. 检查 Python 版本是否为 3.11.x（不能低于3.11.7，不能高于3.12）
+
+  4. 启动成功后，在浏览器访问：
+     http://127.0.0.1:8282/health
+     应返回：{"status":"healthy","service":"liteavatar"}
+
+  5. 访问 http://127.0.0.1:8282/ui/videochat.html
+     确认前端页面能正常加载，没有白屏或 JS 报错。
+
+[检查点1] 启动日志中是否有 ERROR？
+  - 有 ERROR --> 跳转到"七、常见启动错误速查"
+  - 无 ERROR，服务正常启动 --> 进入第二层
+
+[检查点2] 前端页面是否正常？
+  - 页面白屏 --> 检查 web/ 目录下是否有 videochat.html 文件
+  - JS 报错 --> 按 F12 打开浏览器开发者工具查看 Console 面板
+
+
+二、第二层：逐模块验证 API 可用性（推荐优先执行）
+
+根据代码审查结论，你的配置全部依赖阿里云百炼 API，所以 API Key
+能否正常工作是最关键的排查点。
+
+2.1 独立验证 LLM API Key 是否有效
+
+  Windows PowerShell 中执行：
+  ```
+  $headers = @{
+      "Authorization" = "Bearer sk-88dd7955b608436b852996e446023a69"
+      "Content-Type" = "application/json"
+  }
+  $body = @{
+      model = "qwen-vl-max"
+      messages = @(
+          @{role = "user"; content = "请回复一个数字：1"}
+      )
+  } | ConvertTo-Json -Depth 3
+  Invoke-RestMethod -Uri "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions" `
+      -Method Post -Headers $headers -Body $body
+  ```
+
+  可能的返回结果：
+  a. 正常返回 JSON 含 choices[0].message.content = "1"
+     --> API Key 有效，LLM 服务正常，进入 2.2
+
+  b. 返回错误码 402 Payment Required / "insufficient_balance" / "quota"
+     --> 确认欠费！需要去百炼控制台充值：
+        https://bailian.console.aliyun.com/
+     --> 充值后无需重启，刷新页面重试对话即可
+
+  c. 返回错误码 401 Unauthorized / "invalid_api_key"
+     --> API Key 无效（可能被泄露后被禁用）
+     --> 去百炼控制台生成新的 API Key：
+        https://bailian.console.aliyun.com/#/api-key
+     --> 将新 Key 更新到 config/glut2.yaml 的 LLM_Bailian 和 CosyVoice 两处
+
+  d. 返回 "AccessDenied" / "model_not_found"
+     --> qwen-vl-max 模型未开通
+     --> 去百炼控制台开通模型服务，或改用 qwen-plus 等已开通的模型
+
+2.2 独立验证 TTS API Key 是否有效
+
+  Windows PowerShell 中执行：
+  ```
+  $headers = @{
+      "Authorization" = "Bearer sk-88dd7955b608436b852996e446023a69"
+      "Content-Type" = "application/json"
+      "X-DashScope-Async" = "enable"
+  }
+  $body = @{
+      model = "cosyvoice-v1"
+      input = @{text = "你好世界"}
+      parameters = @{voice = "longjing"; format = "pcm"}
+  } | ConvertTo-Json -Depth 4
+  Invoke-RestMethod -Uri "https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation" `
+      -Method Post -Headers $headers -Body $body
+  ```
+
+  可能的返回结果：
+  a. 返回含 task_id 的 JSON --> TTS API 正常
+
+  b. 返回 402 / insufficient_balance --> TTS 也欠费，同 2.1-b 处理
+
+  c. 返回 400 "invalid voice" --> voice 参数异常，检查配置中的 voice: longjing
+
+[检查点3] API 验证结果：
+  - LLM 和 TTS 都正常 --> 进入第三层
+  - 任一 API 返回欠费/无效 --> 充值或更新 Key 后重试
+
+
+三、第三层：WebRTC 连接层排查
+
+这一步确认浏览器到服务器的 WebRTC 音视频通道是否正常建立。
+
+3.1 检查浏览器控制台
+
+  打开 http://127.0.0.1:8282/ui/videochat.html
+  按 F12 打开开发者工具，切换到 Console 面板
+  点击页面上的"开始对话"按钮，观察控制台输出。
+
+  正常情况：出现类似 "WebRTC connection established" / "ICE connected" 的日志
+
+  异常情况：
+
+  a. "getUserMedia" 相关错误
+     --> 浏览器未授权摄像头/麦克风权限
+     --> 解决方法：点击地址栏左侧的锁图标，允许摄像头和麦克风权限
+     --> 如果是 http 协议（非 https），部分浏览器不允许 getuserMedia
+     --> 解决方法：使用 localhost 访问通常可以豁免，或用 https
+
+  b. "ICE connection failed" / WebRTC 连接超时
+     --> NAT 穿透失败
+     --> 本地 localhost 访问一般不存在此问题
+     --> 如果不是 localhost 访问，需要配置 TURN 服务器
+
+  c. 页面按钮一直是"等待中"/"连接中"状态
+     --> WebRTC signaling 失败，检查：
+        - 终端日志中是否有 RtcClient 相关错误
+        - SSL 证书是否正确（非 localhost 访问时需要）
+
+3.2 用浏览器 Network 面板检查
+
+  在 F12 -> Network 面板中：
+  - 确认有 WebSocket 连接建立（ws:// 或 wss://）
+  - 如果没有 WebSocket 连接，说明 RtcClient Handler 的 signaling 有问题
+
+[检查点4] WebRTC 连接状态：
+  - 连接正常建立，能看到自己的摄像头画面 --> 进入第四层
+  - 连接失败 --> 问题在 WebRTC 层，检查 SSL 证书和浏览器权限
+
+
+四、第四层：VAD（语音活动检测）层排查
+
+这一步确认麦克风音频数据能到达服务器，且 VAD 能检测到语音。
+
+注意：当前 glut2.yaml 中 SileroVad 的 end_delay 设置为 10000 采样点
+（约 0.625 秒@16kHz），这个值看起来合理。
+
+4.1 观察终端日志
+
+  启动服务后，在终端窗口中观察日志。
+  正常情况：当用户说话时出现类似：
+    - VAD 检测到语音开始
+    - VAD 检测到语音结束
+    - 提取的语音片段被送入 ASR
+
+  如果终端中完全没有 VAD 相关的日志输出：
+  a. 麦克风数据未能到达服务器（回到第三层检查 WebRTC）
+  b. SileroVad 的 speaking_threshold 设置过高（当前0.5，一般合理）
+     --> 降低到 0.3 试试（需要修改 glut2.yaml 后重启）
+
+4.2 检查模型文件
+
+  确认 models/ 目录下存在 silero-vad 的模型文件。
+  Silero-VAD 通常会自动下载模型，如果下载失败可能导致 VAD 静默失败。
+
+[检查点5] VAD 是否正常工作：
+  - 终端日志中能看到 VAD 检测输出 --> 进入第五层
+  - 完全无 VAD 日志 --> WebRTC 音频通道有问题
+
+
+五、第五层：ASR（语音识别）层排查
+
+这一步确认 VAD 输出的语音片段能正确转写为文本。
+
+5.1 检查 SenseVoice 模型
+
+  SenseVoice 配置文件中的模型为 iic/SenseVoiceSmall，
+  首次加载会从 ModelScope 自动下载。
+
+  启动日志中应有类似：
+    "Registered handler SenseVoice" 或 "ASR handler loaded"
+
+  如果有错误日志提示模型下载失败/加载失败：
+  a. 检查网络是否能访问 modelscope.cn
+     （项目已设置 HF_ENDPOINT 为 hf-mirror.com，但 SenseVoice 走 ModelScope）
+  b. 手动下载模型到 models/ 目录
+
+[检查点6] ASR 是否正常：
+  - 终端日志中出现语音转写文本 --> 进入第六层
+  - 无 ASR 日志输出 --> ASR 模块有问题
+
+
+六、第六层：LLM（大语言模型）层排查
+
+这一步确认 ASR 转写的文本能送入 LLM 并获得回复。
+
+6.1 观察 LLM Handler 日志
+
+  启动日志中应有：
+    "Registered handler LLM_Bailian(HandlerLLM)"
+
+  当有语音输入后，终端应出现：
+    "llm input qwen-vl-max <用户的语音转写文本>"
+    "First token received in XXXms for session=..."
+
+  如果出现以下异常日志：
+  a. 终端出现红色 ERROR 日志：
+     --> 查看具体错误内容
+     --> 如果是 API 相关错误，回到第二层验证 API Key
+
+  b. 完全没有 LLM 的日志输出：
+     --> ASR 没有送数据到 LLM（回到第五层）
+     --> 或 LLM Handler 加载失败（检查启动日志）
+
+  特别注意：LLM Handler 的异常处理会把 API 错误信息伪装成正常回复文本
+  发送给下游。所以如果你在前端看到类似 "Insufficient balance" 或
+  "Model not found" 这样的文本作为回复，说明就是 API Key 的问题。
+
+6.2 确认 system_prompt 没有被篡改
+
+  当前 system_prompt：
+    "你是一名高校人工智能基础通识课老师，你讲话幽默风趣善于引用示例，同时讲话有梗，亲近易懂"
+
+  如果 prompt 异常长（比如是之前被其他大模型修改成了包含"四要件、三阶层、
+  二阶层"等法律术语的超长 prompt），LLM 可能：
+  a. 拒绝回答（安全策略拦截）
+  b. 响应时间过长导致超时
+  c. Token 消耗过大导致配额快速耗尽
+
+[检查点7] LLM 是否正常回复：
+  - 终端日志中出现 LLM 流式输出文本 --> 进入第七层
+  - 无 LLM 日志或出现 API Error --> 回到第二层处理 API Key 问题
+
+
+七、第七层：TTS（语音合成）层排查
+
+这一步确认 LLM 回复的文本能合成语音。
+
+7.1 观察 TTS Handler 日志
+
+  当 LLM 有输出后，终端应出现：
+    "连接成功"（百炼 TTS WebSocket 连接建立）
+    "[TIMING] TTS Synthesizer初始化耗时 XXXms"
+    "[TIMING] TTS首次音频数据到达"
+    "[TIMING] TTS首次音频输出耗时 XXXms"
+
+  如果出现：
+    "bailian tts 服务出现异常,请确保参数正确：..."
+    --> TTS API 调用失败，回到第二层验证
+
+  如果完全没有 TTS 日志：
+    --> LLM 没有输出数据到 TTS Handler（回到第六层）
+
+[检查点8] TTS 是否正常：
+  - 终端日志中有音频数据输出 --> 进入第八层
+  - TTS 报错 --> 回到第二层
+
+
+八、第八层：Avatar（数字人驱动）层排查
+
+这一步确认 TTS 合成的音频能驱动数字人形象。
+
+8.1 检查 LiteAvatar 模型文件
+
+  配置中使用 avatar_name: "20250408/sample_data"
+  
+  确认以下路径存在模型文件：
+    resource/avatar/liteavatar/20250408/sample_data/
+    目录下应有：
+    - bg_video.mp4（底版视频）
+    - ref_frames/ 目录
+    - net.pth / net_encode.pt / net_decode.pt（模型权重）
+
+  如果模型文件缺失：
+  a. 从 LiteAvatarGallery 下载：
+     https://modelscope.cn/models/HumanAIGC-Engineering/LiteAvatarGallery
+  b. 或使用 download_liteavatar_weights.sh 脚本下载
+
+8.2 观察 Avatar Handler 日志
+
+  正常情况：当 TTS 输出音频时，Avatar Handler 应有日志表示正在处理音频帧
+
+  如果出现：
+    "[IDLE_FRAME] Inserted idle during speaking"
+    --> GPU 推理速度跟不上设定的 fps（当前20）
+    --> 降低 fps 到 15 或关闭 enable_fast_mode
+
+[检查点9] Avatar 是否正常：
+  - 启动日志中 LiteAvatar 加载成功 + 运行时无 IDLE 警告 --> 正常
+  - Avatar 模型文件缺失 --> 下载模型
+
+
+九、第九层：前端渲染层排查
+
+9.1 确认前端 JS 文件未被篡改
+
+  检查 web/ 目录下的 JS 文件，确认没有被其他大模型添加/删除/修改代码。
+  特别是 WebRTC 连接相关的 JS 逻辑。
+
+  可以用浏览器 F12 -> Sources 面板查看加载的 JS 文件，是否有报错。
+
+9.2 检查浏览器兼容性
+
+  推荐使用 Chrome 或 Edge 浏览器（最新版本）。
+  Firefox 的 WebRTC 实现可能兼容性问题。
+
+
+十、快速修复方案（基于最可能的根因）
+
+以下按可能性从高到低排列：
+
+修复方案1：API Key 欠费（可能性最高，约85%）
+  1. 访问 https://bailian.console.aliyun.com/
+     查看账户余额和 API Key 状态
+  2. 如果确认欠费，充值后继续使用
+  3. 如果 Key 被禁用，生成新 Key 后：
+     - 修改 config/glut2.yaml 第6行和第12行，替换 api_key 值
+     - 重启 app.py
+  4. 如果不想用百炼，可以切换到 Edge TTS（免费）模式：
+     复制 config/chat_with_openai_compatible_edge_tts.yaml 覆盖 glut2.yaml
+     （但 Edge TTS 效果不如 CosyVoice）
+
+修复方案2：.env 文件缺失导致环境变量未加载
+  1. 在项目根目录创建 .env 文件，内容：
+     DASHSCOPE_API_KEY=sk-你的新key
+     注意：.env 文件中的 key 优先级高于 glut2.yaml 中的配置
+  2. 这样即使配置文件中的 key 失效，也可以通过 .env 覆盖
+
+修复方案3：模型服务未开通
+  1. 如果确认 LLM 模型 qwen-vl-max 未开通：
+     修改 glut2.yaml 第16行，将 model_name 改为 qwen-plus
+     （qwen-plus 是基础模型，通常默认开通且有免费额度）
+  2. 重启 app.py
+
+修复方案4：前端 JS 被篡改
+  1. 用 git status 或 git diff 查看 web/ 目录的变更
+  2. 如果有被修改的 JS 文件，用 git checkout 恢复原始版本
+  3. 如果无法 git 恢复，可能需要重新 clone web 前端仓库
+
+
+十一、常见启动错误速查
+
+错误："Failed to import handler module xxx"
+  --> 依赖未安装，运行：uv sync --all-packages
+
+错误："Handler xxx not found in search path"
+  --> 检查 glut2.yaml 中的 handler_search_path 是否正确（src/handlers）
+  --> 检查对应的 .py 文件是否存在于 src/handlers/ 目录下
+
+错误："No module named 'torch'" 或 CUDA 相关错误
+  --> CUDA 环境未就绪
+  --> 确认 NVIDIA 驱动已安装且 CUDA 版本 >= 12.4
+  --> 运行 nvidia-smi 确认 GPU 可用
+
+错误："pynini" 编译错误（Windows）
+  --> 参见 README.md CosyVoice 本地推理部分
+  --> 需要用 Conda 安装 pynini：conda install -c conda-forge pynini==2.1.6
+
+
+十二、排查路线总结图
+
+  服务启动成功？
+  ├── 否 --> [一] 看启动日志，修复加载错误
+  └── 是
+       └── API Key 测试通过？
+           ├── 否 --> [二] 充值/更新 Key，重试
+           └── 是
+               └── WebRTC 连接成功？
+                   ├── 否 --> [三] 检查浏览器权限、SSL证书
+                   └── 是
+                       └── VAD 有检测日志？
+                           ├── 否 --> [四] 检查麦克风、VAD阈值
+                           └── 是
+                               └── ASR 有转写日志？
+                                   ├── 否 --> [五] 检查SenseVoice模型
+                                   └── 是
+                                       └── LLM 有回复日志？
+                                           ├── 否 --> [六] 检查LLM API
+                                           └── 是
+                                               └── TTS 有音频日志？
+                                                   ├── 否 --> [七] 检查TTS API
+                                                   └── 是
+                                                       └── Avatar 正常驱动？
+                                                           ├── 否 --> [八] 检查模型文件
+                                                           └── 是
+                                                               └── 前端正常显示？
+                                                                   ├── 否 --> [九] 检查前端JS
+                                                                   └── 是 --> 排查完毕
+
+
+建议：直接跳过所有中间层，先执行"第二层 API Key 验证"。
+      如果确认 API 欠费，充值后问题通常能直接解决。
+      如果 API 正常但数字人仍不能对话，再按层次逐级排查。
+
+================================================================================
