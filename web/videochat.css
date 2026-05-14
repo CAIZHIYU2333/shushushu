@@ -2327,3 +2327,14 @@ body.wechat-layout {
 .kg-lib-name { font-size: 14px; font-weight: 600; color: #333; }
 .kg-lib-meta { font-size: 12px; color: #999; }
 .kg-lib-item-actions { display: flex; gap: 8px; }
+
+.memory-manager-tabs { display: flex; gap: 4px; margin-bottom: 14px; border-bottom: 2px solid #eee; }
+.memory-tab { padding: 10px 18px; border: none; background: none; font-size: 14px; color: #888; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+.memory-tab.active { color: #7170ff; border-bottom-color: #7170ff; font-weight: 600; }
+.memory-tab:hover { color: #555; }
+.memory-tab-panel { display: none; }
+.memory-tab-panel.active { display: block; }
+.memory-editor-header h4 { margin: 0 0 4px 0; color: #333; font-size: 15px; }
+.memory-editor-desc { color: #999; font-size: 12px; margin: 0 0 10px 0; }
+.memory-textarea { width: 100%; min-height: 200px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; font-family: inherit; line-height: 1.7; resize: vertical; }
+.memory-editor-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; }

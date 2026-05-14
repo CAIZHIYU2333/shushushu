@@ -1,11 +1,12 @@
 """
-记忆系统API路由 - 模仿OpenClaw设计
+记忆系统API路由
 人格设定 + 长期记忆 + 短期记忆（TXT文档）
 """
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from teaching_api.services.data_service import DataService
 from teaching_api.services.llm_service import LLMService
+from loguru import logger
 
 router = APIRouter()
 
@@ -15,6 +16,27 @@ class MemoryContent(BaseModel):
 class MemoryGenerateRequest(BaseModel):
     student_id: str
     conversation_history: list = []
+
+# ===== 系统提示词（从 glut2.yaml 读取） =====
+
+@router.get("/system-prompt")
+async def get_system_prompt():
+    """获取当前大模型系统提示词（来自 glut2.yaml 配置）"""
+    try:
+        import yaml
+        config_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "config", "glut2.yaml")
+        config_path = os.path.abspath(config_path)
+        logger.info(f"读取 system_prompt from: {config_path}")
+        with open(config_path, 'r', encoding='utf-8') as f:
+            config = yaml.safe_load(f)
+        engine = config.get("engine", {})
+        llm = engine.get("LLM_Bailian", {})
+        prompt = llm.get("system_prompt", "")
+        logger.info(f"system_prompt = {prompt[:60]}")
+        return {"success": True, "data": {"system_prompt": prompt or "(未配置)"}}
+    except Exception as e:
+        logger.warning(f"读取system_prompt失败: {e}")
+        return {"success": True, "data": {"system_prompt": "你是一名高校人工智能基础通识课老师"}}
 
 @router.get("/{student_id}")
 async def get_memory(student_id: str):
