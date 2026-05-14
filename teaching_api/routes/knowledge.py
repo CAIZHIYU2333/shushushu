@@ -1,15 +1,11 @@
 """
-知识图谱API路由 - 三入口模式
-1. POST /summarize-conversation  对话上下文总结提取
-2. POST /extract-from-text       手动输入/粘贴文本提取
-3. POST /extract-from-file       上传txt/md文件提取
-4. POST /generate                原有：学科主题生成
+知识图谱API路由 - 四入口 + 图谱库
 """
 import json
 import re
 from fastapi import APIRouter, UploadFile, File, Form
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from teaching_api.services.llm_service import LLMService
 from teaching_api.services.data_service import DataService
 from loguru import logger
@@ -30,6 +26,12 @@ class ExtractTextRequest(BaseModel):
 class ConversationSummaryRequest(BaseModel):
     conversation: list = []
     summary: str = ""
+
+
+class SaveToLibraryRequest(BaseModel):
+    data: dict
+    name: str = ""
+    source: str = ""
 
 
 @router.get("/subjects")
@@ -115,7 +117,6 @@ async def generate_knowledge_graph(req: KnowledgeGenerateRequest):
     result = await LLMService.generate_knowledge_graph(req.subject, req.topic)
 
     if result.get("success"):
-        # 先尝试 data 字段
         if result.get("data"):
             DataService.save_knowledge_graphs(result["data"])
             return {"success": True, "data": result["data"]}
@@ -132,6 +133,52 @@ async def generate_knowledge_graph(req: KnowledgeGenerateRequest):
         return {"success": False, "error": "未找到JSON数据", "raw_text": text}
 
     return {"success": False, "error": result.get("error")}
+
+
+# ===== 知识图谱库 CRUD =====
+
+@router.post("/library/save")
+async def save_to_library(req: SaveToLibraryRequest):
+    """保存图谱到图谱库"""
+    if not req.data or not req.data.get("nodes"):
+        return {"success": False, "error": "图谱数据无效"}
+    name = req.name.strip() or req.data.get("center_topic", "未命名图谱")
+    gid = DataService.save_knowledge_library_item(req.data, name, req.source)
+    return {"success": True, "id": gid, "message": "已保存到知识图谱库"}
+
+
+@router.get("/library/list")
+async def list_library():
+    """获取图谱库列表"""
+    graphs = DataService.get_knowledge_library()
+    items = [{
+        "id": g.get("id"),
+        "name": g.get("name"),
+        "source": g.get("source"),
+        "created_at": g.get("created_at"),
+        "node_count": g.get("node_count"),
+        "edge_count": g.get("edge_count"),
+    } for g in graphs]
+    return {"success": True, "data": items}
+
+
+@router.get("/library/{gid}")
+async def get_library_item(gid: str):
+    """获取图谱库中的指定图谱"""
+    graphs = DataService.get_knowledge_library()
+    for g in graphs:
+        if g.get("id") == gid:
+            return {"success": True, "data": g.get("data")}
+    return {"success": False, "error": "图谱不存在"}
+
+
+@router.delete("/library/{gid}")
+async def delete_library_item(gid: str):
+    """删除图谱库中的图谱"""
+    ok = DataService.delete_knowledge_library_item(gid)
+    if ok:
+        return {"success": True, "message": "已删除"}
+    return {"success": False, "error": "图谱不存在"}
 
 
 @router.get("/graph/{key:path}")

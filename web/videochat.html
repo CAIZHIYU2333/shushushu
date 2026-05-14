@@ -326,6 +326,7 @@
                     <button class="kg-tab-btn" data-tab="text">文本提取</button>
                     <button class="kg-tab-btn" data-tab="conversation">对话总结</button>
                     <button class="kg-tab-btn" data-tab="file">文件上传</button>
+                    <button class="kg-tab-btn" data-tab="library">图谱库</button>
                 </div>
 
                 <!-- 加载动画 -->
@@ -355,7 +356,13 @@
 
                 <!-- Tab 3: 对话总结 -->
                 <div class="kg-tab-panel" id="kg-tab-conversation" style="display:none;">
-                    <textarea class="form-input" id="kg-conv-input" rows="6" placeholder="粘贴课堂对话记录或输入教学总结文本，AI将提取核心知识点和层级关系..." style="margin-bottom:8px;"></textarea>
+                    <div style="margin-bottom:8px;">
+                        <label style="font-size:13px;color:#666;">选择历史对话（一键提取）：</label>
+                        <select class="form-select" id="kg-conv-select">
+                            <option value="__custom__">自定义输入...</option>
+                        </select>
+                    </div>
+                    <textarea class="form-input" id="kg-conv-input" rows="5" placeholder="或直接粘贴对话记录/总结文本...（选择历史对话后自动填充）" style="margin-bottom:8px;"></textarea>
                     <button class="btn btn-primary btn-block" onclick="window.kgViewer.extractFromConversation()">从对话提取知识图谱</button>
                 </div>
 
@@ -366,6 +373,16 @@
                         <input type="file" id="kg-file-input" accept=".txt,.md,.json,.py,.java,.cpp,.js,.ts,.html,.css" style="display:block;margin:0 auto 12px;">
                         <button class="btn btn-primary" onclick="window.kgViewer.extractFromFile()">上传并提取知识图谱</button>
                     </div>
+                </div>
+
+                <!-- Tab 5: 图谱库 -->
+                <div class="kg-tab-panel" id="kg-tab-library" style="display:none;">
+                    <div id="kg-library-list" style="max-height:350px;overflow-y:auto;"></div>
+                </div>
+
+                <!-- 保存按钮（图谱生成后显示） -->
+                <div id="kg-save-hint" style="display:none;text-align:center;margin-top:8px;">
+                    <button class="btn btn-primary" id="kg-save-btn" style="display:none;" onclick="window.kgViewer.saveToLibrary()">添加到知识图谱库</button>
                 </div>
 
                 <!-- vis.js 画布 -->

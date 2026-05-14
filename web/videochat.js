@@ -266,6 +266,10 @@ class VideoChatManager {
       window.kgViewer = new KnowledgeGraphViewer();
     }
 
+    // 对话记录追踪（供知识图谱对话总结使用）
+    window._conversationLog = window._conversationLog || [];
+    window._convSessionId = window._convSessionId || ('conv_' + Date.now().toString(36));
+
     // 视频控制按钮
     if (this.elements.cameraToggle) {
       this.elements.cameraToggle.addEventListener('click', () => {
@@ -701,10 +705,20 @@ class VideoChatManager {
           // 流式输出消息
           this.handleStreamingMessage(data);
         } else if (data.type === 'avatar_end') {
-          // 收到avatar_end表示处理结束
           this.state.replying = false;
           this.hideTypingIndicator();
-          // 延迟重置，让用户看到最终时间
+          try {
+            const lastMsg = Array.from(this.elements.chatMessages.querySelectorAll('.message-bubble.received')).pop();
+            if (lastMsg) {
+              const aiText = (lastMsg.querySelector('.message-text') || {}).textContent || '';
+              if (aiText) window._conversationLog.push({ role: 'assistant', content: aiText, time: new Date().toISOString() });
+            }
+            const topic = window._conversationLog[0] ? window._conversationLog[0].content.slice(0, 30) : '对话';
+            fetch('/api/memory/conversations/save', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: window._convSessionId, topic: topic, messages: window._conversationLog }),
+            }).catch(() => {});
+          } catch (e) {}
           setTimeout(() => {
             this.resetTimingState();
           }, 2000);
@@ -977,6 +991,9 @@ class VideoChatManager {
 
     // 添加消息到界面
     this.addMessage(text, 'user');
+
+    // 记录到对话日志（供知识图谱对话总结使用）
+    window._conversationLog.push({ role: 'user', content: text, time: new Date().toISOString() });
     
     // 清空输入框
     this.elements.chatInput.value = '';

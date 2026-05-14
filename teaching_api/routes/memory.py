@@ -89,10 +89,49 @@ async def generate_profile(data: MemoryGenerateRequest):
     
     return {"success": result.get("success"), "data": result.get("data"), "raw_text": result.get("text"), "error": result.get("error")}
 
-@router.post("/{student_id}/append_short_term")
-async def append_short_term_memory(student_id: str, data: MemoryContent):
-    """追加短期记忆（对话后自动调用）"""
-    current = DataService.get_short_term_memory(student_id)
-    new_content = f"{current}\n{data.content}"
-    DataService.save_short_term_memory(student_id, new_content)
-    return {"success": True, "message": "短期记忆已追加"}
+# ===== 对话历史（供知识图谱对话总结提取） =====
+
+class ConversationSession(BaseModel):
+    id: str = ""
+    topic: str = ""
+    messages: list = []
+
+@router.get("/conversations/list")
+async def get_conversations():
+    """获取所有对话历史列表"""
+    sessions = DataService.get_conversation_history()
+    items = [{"id": s.get("id"), "topic": s.get("topic", "未命名对话"),
+              "msg_count": len(s.get("messages", [])),
+              "created_at": s.get("created_at", "")} for s in sessions]
+    items.reverse()
+    return {"success": True, "data": items}
+
+@router.get("/conversations/{conv_id}")
+async def get_conversation(conv_id: str):
+    """获取指定对话的完整消息"""
+    sessions = DataService.get_conversation_history()
+    for s in sessions:
+        if s.get("id") == conv_id:
+            return {"success": True, "data": s}
+    return {"success": False, "error": "对话不存在"}
+
+@router.post("/conversations/save")
+async def save_conversation(req: ConversationSession):
+    """保存对话历史（前端对话结束后调用）"""
+    import uuid, datetime
+    sessions = DataService.get_conversation_history()
+    if req.id:
+        for s in sessions:
+            if s.get("id") == req.id:
+                s["messages"] = req.messages
+                s["topic"] = req.topic or s.get("topic", "未命名对话")
+                DataService.save_conversation_history(sessions)
+                return {"success": True, "id": req.id}
+    cid = req.id or f"conv_{uuid.uuid4().hex[:8]}"
+    sessions.append({
+        "id": cid, "topic": req.topic or "未命名对话",
+        "messages": req.messages,
+        "created_at": datetime.datetime.now().isoformat(),
+    })
+    DataService.save_conversation_history(sessions)
+    return {"success": True, "id": cid}

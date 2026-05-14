@@ -129,3 +129,52 @@ class DataService:
     def save_knowledge_graphs(data: Dict):
         filepath = os.path.join(DATA_DIR, "knowledge_graphs.json")
         DataService._write_json(filepath, data)
+
+    # 知识图谱库
+    @staticmethod
+    def get_knowledge_library() -> List[Dict]:
+        filepath = os.path.join(DATA_DIR, "knowledge_library.json")
+        data = DataService._read_json(filepath)
+        return data.get("graphs", [])
+
+    @staticmethod
+    def save_knowledge_library_item(graph_data: Dict, name: str, source: str = "") -> str:
+        import uuid
+        filepath = os.path.join(DATA_DIR, "knowledge_library.json")
+        data = DataService._read_json(filepath)
+        graphs = data.get("graphs", [])
+        gid = f"kg_{uuid.uuid4().hex[:8]}"
+        graphs.append({
+            "id": gid,
+            "name": name,
+            "source": source,
+            "data": graph_data,
+            "created_at": __import__('datetime').datetime.now().isoformat(),
+            "node_count": len(graph_data.get("nodes", [])),
+            "edge_count": len(graph_data.get("edges", [])),
+        })
+        DataService._write_json(filepath, {"graphs": graphs})
+        return gid
+
+    @staticmethod
+    def delete_knowledge_library_item(gid: str) -> bool:
+        filepath = os.path.join(DATA_DIR, "knowledge_library.json")
+        data = DataService._read_json(filepath)
+        graphs = data.get("graphs", [])
+        new_graphs = [g for g in graphs if g.get("id") != gid]
+        if len(new_graphs) == len(graphs):
+            return False
+        DataService._write_json(filepath, {"graphs": new_graphs})
+        return True
+
+    # 对话历史记录
+    @staticmethod
+    def get_conversation_history() -> List[Dict]:
+        filepath = os.path.join(DATA_DIR, "conversation_history.json")
+        data = DataService._read_json(filepath)
+        return data.get("sessions", [])
+
+    @staticmethod
+    def save_conversation_history(sessions: List[Dict]):
+        filepath = os.path.join(DATA_DIR, "conversation_history.json")
+        DataService._write_json(filepath, {"sessions": sessions})
