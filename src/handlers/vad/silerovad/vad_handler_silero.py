@@ -216,13 +216,23 @@ class HandlerAudioVAD(HandlerBase, ABC):
         context = cast(HumanAudioVADContext, context)
         output_definition = output_definitions.get(ChatDataType.HUMAN_AUDIO).definition
         if not context.shared_states.enable_vad:
+            if not hasattr(context, '_vad_disabled_logged') or not context._vad_disabled_logged:
+                logger.info("[VAD] VAD已禁用，等待avatar说完话后再开启")
+                context._vad_disabled_logged = True
             return
+        # 清除禁用标记（VAD重新启用了）
+        if hasattr(context, '_vad_disabled_logged'):
+            context._vad_disabled_logged = False
         if inputs.type != ChatDataType.MIC_AUDIO:
             return
 
         audio = inputs.data.get_main_data()
         if audio is None:
             return
+        # 首次收到音频时记录
+        if not hasattr(context, '_first_audio_logged'):
+            context._first_audio_logged = True
+            logger.info(f"[VAD] 首次收到MIC_AUDIO，开始语音活动检测... (session={context.session_id})")
         audio_entry = inputs.data.get_main_definition_entry()
         sample_rate = audio_entry.sample_rate
         audio = audio.squeeze()

@@ -96,7 +96,20 @@ class RtcClientSessionDelegate(ClientSessionDelegate):
         return self.timestamp_generator()
 
     def emit_signal(self, signal: ChatSignal):
-        pass
+        from chat_engine.data_models.chat_signal_type import ChatSignalType
+        if signal.type == ChatSignalType.INTERRUPT:
+            logger.info(f"[RTC] 收到INTERRUPT信号，清空输出队列+重新启用VAD")
+            if self.shared_states:
+                self.shared_states.enable_vad = True
+            for q in self.output_queues.values():
+                while not q.empty():
+                    try:
+                        q.get_nowait()
+                    except:
+                        break
+        elif signal.type == ChatSignalType.END:
+            if self.shared_states:
+                self.shared_states.enable_vad = True
 
     def clear_data(self):
         for data_queue in self.output_queues.values():
