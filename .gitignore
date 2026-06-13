@@ -51,3 +51,4 @@ exp/
 uv.lock
 logs/
 .lock
+ngrok.exe

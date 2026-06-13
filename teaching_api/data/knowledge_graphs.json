@@ -1,0 +1,183 @@
+{
+  "center_topic": "比喻",
+  "nodes": [
+    {
+      "id": "n1",
+      "label": "比喻",
+      "group": "core",
+      "level": 1,
+      "desc": "一种常用的修辞手法，通过相似性将两个不同类的事物联系起来"
+    },
+    {
+      "id": "n2",
+      "label": "本体",
+      "group": "basic",
+      "level": 2,
+      "desc": "比喻中被描述的对象"
+    },
+    {
+      "id": "n3",
+      "label": "喻体",
+      "group": "basic",
+      "level": 2,
+      "desc": "用来作比的事物"
+    },
+    {
+      "id": "n4",
+      "label": "喻词",
+      "group": "basic",
+      "level": 2,
+      "desc": "连接本体和喻体的词语"
+    },
+    {
+      "id": "n5",
+      "label": "相似性",
+      "group": "core",
+      "level": 1,
+      "desc": "比喻的核心，指本体与喻体之间的共同特征"
+    },
+    {
+      "id": "n6",
+      "label": "语言生动形象",
+      "group": "application",
+      "level": 3,
+      "desc": "比喻的作用之一，使文章更加吸引人"
+    },
+    {
+      "id": "n7",
+      "label": "帮助理解抽象事物",
+      "group": "application",
+      "level": 3,
+      "desc": "比喻能够简化复杂概念的理解过程"
+    },
+    {
+      "id": "n8",
+      "label": "修辞手法",
+      "group": "basic",
+      "level": 2,
+      "desc": "写作中使用的技巧或方法以增强表达效果"
+    },
+    {
+      "id": "n9",
+      "label": "弯弯的月亮像小船",
+      "group": "example",
+      "level": 2,
+      "desc": "一个具体的比喻例子"
+    },
+    {
+      "id": "n10",
+      "label": "形状都是弯曲的",
+      "group": "basic",
+      "level": 2,
+      "desc": "该例中的相似点"
+    },
+    {
+      "id": "n11",
+      "label": "常见喻词",
+      "group": "basic",
+      "level": 2,
+      "desc": "比喻中常用的连接词汇"
+    },
+    {
+      "id": "n12",
+      "label": "作文更具感染力",
+      "group": "application",
+      "level": 3,
+      "desc": "掌握比喻可以提高写作质量"
+    },
+    {
+      "id": "n13",
+      "label": "同类事物对比",
+      "group": "advanced",
+      "level": 3,
+      "desc": "当比较对象属于同一类别时，不构成比喻"
+    },
+    {
+      "id": "n14",
+      "label": "不同类事物",
+      "group": "core",
+      "level": 1,
+      "desc": "比喻要求本体和喻体来自不同的类别"
+    }
+  ],
+  "edges": [
+    {
+      "source": "n1",
+      "target": "n2",
+      "label": "核心组成",
+      "type": "component"
+    },
+    {
+      "source": "n1",
+      "target": "n3",
+      "label": "核心组成",
+      "type": "component"
+    },
+    {
+      "source": "n1",
+      "target": "n4",
+      "label": "核心组成",
+      "type": "component"
+    },
+    {
+      "source": "n1",
+      "target": "n5",
+      "label": "核心组成",
+      "type": "component"
+    },
+    {
+      "source": "n1",
+      "target": "n6",
+      "label": "实际应用",
+      "type": "application"
+    },
+    {
+      "source": "n1",
+      "target": "n7",
+      "label": "实际应用",
+      "type": "application"
+    },
+    {
+      "source": "n1",
+      "target": "n8",
+      "label": "前置依赖",
+      "type": "prerequisite"
+    },
+    {
+      "source": "n1",
+      "target": "n9",
+      "label": "示例",
+      "type": "example"
+    },
+    {
+      "source": "n1",
+      "target": "n11",
+      "label": "相关知识",
+      "type": "related"
+    },
+    {
+      "source": "n1",
+      "target": "n12",
+      "label": "实际应用",
+      "type": "application"
+    },
+    {
+      "source": "n1",
+      "target": "n13",
+      "label": "进阶方向",
+      "type": "advanced"
+    },
+    {
+      "source": "n1",
+      "target": "n14",
+      "label": "核心组成",
+      "type": "component"
+    },
+    {
+      "source": "n9",
+      "target": "n10",
+      "label": "解释",
+      "type": "explanation"
+    }
+  ]
+}

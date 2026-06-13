@@ -1,0 +1,24 @@
+{
+  "students": [
+    {
+      "id": "stu_43a9efcd",
+      "name": "测试学生A",
+      "grade": "大三",
+      "school": "大连海事",
+      "avatar": null,
+      "email": "a@test.com",
+      "phone": "",
+      "notes": "测试导入"
+    },
+    {
+      "id": "stu_a7875874",
+      "name": "测试学生B",
+      "grade": "大二",
+      "school": "清华大学",
+      "avatar": null,
+      "email": "b@test.com",
+      "phone": "",
+      "notes": ""
+    }
+  ]
+}

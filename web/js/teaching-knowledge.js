@@ -198,12 +198,6 @@ class KnowledgeGraphViewer {
       else alert('加载失败');
     } catch (e) { alert('网络错误'); }
     this.setLoading(false);
-    document.querySelectorAll('#teaching-knowledge-modal .kg-tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('#teaching-knowledge-modal .kg-tab-panel').forEach(p => p.style.display = 'none');
-    const btn = document.querySelector('#teaching-knowledge-modal .kg-tab-btn[data-tab="subject"]');
-    if (btn) btn.classList.add('active');
-    const panel = document.getElementById('kg-tab-subject');
-    if (panel) panel.style.display = 'block';
   }
 
   async deleteFromLibrary(gid) {
@@ -270,15 +264,6 @@ class KnowledgeGraphViewer {
 
     if (this.saveBtn) this.saveBtn.style.display = 'inline-block';
     document.getElementById('kg-save-hint').style.display = 'block';
-
-    const tabBtns = document.querySelectorAll('#teaching-knowledge-modal .kg-tab-btn');
-    const tabPanels = document.querySelectorAll('#teaching-knowledge-modal .kg-tab-panel');
-    tabBtns.forEach(b => b.classList.remove('active'));
-    tabPanels.forEach(p => p.style.display = 'none');
-    const btn = document.querySelector('#teaching-knowledge-modal .kg-tab-btn[data-tab="subject"]');
-    if (btn) btn.classList.add('active');
-    const panel = document.getElementById('kg-tab-subject');
-    if (panel) panel.style.display = 'block';
   }
 
   showNodeDetail(nodeId) {
