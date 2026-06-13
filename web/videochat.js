@@ -43,11 +43,11 @@ class VideoChatManager {
     };
     
     // 计时器相关（不在state中，因为不需要持久化）
-      this.timingInterval = null;
-      // 音频可视化
-      this.audioContext = null;
-      this.audioAnalyser = null;
-      this.volumeAnimFrame = null;
+    this.timingInterval = null;
+    // 音频可视化
+    this.audioContext = null;
+    this.audioAnalyser = null;
+    this.volumeAnimFrame = null;
     this.videoFrameDetectionHandler = null;
 
     this.elements = {};
