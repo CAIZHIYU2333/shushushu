@@ -1131,12 +1131,13 @@ class LiteAvatarApp:
         # 集成Teaching API
         try:
             from teaching_api.app import app as teaching_app
-            from teaching_api.routes import students, memory, knowledge, lesson, evaluation
+            from teaching_api.routes import students, memory, knowledge, lesson, evaluation, asr_test
             self.app.include_router(students.router, prefix="/api/students", tags=["学生管理"])
             self.app.include_router(memory.router, prefix="/api/memory", tags=["记忆系统"])
             self.app.include_router(knowledge.router, prefix="/api/knowledge", tags=["知识图谱"])
             self.app.include_router(lesson.router, prefix="/api/lesson", tags=["教案生成"])
             self.app.include_router(evaluation.router, prefix="/api/evaluation", tags=["学习评价"])
+            self.app.include_router(asr_test.router, prefix="/api", tags=["ASR测试"])
             logger.info("[OK] Teaching API集成成功")
         except Exception as e:
             logger.warning(f"Teaching API集成失败: {e}")

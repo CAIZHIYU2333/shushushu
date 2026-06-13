@@ -43,7 +43,11 @@ class VideoChatManager {
     };
     
     // 计时器相关（不在state中，因为不需要持久化）
-    this.timingInterval = null;
+      this.timingInterval = null;
+      // 音频可视化
+      this.audioContext = null;
+      this.audioAnalyser = null;
+      this.volumeAnimFrame = null;
     this.videoFrameDetectionHandler = null;
 
     this.elements = {};
@@ -522,6 +526,12 @@ class VideoChatManager {
     this.state.chatDataChannel = null;
     this.state.replying = false;
     
+    // 停止音量可视化
+    this.stopVolumeMeter();
+    // 隐藏ASR状态栏
+    const asrEl = document.getElementById('asr-status');
+    if (asrEl) asrEl.style.display = 'none';
+    
     // 隐藏数字人视频窗口
     if (this.elements.avatarVideoPanel) {
       this.elements.avatarVideoPanel.style.display = 'none';
@@ -543,6 +553,8 @@ class VideoChatManager {
           // 如果是human消息，表示语音识别完成，开始计时
           // 注意：每次新的human消息都表示新的对话开始，需要重置并重新计时
           if (data.role === 'human') {
+            // 显示ASR识别结果
+            this.updateASRStatus('recognized', data.message);
             // 如果已经有计时在进行，先重置（表示上一轮对话结束）
             if (this.state.speechRecognitionStartTime) {
               this.resetTimingState();
@@ -1066,6 +1078,138 @@ class VideoChatManager {
     }
     
     console.log('麦克风状态:', this.state.micMuted ? '已静音' : '已开启');
+    
+    // 启动/停止音量可视化
+    if (this.state.micMuted) {
+      this.stopVolumeMeter();
+    } else {
+      this.startVolumeMeter();
+    }
+  }
+
+  // 启动麦克风音量可视化
+  startVolumeMeter() {
+    if (!this.state.localStream) return;
+    const audioTrack = this.state.localStream.getAudioTracks()[0];
+    if (!audioTrack) return;
+    
+    try {
+      if (!this.audioContext) {
+        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (this.audioContext.state === 'suspended') {
+        this.audioContext.resume();
+      }
+      if (!this.audioAnalyser) {
+        const source = this.audioContext.createMediaStreamSource(this.state.localStream);
+        this.audioAnalyser = this.audioContext.createAnalyser();
+        this.audioAnalyser.fftSize = 256;
+        this.audioAnalyser.smoothingTimeConstant = 0.3;
+        source.connect(this.audioAnalyser);
+      }
+      this._runVolumeMeter();
+      console.log('音量可视化已启动');
+    } catch (e) {
+      console.warn('无法启动音量可视化:', e);
+    }
+  }
+
+  _runVolumeMeter() {
+    if (this.state.micMuted) return;
+    const analyser = this.audioAnalyser;
+    if (!analyser) return;
+    
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteFrequencyData(dataArray);
+    
+    // 计算平均音量 (0-255)
+    let sum = 0;
+    for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+    const avg = sum / dataArray.length;
+    const pct = Math.min(100, (avg / 128) * 100); // 归一化到0-100
+    
+    // 更新音量条
+    const bar = document.getElementById('mic-meter-bar');
+    const meter = document.getElementById('mic-meter');
+    if (bar) bar.style.width = pct + '%';
+    if (meter) {
+      meter.style.display = 'block';
+      if (pct > 60) meter.className = 'mic-meter speaking';
+      else if (pct > 20) meter.className = 'mic-meter active';
+      else meter.className = 'mic-meter';
+    }
+    
+    // 更新VAD状态
+    const vadStatus = document.getElementById('vad-status');
+    if (vadStatus && !this.state.micMuted) {
+      vadStatus.style.display = 'inline';
+      if (pct > 30) {
+        vadStatus.textContent = '检测到语音';
+        vadStatus.style.color = '#f59e0b';
+      } else if (pct > 5) {
+        vadStatus.textContent = '聆听中';
+        vadStatus.style.color = '#10b981';
+      } else {
+        vadStatus.textContent = '等待语音';
+        vadStatus.style.color = '#999';
+      }
+    }
+    
+    this.volumeAnimFrame = requestAnimationFrame(() => this._runVolumeMeter());
+  }
+
+  stopVolumeMeter() {
+    if (this.volumeAnimFrame) {
+      cancelAnimationFrame(this.volumeAnimFrame);
+      this.volumeAnimFrame = null;
+    }
+    const bar = document.getElementById('mic-meter-bar');
+    const meter = document.getElementById('mic-meter');
+    if (bar) bar.style.width = '0%';
+    if (meter) meter.style.display = 'none';
+    const vadStatus = document.getElementById('vad-status');
+    if (vadStatus) vadStatus.style.display = 'none';
+  }
+
+  // 更新ASR状态栏
+  updateASRStatus(status, text) {
+    const el = document.getElementById('asr-status');
+    const icon = document.getElementById('asr-status-icon');
+    const statusText = document.getElementById('asr-status-text');
+    const resultText = document.getElementById('asr-result-text');
+    if (!el) return;
+    
+    el.style.display = 'block';
+    el.className = 'asr-status';
+    
+    switch (status) {
+      case 'listening':
+        el.className = 'asr-status';
+        if (icon) icon.innerHTML = '&#x1f399;';
+        if (statusText) statusText.textContent = '聆听中...';
+        if (resultText) resultText.textContent = '';
+        break;
+      case 'speaking':
+        el.className = 'asr-status speaking';
+        if (icon) icon.innerHTML = '&#x1f3a4;';
+        if (statusText) statusText.textContent = '检测到语音，正在识别...';
+        if (resultText) resultText.textContent = '';
+        break;
+      case 'recognized':
+        el.className = 'asr-status recognized';
+        if (icon) icon.innerHTML = '&#x2705;';
+        if (statusText) statusText.textContent = '识别结果:';
+        if (resultText) resultText.textContent = text || '(空)';
+        // 3秒后自动隐藏
+        setTimeout(() => { if (el) el.style.display = 'none'; }, 5000);
+        break;
+      case 'error':
+        el.className = 'asr-status error';
+        if (icon) icon.innerHTML = '&#x26a0;';
+        if (statusText) statusText.textContent = '识别失败:';
+        if (resultText) resultText.textContent = text || '未知错误';
+        break;
+    }
   }
 
   updateUI() {
@@ -1340,6 +1484,12 @@ class VideoChatManager {
         
         // 立即更新状态为open，防止updateUI重新显示等待动画
         this.state.streamState = 'open';
+        
+        // 启动麦克风音量可视化 + ASR状态监听
+        if (!this.state.micMuted) {
+          this.startVolumeMeter();
+          this.updateASRStatus('listening', '');
+        }
         
         // 显示远程视频
         if (this.elements.remoteVideo) {

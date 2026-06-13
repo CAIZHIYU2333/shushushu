@@ -183,6 +183,13 @@
                     <!-- 消息气泡将通过JavaScript动态添加 -->
                 </div>
 
+                <!-- ASR语音识别状态栏 -->
+                <div class="asr-status" id="asr-status" style="display:none;background:#f0f4ff;border:1px solid #c4d4ff;border-radius:10px;padding:8px 14px;margin:8px 0;font-size:12px;color:#3b5ccc;">
+                    <span class="asr-status-icon" id="asr-status-icon" style="margin-right:6px;">&#x1f399;</span>
+                    <span class="asr-status-text" id="asr-status-text">准备聆听...</span>
+                    <span class="asr-result-text" id="asr-result-text" style="font-weight:600;margin-left:8px;color:#1a1a2e;"></span>
+                </div>
+
                 <!-- 输入区域 -->
                 <div class="chat-input-area" id="chat-input-area">
                     <div class="input-toolbar">
@@ -237,6 +244,11 @@
                         </svg>
                     </button>
                     <span id="vad-status" style="font-size:10px;color:#999;display:none;align-self:center;margin-left:-4px;">聆听中</span>
+                    <!-- 麦克风音量指示器 -->
+                    <div class="mic-meter" id="mic-meter" title="麦克风音量">
+                        <div class="mic-meter-bar" id="mic-meter-bar"></div>
+                    </div>
+                    <!-- ASR识别结果显示 -->
                     <button class="control-btn" id="volume-toggle" title="音量">
                         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
