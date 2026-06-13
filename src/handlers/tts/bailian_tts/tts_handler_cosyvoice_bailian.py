@@ -181,7 +181,7 @@ class CosyvoiceCallBack(ResultCallback):
             logger.info(f'[TIMING] TTS首次音频数据到达 (session={self.context.session_id}, base_time={self._first_audio_time})')
         
         self.temp_bytes += data
-        if len(self.temp_bytes) > 24000:
+        if len(self.temp_bytes) > 8000:
             # 实现接收合成二进制音频结果的逻辑
             output_audio = np.array(np.frombuffer(self.temp_bytes, dtype=np.int16)).astype(
                 np.float32)/32767  # librosa.load(io.BytesIO(self.temp_bytes), sr=None)[0]

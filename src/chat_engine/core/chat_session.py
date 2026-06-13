@@ -392,3 +392,23 @@ class ChatSession:
         # TODO this is temp implementation a full signal infrastructure is needed.
         if signal.source_type == ChatSignalSourceType.CLIENT and signal.type == ChatSignalType.END:
             self.session_context.shared_states.enable_vad = True
+        elif signal.source_type == ChatSignalSourceType.CLIENT and signal.type == ChatSignalType.INTERRUPT:
+            # 中断数字人：清空输出队列 + 重新启用VAD
+            logger.info(f"处理INTERRUPT信号, session={self.session_context.session_info.session_id}")
+            self.session_context.shared_states.enable_vad = True
+            for engine_type, output_queue in self.session_context.output_queues.items():
+                while not output_queue.empty():
+                    try:
+                        output_queue.get_nowait()
+                    except:
+                        break
+            # 清空所有handler的input队列(防止旧消息继续处理)
+            for handler_name, handler_record in self.handlers.items():
+                input_queue = handler_record.env.input_queue
+                if input_queue:
+                    while not input_queue.empty():
+                        try:
+                            input_queue.get_nowait()
+                        except:
+                            break
+            logger.info(f"INTERRUPT处理完成")

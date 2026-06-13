@@ -205,8 +205,19 @@ class RtcStream(AsyncAudioVideoStreamHandler):
                     )
                 elif message['type'] == 'chat':
                     channel.send(json.dumps({'type': 'avatar_end'}))
+                    # 允许文本输入打断数字人说话
                     if self.client_session_delegate.shared_states.enable_vad is False:
-                        return
+                        # 数字人正在说话，发送中断信号停止当前播放
+                        self.client_session_delegate.emit_signal(
+                            ChatSignal(
+                                type=ChatSignalType.INTERRUPT,
+                                source_type=ChatSignalSourceType.CLIENT,
+                                source_name="rtc",
+                            )
+                        )
+                        # 短暂等待中断处理完成
+                        import time as _time
+                        _time.sleep(0.1)
                     self.client_session_delegate.shared_states.enable_vad = False
                     self.client_session_delegate.emit_signal(
                         ChatSignal(

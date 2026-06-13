@@ -286,6 +286,13 @@ class VideoChatManager {
         this.toggleMic();
       });
     }
+    // 头部麦克风按钮也绑定
+    const headerMicBtn = document.getElementById('mic-toggle-btn');
+    if (headerMicBtn) {
+      headerMicBtn.addEventListener('click', () => {
+        this.toggleMic();
+      });
+    }
 
     // 窗口大小变化
     window.addEventListener('resize', () => {
@@ -1022,17 +1029,43 @@ class VideoChatManager {
 
   // 切换麦克风
   toggleMic() {
-    if (!this.state.localStream) return;
+    if (!this.state.localStream) {
+      alert('请先启动视频通话');
+      return;
+    }
     
     const audioTracks = this.state.localStream.getAudioTracks();
-    if (audioTracks.length > 0) {
-      this.state.micMuted = !this.state.micMuted;
-      audioTracks[0].enabled = !this.state.micMuted;
-      
-      if (this.elements.micToggle) {
-        this.elements.micToggle.classList.toggle('active', !this.state.micMuted);
+    if (audioTracks.length === 0) {
+      alert('未检测到麦克风设备');
+      return;
+    }
+    
+    this.state.micMuted = !this.state.micMuted;
+    audioTracks[0].enabled = !this.state.micMuted;
+    
+    if (this.elements.micToggle) {
+      if (this.state.micMuted) {
+        this.elements.micToggle.classList.remove('active');
+        this.elements.micToggle.style.color = '#ef4444';
+      } else {
+        this.elements.micToggle.classList.add('active');
+        this.elements.micToggle.style.color = '#10b981';
       }
     }
+    
+    // 更新VAD状态指示器
+    const vadStatus = document.getElementById('vad-status');
+    if (vadStatus) {
+      if (this.state.micMuted) {
+        vadStatus.style.display = 'none';
+      } else {
+        vadStatus.style.display = 'inline';
+        vadStatus.textContent = '聆听中';
+        vadStatus.style.color = '#10b981';
+      }
+    }
+    
+    console.log('麦克风状态:', this.state.micMuted ? '已静音' : '已开启');
   }
 
   updateUI() {

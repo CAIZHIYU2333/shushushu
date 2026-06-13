@@ -208,8 +208,7 @@ class AvatarProcessor:
         
         # delay start to ensure no extra audio and video generated
         delay_start = time.time()
-        logger.info(f'[TIMING] signal2img loop开始0.5秒延迟 (这是固定延迟，每次会话都有)')
-        time.sleep(0.5)
+        time.sleep(0.1)
         delay_end = time.time()
         logger.info(f'[TIMING] signal2img loop延迟结束，实际延迟: {(delay_end - delay_start)*1000:.2f}ms')
         
