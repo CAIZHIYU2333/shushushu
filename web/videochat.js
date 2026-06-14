@@ -396,60 +396,53 @@ class VideoChatManager {
         alert('无法获取媒体设备，请确保用localhost访问或https协议访问');
         return;
       }
-
-      // 请求权限
-      await navigator.mediaDevices.getUserMedia({ audio: true }).catch(() => {
-        console.log('no audio permission');
-        this.state.hasMicPermission = false;
-      });
-
-      await navigator.mediaDevices.getUserMedia({ video: true }).catch(() => {
-        console.log('no video permission');
-        this.state.hasCameraPermission = false;
-      });
-
-      // 获取设备列表
-      const devices = window.streamUtils ? 
-        await window.streamUtils.getDevices() : 
-        await navigator.mediaDevices.enumerateDevices();
-      console.log('设备列表:', devices);
-
-      // 获取媒体流
+      // 直接获取媒体流(含权限请求)，不再分开请求
       await this.getLocalStream();
-      
       this.state.webcamAccessed = true;
       this.updateUI();
     } catch (error) {
       console.error('访问设备失败:', error);
-      alert('访问设备失败: ' + error.message);
+      alert('访问设备失败: ' + error.message + '\n\n请确保已授权麦克风和摄像头权限');
     }
   }
 
   async getLocalStream() {
     try {
-      const audio = this.state.hasMicPermission ? this.config.trackConstraints.audio : false;
-      const video = this.state.hasCameraPermission ? this.config.trackConstraints.video : false;
-
-      // 使用stream-utils中的getStream函数
+      // 直接用一个getUserMedia请求音频+视频
+      const constraints = {
+        audio: this.config.trackConstraints.audio || true,
+        video: this.config.trackConstraints.video || false,
+      };
+      
       let stream;
-      if (window.streamUtils && window.streamUtils.getStream) {
-        stream = await window.streamUtils.getStream(audio, video, this.config.trackConstraints);
-      } else {
-        const constraints = {
-          video: video || false,
-          audio: audio || false,
-        };
+      try {
         stream = await navigator.mediaDevices.getUserMedia(constraints);
+      } catch (permErr) {
+        // 权限被拒绝，尝试只请求音频
+        console.warn('音视频权限被拒, 尝试仅音频:', permErr.message);
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+          this.state.hasCameraPermission = false;
+          this.state.hasMicPermission = true;
+        } catch (audioErr) {
+          console.error('麦克风权限也被拒:', audioErr.message);
+          this.state.hasMicPermission = false;
+          this.state.hasCameraPermission = false;
+          this.updateMicPermissionUI(false);
+          return;
+        }
       }
 
       this.state.stream = stream;
       this.state.localStream = stream;
-
-      // 检查设备
       this.state.hasCamera = stream.getVideoTracks().length > 0;
       this.state.hasMic = stream.getAudioTracks().length > 0;
+      this.state.hasMicPermission = this.state.hasMic;
+      this.state.hasCameraPermission = this.state.hasCamera;
+      
+      // 更新麦克风权限UI
+      this.updateMicPermissionUI(this.state.hasMic);
 
-      // 显示本地视频
       if (this.elements.localVideo && this.state.hasCamera) {
         if (window.streamUtils && window.streamUtils.setLocalStream) {
           window.streamUtils.setLocalStream(stream, this.elements.localVideo);
@@ -459,12 +452,48 @@ class VideoChatManager {
           await this.elements.localVideo.play();
         }
       }
-
-      console.log('本地流获取成功:', stream);
+      console.log('本地流获取成功:', stream, 'hasMic:', this.state.hasMic, 'hasCamera:', this.state.hasCamera);
     } catch (error) {
       console.error('获取本地流失败:', error);
-      // 创建模拟流（如果没有设备）
+      this.state.hasMicPermission = false;
+      this.state.hasCameraPermission = false;
+      this.updateMicPermissionUI(false);
       this.createSimulatedStream();
+    }
+  }
+
+  // 更新麦克风权限UI
+  updateMicPermissionUI(hasMic) {
+    const statusEl = document.getElementById('vad-status');
+    const micBtn = document.getElementById('mic-toggle');
+    
+    if (hasMic) {
+      // 麦克风可用
+      if (statusEl) {
+        statusEl.style.display = 'inline';
+        statusEl.textContent = '麦克风就绪';
+        statusEl.style.color = '#10b981';
+      }
+      if (micBtn) {
+        micBtn.style.color = '#10b981';
+        micBtn.classList.add('active');
+      }
+      // 启动音量可视化
+      this.startVolumeMeter();
+    } else {
+      // 麦克风不可用
+      if (statusEl) {
+        statusEl.style.display = 'inline';
+        statusEl.textContent = '麦克风未授权 (点击重试)';
+        statusEl.style.color = '#ef4444';
+        statusEl.style.cursor = 'pointer';
+        statusEl.onclick = () => this.getLocalStream();
+      }
+      if (micBtn) {
+        micBtn.style.color = '#ef4444';
+        micBtn.classList.remove('active');
+      }
+      this.stopVolumeMeter();
     }
   }
 
