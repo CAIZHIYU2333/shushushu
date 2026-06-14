@@ -134,8 +134,10 @@ class HandlerTTS(HandlerBase, ABC):
                         context=context, output_definition=output_definition, speech_id=speech_id)
                     context.synthesizer = SpeechSynthesizer(
                         model=self.model_name, voice=self.voice, callback=callback, format=AudioFormat.PCM_24000HZ_MONO_16BIT)
+                    context._tts_init_time = time.time()
+                    context._tts_first_audio_base_time = context._tts_init_time
                     tts_init_time = (time.time() - tts_init_start) * 1000
-                    logger.info(f'[TIMING] TTS Synthesizer初始化耗时: {tts_init_time:.2f}ms (session={context.session_id})')
+                    logger.info(f'[TTS] Synthesizer初始化完成: {tts_init_time:.0f}ms (session={context.session_id})')
                 
                 # 每积累20字以上或有句号/问号/感叹号时发送一批
                 if len(context.input_text) >= 20 or any(p in context.input_text for p in '。！？!?'):
@@ -198,7 +200,8 @@ class CosyvoiceCallBack(ResultCallback):
             # 将基准时间存储到context，供后续传递
             if not hasattr(self.context, '_tts_first_audio_base_time'):
                 self.context._tts_first_audio_base_time = self._first_audio_time
-            logger.info(f'[TIMING] TTS首次音频数据到达 (session={self.context.session_id}, base_time={self._first_audio_time})')
+            tts_total_latency = (self._first_audio_time - self.context._tts_first_audio_base_time) * 1000 if hasattr(self.context, '_tts_first_audio_base_time') else 0
+            logger.info(f'[TTS] 首次音频数据到达! (距离TTS初始化: {tts_total_latency:.0f}ms, session={self.context.session_id})')
         
         self.temp_bytes += data
         threshold = self._get_buffer_threshold()

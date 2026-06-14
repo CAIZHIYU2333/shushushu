@@ -192,6 +192,8 @@ class HandlerLLM(HandlerBase, ABC):
         
         # 记录请求开始时间，用于性能分析
         request_start_time = time.time()
+        llm_start_total = request_start_time  # 总体计时起点
+        logger.info(f'[LLM] 收到用户消息开始处理, 内容="{chat_text[:40]}..." (共{len(chat_text)}字) (session={context.session_id})')
         try:
             completion = context.client.chat.completions.create(
                 model=context.model_name,  # 此处以qwen-plus为例，可按需更换模型名称。模型列表：https://help.aliyun.com/zh/model-studio/getting-started/models
@@ -206,21 +208,24 @@ class HandlerLLM(HandlerBase, ABC):
             context.output_texts = ''
             
             first_chunk_received = False
+            token_count = 0
             for chunk in completion:
                 if (chunk and chunk.choices and chunk.choices[0] and chunk.choices[0].delta.content):
                     if not first_chunk_received:
                         first_chunk_received = True
                         first_chunk_time = time.time() - request_start_time
-                        logger.info(f'First token received in {first_chunk_time*1000:.2f}ms for session={context.session_id}')
+                        logger.info(f'[LLM] 首token到达: {first_chunk_time*1000:.0f}ms (session={context.session_id})')
                     
                     output_text = chunk.choices[0].delta.content
                     context.output_texts += output_text
-                    logger.info(output_text)
+                    token_count += 1
                     output = DataBundle(output_definition)
                     output.set_main_data(output_text)
                     output.add_meta("avatar_text_end", False)
                     output.add_meta("speech_id", speech_id)
                     yield output
+            total_time = time.time() - request_start_time
+            logger.info(f'[LLM] 全文本生成完成: {token_count} tokens, 总耗时{total_time*1000:.0f}ms (session={context.session_id})')
             context.history.add_message(HistoryMessage(role="human", content=chat_text))
             context.history.add_message(HistoryMessage(role="avatar", content=context.output_texts))
         except Exception as e:
