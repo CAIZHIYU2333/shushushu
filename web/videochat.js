@@ -489,6 +489,14 @@ class VideoChatManager {
 
   async startChat() {
     if (this.state.streamState === 'closed') {
+      // 清空之前的聊天记录
+      if (this.elements.chatMessages) {
+        this.elements.chatMessages.innerHTML = '';
+      }
+      // 重置对话日志
+      window._conversationLog = [];
+      window._convSessionId = 'conv_' + Date.now().toString(36);
+      
       // TODO: 实现WebRTC连接
       console.log('开始聊天 - WebRTC连接功能待实现');
       this.state.streamState = 'waiting';
