@@ -126,6 +126,8 @@ class HandlerTTS(HandlerBase, ABC):
         text_end = inputs.data.get_meta("avatar_text_end", False)
         try:
             if not text_end:
+                # 按句批量发送: 积累到句号/20字以上再送TTS
+                context.input_text += text
                 if context.synthesizer is None:
                     tts_init_start = time.time()
                     callback = CosyvoiceCallBack(
@@ -135,12 +137,20 @@ class HandlerTTS(HandlerBase, ABC):
                     tts_init_time = (time.time() - tts_init_start) * 1000
                     logger.info(f'[TIMING] TTS Synthesizer初始化耗时: {tts_init_time:.2f}ms (session={context.session_id})')
                 
-                tts_call_start = time.time()
-                logger.info(f'[TIMING] TTS streaming_call开始 (session={context.session_id}, text_len={len(text) if text else 0})')
-                context.synthesizer.streaming_call(text)
-                tts_call_time = (time.time() - tts_call_start) * 1000
-                logger.info(f'[TIMING] TTS streaming_call完成耗时: {tts_call_time:.2f}ms (session={context.session_id})')
+                # 每积累20字以上或有句号/问号/感叹号时发送一批
+                if len(context.input_text) >= 20 or any(p in context.input_text for p in '。！？!?'):
+                    tts_call_start = time.time()
+                    batch_text = context.input_text
+                    context.input_text = ''
+                    logger.info(f'[TTS] 批量发送: "{batch_text}" ({len(batch_text)}字)')
+                    context.synthesizer.streaming_call(batch_text)
+                    tts_call_time = (time.time() - tts_call_start) * 1000
+                    logger.info(f'[TIMING] TTS streaming_call完成耗时: {tts_call_time:.2f}ms (session={context.session_id})')
             else:
+                # 发送剩余文本
+                if context.input_text:
+                    logger.info(f'[TTS] 发送最后一批: "{context.input_text}"')
+                    context.synthesizer.streaming_call(context.input_text)
                 logger.info(f'streaming_call last {text}')
                 context.synthesizer.streaming_call(text)
                 context.synthesizer.streaming_complete()
