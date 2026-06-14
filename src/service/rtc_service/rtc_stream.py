@@ -167,9 +167,16 @@ class RtcStream(AsyncAudioVideoStreamHandler):
             async def process_chat_history():
                 role = None
                 chat_id = None
+                last_status = None
                 while not self.quit.is_set():
                     chat_data = await self.client_session_delegate.get_data(EngineChannelType.TEXT)
                     if chat_data is None or chat_data.data is None:
+                        continue
+                    # 检查是否是VAD/ASR状态标记
+                    status = chat_data.data.get_meta("_status", None)
+                    if status and status != last_status:
+                        last_status = status
+                        self.chat_channel.send(json.dumps({'type': 'asr_status', 'status': status}))
                         continue
                     logger.debug(f"Got chat data {str(chat_data)}")
                     current_role = 'human' if chat_data.type == ChatDataType.HUMAN_TEXT else 'avatar'

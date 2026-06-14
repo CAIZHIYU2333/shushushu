@@ -116,6 +116,15 @@ class HandlerASR(HandlerBase, ABC):
         if audio is not None:
             audio = audio.squeeze()
 
+            # 检测VAD语音开始，发送状态到前端
+            speech_start = inputs.data.get_meta("human_speech_start", False)
+            if speech_start and context.data_submitter is not None:
+                status_bundle = DataBundle(DataBundleDefinition())
+                status_bundle.add_entry(DataBundleEntry.create_text_entry("_status"))
+                status_bundle.set_main_data("")
+                status_bundle.add_meta("_status", "vad_speaking")
+                context.data_submitter.submit(status_bundle)
+
             logger.info('audio in')
             for audio_segment in slice_data(context.audio_slice_context, audio):
                 if audio_segment is None or audio_segment.shape[0] == 0:
@@ -145,6 +154,14 @@ class HandlerASR(HandlerBase, ABC):
             context.audio_dump_file.write(output_audio.tobytes())
 
         logger.info(f"[ASR] 开始识别, 音频长度={audio_dur:.1f}秒 ({len(output_audio)}样本)")
+        # 发送"正在识别"状态到前端
+        if context.data_submitter is not None:
+            status_bundle = DataBundle(DataBundleDefinition())
+            status_bundle.add_entry(DataBundleEntry.create_text_entry("_status"))
+            status_bundle.set_main_data("")
+            status_bundle.add_meta("_status", "asr_processing")
+            context.data_submitter.submit(status_bundle)
+            
         asr_start = __import__('time').time()
         res = self.model.generate(input=output_audio, batch_size_s=10)
         asr_elapsed = (__import__('time').time() - asr_start) * 1000
@@ -152,7 +169,16 @@ class HandlerASR(HandlerBase, ABC):
         context.output_audios.clear()
         output_text = re.sub(r"<\|.*?\|>", "", res[0]['text'])
         if len(output_text) == 0:
-            # 如果 ASR 识别结果为空，则需要重新开启vad
+            # 如果 ASR 识别结果为空，延时2秒后重新开启vad (避免背景噪音死循环)
+            logger.info("[ASR] 识别为空，2秒后重新启用VAD")
+            if context.data_submitter is not None:
+                status_bundle = DataBundle(DataBundleDefinition())
+                status_bundle.add_entry(DataBundleEntry.create_text_entry("_status"))
+                status_bundle.set_main_data("")
+                status_bundle.add_meta("_status", "asr_empty")
+                context.data_submitter.submit(status_bundle)
+            import time as _time
+            _time.sleep(2)
             context.shared_states.enable_vad = True
             return
         output = DataBundle(output_definition)

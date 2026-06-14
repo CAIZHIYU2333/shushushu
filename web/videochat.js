@@ -614,6 +614,20 @@ class VideoChatManager {
           
           // 流式输出消息
           this.handleStreamingMessage(data);
+        } else if (data.type === 'asr_status') {
+          // 后端VAD/ASR状态事件
+          console.log('ASR状态:', data.status);
+          switch (data.status) {
+            case 'vad_speaking':
+              this.updateASRStatus('speaking', '');
+              break;
+            case 'asr_processing':
+              this.updateASRStatus('processing', '');
+              break;
+            case 'asr_empty':
+              this.updateASRStatus('empty', '识别为空,2秒后重试');
+              break;
+          }
         } else if (data.type === 'avatar_end') {
           this.state.replying = false;
           this.hideTypingIndicator();
@@ -1231,6 +1245,21 @@ class VideoChatManager {
         if (icon) icon.innerHTML = '&#x1f3a4;';
         if (statusText) statusText.textContent = '检测到语音，正在识别...';
         if (resultText) resultText.textContent = '';
+        break;
+      case 'processing':
+        el.className = 'asr-status';
+        el.style.background = '#e8f0fe';
+        el.style.borderColor = '#7170ff';
+        if (icon) icon.innerHTML = '&#x23f3;';
+        if (statusText) statusText.textContent = '正在识别...';
+        if (resultText) resultText.textContent = '';
+        break;
+      case 'empty':
+        el.className = 'asr-status error';
+        if (icon) icon.innerHTML = '&#x26a0;';
+        if (statusText) statusText.textContent = '未识别到语音';
+        if (resultText) resultText.textContent = text || '请大声说话重试';
+        setTimeout(() => { if (el) el.style.display = 'none'; }, 4000);
         break;
       case 'recognized':
         el.className = 'asr-status recognized';
