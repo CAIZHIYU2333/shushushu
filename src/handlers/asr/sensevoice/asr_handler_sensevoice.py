@@ -123,8 +123,12 @@ class HandlerASR(HandlerBase, ABC):
                 context.output_audios.append(audio_segment)
 
         speech_end = inputs.data.get_meta("human_speech_end", False)
-        if not speech_end:
+        # 防堆积：如果累积音频超过30秒仍未收到speech_end，强制处理
+        total_samples = sum(a.shape[0] for a in context.output_audios) if context.output_audios else 0
+        if not speech_end and total_samples < 16000 * 30:
             return
+        if total_samples >= 16000 * 30 and not speech_end:
+            logger.warning(f"[ASR] 音频堆积{total_samples/16000:.1f}秒未收到speech_end，强制处理")
 
         # prefill remainder audio in slice context
         remainder_audio = context.audio_slice_context.flush()
@@ -135,12 +139,16 @@ class HandlerASR(HandlerBase, ABC):
                      np.zeros(shape=(context.audio_slice_context.slice_size - remainder_audio.shape[0]))])
                 context.output_audios.append(remainder_audio)
         output_audio = np.concatenate(context.output_audios)
+        audio_dur = len(output_audio) / 16000
         if context.audio_dump_file is not None:
             logger.info('dump audio')
             context.audio_dump_file.write(output_audio.tobytes())
 
+        logger.info(f"[ASR] 开始识别, 音频长度={audio_dur:.1f}秒 ({len(output_audio)}样本)")
+        asr_start = __import__('time').time()
         res = self.model.generate(input=output_audio, batch_size_s=10)
-        logger.info(res)
+        asr_elapsed = (__import__('time').time() - asr_start) * 1000
+        logger.info(f"[ASR] 识别完成, 耗时={asr_elapsed:.0f}ms, 结果={res}")
         context.output_audios.clear()
         output_text = re.sub(r"<\|.*?\|>", "", res[0]['text'])
         if len(output_text) == 0:

@@ -31,7 +31,7 @@ default:
         module: asr/sensevoice/asr_handler_sensevoice
       SileroVad:
         buffer_look_back: 5000
-        end_delay: 10000
+        end_delay: 5000
         module: vad/silerovad/vad_handler_silero
         speaking_threshold: 0.5
         speech_padding: 512

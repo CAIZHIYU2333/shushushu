@@ -75,18 +75,16 @@ class HumanAudioVADContext(HandlerContext):
             output_audio = np.concatenate(
                 [np.zeros(self.config.speech_padding, dtype=clip.dtype), output_audio], axis=0)
             self.speech_id += 1
-            logger.info("Start of human speech")
+            logger.info(f"[VAD] 检测到语音开始 (speech_id={self.speech_id}, speech_len={self.speech_length}样本, 阈值={self.config.speaking_threshold})")
             extra_args =  {
                 "human_speech_start": True,
                 "pre_padding": self.config.speech_padding,
             }
             if head_sample_id is not None:
                 extra_args["head_sample_id"] = head_sample_id
-                logger.info(f"VAD pre_start to start got timestamp {head_sample_id}")
             return output_audio, extra_args
         else:
             if self.silence_length > 0:
-                logger.info("Back to not started status")
                 self.speaking_status = SpeakingStatus.END
             return None, {}
 
@@ -95,14 +93,13 @@ class HumanAudioVADContext(HandlerContext):
             self.speaking_status = SpeakingStatus.END
             output_audio = np.concatenate(
                 [clip, np.zeros(self.config.speech_padding, dtype=clip.dtype)], axis=0)
-            logger.info("End of human speech")
+            logger.info(f"[VAD] 检测到语音结束 (silence_len={self.silence_length}样本, end_delay={self.config.end_delay})")
             extra_args =  {
                 "human_speech_end": True,
                 "post_padding": self.config.speech_padding,
             }
             if timestamp is not None:
                 extra_args["head_sample_id"] = timestamp
-                logger.info(f"VAD start to start got timestamp {timestamp}")
             return output_audio,  extra_args
         else:
             return clip, {"head_sample_id": timestamp}
@@ -249,6 +246,12 @@ class HandlerAudioVAD(HandlerBase, ABC):
         for clip in slice_data(context.slice_context, audio):
             head_sample_id = context.slice_context.get_last_slice_start_index()
             speech_prob = self._inference(context, clip)
+            # 每20个clip记录一次概率(约每秒一次)
+            if not hasattr(context, '_prob_sample_count'):
+                context._prob_sample_count = 0
+            context._prob_sample_count += 1
+            if context._prob_sample_count % 20 == 0:
+                logger.info(f"[VAD] 语音概率={speech_prob:.3f} (阈值={context.config.speaking_threshold}) status={context.speaking_status}")
             audio_clip, extra_args = context.update_status(speech_prob, clip, timestamp=head_sample_id)
             # FIXME this is a hack to disable VAD after human speech end,
             #  but it should be handled by client or downstream handlers
