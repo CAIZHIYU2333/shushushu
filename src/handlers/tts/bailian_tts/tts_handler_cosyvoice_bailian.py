@@ -139,8 +139,8 @@ class HandlerTTS(HandlerBase, ABC):
                     tts_init_time = (time.time() - tts_init_start) * 1000
                     logger.info(f'[TTS] Synthesizer初始化完成: {tts_init_time:.0f}ms (session={context.session_id})')
                 
-                # 每积累20字以上或有句号/问号/感叹号时发送一批
-                if len(context.input_text) >= 20 or any(p in context.input_text for p in '。！？!?'):
+                # 每积累10字以上或有句号/问号/感叹号时发送一批
+                if len(context.input_text) >= 10 or any(p in context.input_text for p in '。！？!?'):
                     tts_call_start = time.time()
                     batch_text = context.input_text
                     context.input_text = ''
@@ -153,8 +153,6 @@ class HandlerTTS(HandlerBase, ABC):
                 if context.input_text:
                     logger.info(f'[TTS] 发送最后一批: "{context.input_text}"')
                     context.synthesizer.streaming_call(context.input_text)
-                logger.info(f'streaming_call last {text}')
-                context.synthesizer.streaming_call(text)
                 context.synthesizer.streaming_complete()
                 context.synthesizer = None
                 context.input_text = ''
