@@ -162,6 +162,16 @@ class CosyvoiceCallBack(ResultCallback):
         self.output_definition = output_definition
         self.speech_id = speech_id
         self.temp_bytes = b''
+        self._chunk_index = 0  # 渐进式缓冲
+
+    def _get_buffer_threshold(self):
+        """渐进式缓冲: 首块4000→次块12000→后续24000字节"""
+        if self._chunk_index == 0:
+            return 4000   # 首块~83ms, 快速响应
+        elif self._chunk_index == 1:
+            return 12000  # 次块~250ms
+        else:
+            return 24000  # 后续~500ms, 保证平滑
 
     def on_open(self) -> None:
         logger.info('连接成功')
@@ -181,7 +191,8 @@ class CosyvoiceCallBack(ResultCallback):
             logger.info(f'[TIMING] TTS首次音频数据到达 (session={self.context.session_id}, base_time={self._first_audio_time})')
         
         self.temp_bytes += data
-        if len(self.temp_bytes) > 24000:
+        threshold = self._get_buffer_threshold()
+        if len(self.temp_bytes) > threshold:
             # 实现接收合成二进制音频结果的逻辑
             output_audio = np.array(np.frombuffer(self.temp_bytes, dtype=np.int16)).astype(
                 np.float32)/32767  # librosa.load(io.BytesIO(self.temp_bytes), sr=None)[0]
@@ -202,6 +213,7 @@ class CosyvoiceCallBack(ResultCallback):
             
             self.context.submit_data(output)
             self.temp_bytes = b''
+            self._chunk_index += 1  # 渐进式缓冲步进
 
     def on_complete(self) -> None:
         if len(self.temp_bytes) > 0:
